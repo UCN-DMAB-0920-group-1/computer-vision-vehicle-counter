@@ -8,11 +8,9 @@ from util import get_stream
 
 stream_url = get_stream("sources/highway.mp4")  # highway file stream
 
-# highway live stream
-#stream_url = get_stream("https://www.youtube.com/watch?v=ffsC9km5xDY")
 
 # Parse stream link, to do some additional filtering (see util.py)
-# stream_url = get_stream("https://drlive01hls.akamaized.net/hls/live/2014185/drlive01/master2000.m3u8")  # DR live TV
+# stream_url = get_stream("")  # DR live TV
 
 #stream_url = get_stream("https://www.youtube.com/watch?v=HIPNVm6lNfM")
 
