@@ -26,7 +26,7 @@ img_size: int = 720
 # How confidence should YOLO be, before labeling
 confidence_threshold: float = 0.25
 iou_threshold: float = 0.45
-track_points: str = "centroid"  # Can be centroid or bbox
+track_points: str = "bbox"  # Can be centroid or bbox
 label_offset: int = 50  # Offset from center point to classification label
 max_distance_between_points: int = 30
 
@@ -72,7 +72,7 @@ while videoStream.isOpened():
     elif track_points == 'bbox':
         norfair.draw_boxes(frame, detections)
 
-    norfair.draw_tracked_objects(frame, tracked_objects)
+    norfair.draw_tracked_objects(frame, tracked_objects, id_thickness=3)
 
     # Draw detected label
     frame_scale = frame.shape[0] / 100
@@ -108,7 +108,7 @@ while videoStream.isOpened():
     cv2.imshow("REALTIME!", np.squeeze(frame))
 
     # Wait for Q to be pressed (then exit)
-    if(cv2.waitKey(10) & 0XFF == ord("q")):
+    if(cv2.waitKey(10) == 27):
         break
 
 # Safely disposed any used resources
