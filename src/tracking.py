@@ -4,18 +4,14 @@ from charset_normalizer import detect
 from util import get_stream
 from streams import streams
 import argparse
-
 import numpy as np
 import torch
 import yolov5
 from typing import Union, List, Optional
-
 import norfair
 from norfair import Tracker
-
 import cv2
 import time
-
 from norfair_helpers import euclidean_distance, yolo_detections_to_norfair_detections
 
 
@@ -36,7 +32,7 @@ model = torch.hub.load("ultralytics/yolov5", detector_path)
 
 
 # Ready the stream
-stream_url = get_stream(streams["highway"])
+stream_url = get_stream(streams["highway3"])
 
 # Open stream
 videoStream = cv2.VideoCapture(stream_url)

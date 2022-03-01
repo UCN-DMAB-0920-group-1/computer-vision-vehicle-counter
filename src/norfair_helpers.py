@@ -3,15 +3,11 @@ from charset_normalizer import detect
 from util import get_stream
 from streams import streams
 import argparse
-
 import numpy as np
 import torch
 import yolov5
 from typing import Union, List, Optional
-
-
 from norfair import Detection, Tracker, Video
-
 import cv2
 import time
 

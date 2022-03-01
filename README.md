@@ -5,6 +5,7 @@ _Bug free_ AI, ML disco, and other buzzwords!
 ## Dependencies
 
 - Python 3.9.x (tested with 3.9.10)
+- pip install youtube-dl
 - pip install git+https://github.com/Cupcakus/pafy # Due to pafy having a issue with dislike-count (see https://github.com/mps-youtube/pafy/pull/305#issuecomment-986212672)
 
 - install Pytorch (https://pytorch.org/) tested with both CPU and Cuda(GPU)
