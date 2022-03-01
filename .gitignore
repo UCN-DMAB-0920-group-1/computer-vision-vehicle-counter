@@ -130,3 +130,6 @@ dmypy.json
 
 # Workspaces
 *.code-workspace
+
+# ML model
+*.pt
