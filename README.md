@@ -8,7 +8,7 @@ _Bug free_ AI, ML disco, and other buzzwords!
 - pip install git+https://github.com/Cupcakus/pafy # Due to pafy having a issue with dislike-count (see https://github.com/mps-youtube/pafy/pull/305#issuecomment-986212672)
 
 - install Pytorch (https://pytorch.org/) tested with both CPU and Cuda(GPU)
-- pip3 install opencv-contrib-python torch torchvision torchaudio youtube-dl
+- pip3 install opencv-contrib-python torch torchvision torchaudio youtube-dl numpy pandas requests pyyaml tqdm matplotlib seaborn norfair yolov5
 - https://github.com/ultralytics/yolov5
 - FFmpeg (https://github.com/BtbN/FFmpeg-Builds/releases)<br>
   (TODO: write more dependencies)

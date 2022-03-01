@@ -36,7 +36,7 @@ model = torch.hub.load("ultralytics/yolov5", detector_path)
 
 
 # Ready the stream
-stream_url = get_stream(streams["highway"])
+stream_url = get_stream(streams["file"])
 
 # Open stream
 videoStream = cv2.VideoCapture(stream_url)
