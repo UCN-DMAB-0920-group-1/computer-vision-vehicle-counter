@@ -1,4 +1,5 @@
 
+from importlib.resources import path
 import string
 from charset_normalizer import detect
 from util import get_stream
@@ -21,18 +22,19 @@ from norfair_helpers import euclidean_distance, yolo_detections_to_norfair_detec
 
 # Defaults
 device: str = "cuda"  # Device (CPU or GPU)
-detector_path: str = "yolov5n"  # YOLO version
+detector_path: str = "yolov5m6"  # YOLO version
 img_size: int = 720
 # How confidence should YOLO be, before labeling
 confidence_threshold: float = 0.25
-iou_threshold: float = 0.45
+iou_threshold: float = 0.1
 track_points: str = "bbox"  # Can be centroid or bbox
 label_offset: int = 50  # Offset from center point to classification label
 max_distance_between_points: int = 30
 
 
 # Load yolo model
-model = torch.hub.load("ultralytics/yolov5", detector_path)
+#model = torch.hub.load(repo_or_dir="ultralytics/yolov5", model=detector_path)
+model = torch.hub.load("ultralytics/yolov5", 'custom', path='models\\yolov5-cars.pt', force_reload=True)
 
 
 # Ready the stream
@@ -70,7 +72,7 @@ while videoStream.isOpened():
     if track_points == 'centroid':
         norfair.draw_points(frame, detections)
     elif track_points == 'bbox':
-        norfair.draw_boxes(frame, detections)
+        norfair.draw_boxes(frame, detections, line_width=3)
 
     norfair.draw_tracked_objects(frame, tracked_objects, id_thickness=3)
 

@@ -133,3 +133,7 @@ dmypy.json
 
 # ML model
 *.pt
+
+# ML training
+content/
+algo
