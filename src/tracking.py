@@ -26,7 +26,7 @@ detector_name: str = "yolov5m6"  # YOLO version
 detector_path: str = "res\\models\\yolov5m-custom-97.pt"  # YOLO version
 img_size: int = 720
 # How confidence should YOLO be, before labeling
-confidence_threshold: float = 0.25
+confidence_threshold: float = 0.75
 iou_threshold: float = 0.1
 track_points: str = "bbox"  # Can be centroid or bbox
 label_offset: int = 50  # Offset from center point to classification label
@@ -34,13 +34,12 @@ max_distance_between_points: int = 30
 
 
 # Load yolo model
-#model = torch.hub.load(repo_or_dir="ultralytics/yolov5", model=detector_name)
-model = torch.hub.load("ultralytics/yolov5", 'custom',
-                       path=detector_path, force_reload=True)
+model = torch.hub.load(repo_or_dir="ultralytics/yolov5", model=detector_name)
+#model = torch.hub.load("ultralytics/yolov5", 'custom', path=detector_path, force_reload=True)
 
 
 # Ready the stream
-stream_url = get_stream(streams["file"])
+stream_url = get_stream(streams["highway"])
 
 # Open stream
 videoStream = cv2.VideoCapture(stream_url)
@@ -52,16 +51,26 @@ tracker = Tracker(
 )
 
 # As long as the video stream is open, run the YOLO model on the frame, and show the output
+selectedROI = False
 while videoStream.isOpened():
-    # time.sleep(0.2)
     ret, frame = videoStream.read()
+    ret2, frame2 = videoStream.read()
+    #Select ROI Rectangle
+    if selectedROI == False:
+        roi = cv2.selectROI("REALTIME!",frame, True)
+        selectedROI = True
 
+    #Set ROI rectangle [Start_y: End_y: Start_x: End_x]
+    frame = frame[int(roi[1]):int(roi[1]+roi[3]),int(roi[0]):int(roi[0]+roi[2])]
+    
+    # time.sleep(0.2)
     # Ensures no error occur, even when there is no more frames to check for
     if(ret is False):
         break
 
     # Detect objects inside the frame
     yolo_detections = model(frame)
+    
 
     # Convert to norfair detections
     detections = yolo_detections_to_norfair_detections(
@@ -109,7 +118,8 @@ while videoStream.isOpened():
         )
 
     # Draw the model classifications on a gui
-    cv2.imshow("REALTIME!", np.squeeze(frame))
+    cv2.imshow("REALTIME!", frame)
+    cv2.imshow("REALTIME!2", frame2)
 
     # Wait for Q to be pressed (then exit)
     if(cv2.waitKey(10) == 27):
