@@ -44,7 +44,7 @@ def upload_file():
             file.save(video_path)
 
             tracker = Tracking(should_draw=True, roi_area=[
-                (100, 400), (100, 200), (600, 200), (600, 487)])
+                (100, 400), (100, 200), (600, 200), (600, 487)],)
             detections = tracker.track(video_path)
 
             return "total cars detected: " + str(detections["total"])
