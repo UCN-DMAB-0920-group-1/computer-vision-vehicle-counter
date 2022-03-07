@@ -4,13 +4,18 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
-            "name": "Python: Current File",
+            "name": "Python: Flask",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "module": "flask",
+            "env": {"FLASK_APP":"src/TrackingAPI.py",
+                    "FLASK_ENV":"development",
+                    "FLASK_DEBUG":"1"},
             "console": "integratedTerminal",
-            "args": []
+            "args": ["run","--no-debugger", "--no-reload"],
+            "jinja": true
         }
     ]
 }

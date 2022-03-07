@@ -1,7 +1,7 @@
+import os
 from flask import Flask, jsonify, flash, request, redirect, url_for
 from dummydata import dummydata
 from werkzeug.utils import secure_filename
-import os
 
 app = Flask(__name__)
 app.secret_key = "super secret key"
@@ -14,6 +14,12 @@ app.config[UPLOAD_FOLDER] = UPLOAD_FOLDER
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route('/poop')
+def poop():
+    testing = True
+    return 'hello world'
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -31,6 +37,6 @@ def upload_file():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(UPLOAD_FOLDER, filename)
-            return redirect(url_for('download_file', name=filename))
-    return 'lolz'
+            file.save(os.path.join(UPLOAD_FOLDER, filename))
+            return 'succes'
+    return 'error'
