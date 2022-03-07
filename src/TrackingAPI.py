@@ -3,10 +3,13 @@ from flask import Flask, jsonify, flash, request, redirect, url_for
 from dummydata import dummydata
 from werkzeug.utils import secure_filename
 
+from tracking_module.tracking import Tracking
+from tracking_module.streams import streams
+
 app = Flask(__name__)
 app.secret_key = "super secret key"
 test = dummydata()
-UPLOAD_FOLDER = './sources'
+UPLOAD_FOLDER = '../sources'
 ALLOWED_EXTENSIONS = {'mp4'}
 app.config[UPLOAD_FOLDER] = UPLOAD_FOLDER
 
@@ -39,5 +42,10 @@ def upload_file():
             filename = secure_filename(file.filename)
             video_path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(video_path)
-            return video_path
+
+            tracker = Tracking(should_draw=True, roi_area=[
+                (100, 400), (100, 200), (600, 200), (600, 487)])
+            detections = tracker.track(video_path)
+
+            return "total cars detected: " + str(detections["total"])
     return 'error'
