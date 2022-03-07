@@ -37,6 +37,7 @@ def upload_file():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            return 'succes'
+            video_path = os.path.join(UPLOAD_FOLDER, filename)
+            file.save(video_path)
+            return video_path
     return 'error'
