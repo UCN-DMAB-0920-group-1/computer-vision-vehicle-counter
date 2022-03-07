@@ -28,8 +28,8 @@ class Tracking:
         device: str = "cuda",  # Device (CPU or GPU)
         detector_path: str = "yolov5m6",  # YOLO version
         # How confidence should YOLO be, before labeling
-        confidence_threshold: float = 0.6,
-        track_points: str = "centroid",  # Can be centroid or bbox
+        confidence_threshold: float = 0.5,
+        track_points: str = "bbox",  # Can be centroid or bbox
         label_offset: int = 50,  # Offset from center point to classification label
         max_distance_between_points: int = 30,
         # TOP LEFT, BOTTOM LEFT, BOTTOM RIGHT, TOP RIGHT,
