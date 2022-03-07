@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify, flash, request, redirect, url_for
+from flask import Flask, jsonify, flash, request, redirect, url_for, send_file, send_from_directory, safe_join, abort
 from dummydata import dummydata
 from werkzeug.utils import secure_filename
 
@@ -8,18 +8,12 @@ app.secret_key = "super secret key"
 test = dummydata()
 UPLOAD_FOLDER = './sources'
 ALLOWED_EXTENSIONS = {'mp4'}
-app.config[UPLOAD_FOLDER] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-@app.route('/poop')
-def poop():
-    testing = True
-    return 'hello world'
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -39,5 +33,5 @@ def upload_file():
             filename = secure_filename(file.filename)
             video_path = os.path.join(UPLOAD_FOLDER, filename)
             file.save(video_path)
-            return video_path
+            return send_file('../sources/' + file.filename, as_attachment=True)
     return 'error'
