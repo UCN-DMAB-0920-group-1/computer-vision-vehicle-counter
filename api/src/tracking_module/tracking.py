@@ -1,24 +1,17 @@
+import cv2
+import time
+import torch
+import norfair
+import numpy as np
+import pandas
 
+from norfair import Tracker
 from importlib.resources import path
 from charset_normalizer import detect
 from matplotlib.pyplot import draw
-from pandas import array
+
 from tracking_module.util import get_stream, centroid
-
-
-import numpy as np
-import torch
-
-
-import norfair
-from norfair import Tracker
-
-import cv2
-
 from tracking_module.norfair_helpers import euclidean_distance, yolo_detections_to_norfair_detections
-
-
-import time
 
 
 class Tracking:
@@ -133,11 +126,11 @@ class Tracking:
         stream_url = get_stream(stream_location)
 
         # Open stream
-        videoStream = cv2.VideoCapture(stream_url)
+        video_stream = cv2.VideoCapture(stream_url)
 
         # As long as the video stream is open, run the YOLO model on the frame, and show the output
-        while videoStream.isOpened():
-            ret, frame = videoStream.read()
+        while video_stream.isOpened():
+            ret, frame = video_stream.read()
 
             # Ensures no error occur, even when there is no more frames to check for
             if(ret is False):
@@ -180,7 +173,7 @@ class Tracking:
                 break
 
         # Safely disposed any used resources
-        videoStream.release()
+        video_stream.release()
         # cv2.destroyAllWindows()
 
         return {"total": self.vehicle_count}
