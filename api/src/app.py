@@ -1,8 +1,6 @@
-import json
 import os
 import uuid
 from flask import Flask, jsonify, flash, request, redirect, url_for, send_file, send_from_directory, safe_join, abort
-from werkzeug.utils import secure_filename
 from dao.daoDetections import daoDetections
 
 from tracking_module.tracking import Tracking
@@ -43,9 +41,10 @@ def upload_video():
         return jsonify({'id': res.inserted_id, "cars": detections['total']})
 
 
-@app.route('/video/<string:id>/video')
+@app.route('/video/<string:id>/download')
 def get_video(id):
-    return send_from_directory(UPLOAD_FOLDER, id)
+    path = id + ".mp4"
+    return send_from_directory(UPLOAD_FOLDER, path)  #mp4 is hardcoded
 
 
 @app.route('/video/<string:id>')

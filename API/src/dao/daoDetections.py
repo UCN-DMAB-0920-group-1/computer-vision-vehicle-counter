@@ -1,8 +1,6 @@
-from matplotlib.collections import Collection
 from interfaces.IDao import IDao
 from pymongo import MongoClient
-import pymongo
-from ...env import CONNECTION_STRING
+from env import CONNECTION_STRING
 
 
 class daoDetections(IDao):
