@@ -6,7 +6,6 @@ from dummydata import dummydata
 from werkzeug.utils import secure_filename
 
 from tracking_module.tracking import Tracking
-from tracking_module.streams import streams
 
 app = Flask(__name__)
 app.secret_key = "super secret key"
