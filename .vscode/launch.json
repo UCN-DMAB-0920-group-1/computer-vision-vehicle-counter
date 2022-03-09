@@ -10,7 +10,7 @@
             "type": "python",
             "request": "launch",
             "module": "flask",
-            "env": {"FLASK_APP":"src/TrackingAPI.py",
+            "env": {"FLASK_APP":"api/src/app.py",
                     "FLASK_ENV":"development",
                     "FLASK_DEBUG":"1"},
             "console": "integratedTerminal",
