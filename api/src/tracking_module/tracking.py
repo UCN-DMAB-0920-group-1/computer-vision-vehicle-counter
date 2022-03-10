@@ -33,6 +33,7 @@ class Tracking:
         self.model = torch.hub.load(
             repo_or_dir="ultralytics/yolov5", model=detector_path)
         self.model.conf = confidence_threshold
+        #self.model.
 
         self.inside_roi = []  # Int array
         self.vehicle_count = 0

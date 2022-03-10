@@ -9,7 +9,7 @@ from tracking_module.tracking import Tracking
 
 app = Flask(__name__)
 app.secret_key = "super secret key"
-UPLOAD_FOLDER = '../storage/'  # check if working, this changes often!
+UPLOAD_FOLDER = './storage/'  # check if working, this changes often!
 ALLOWED_EXTENSIONS = {'mp4'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
