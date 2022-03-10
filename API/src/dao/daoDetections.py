@@ -1,12 +1,15 @@
 from interfaces.IDao import IDao
 from pymongo import MongoClient
-from env import CONNECTION_STRING
+import json
 
+# Load config
+with open("conf.json", "r") as config:
+    data = json.load(config)
 
 class daoDetections(IDao):
 
     global collection
-    client = MongoClient(CONNECTION_STRING)
+    client = MongoClient(data["mongodb"])
     db = client['AI_result_database']
     collection = db['Vehicle_tracking_result']
 
