@@ -1,9 +1,7 @@
-import json
 import os
 import uuid
 from flask import Flask, jsonify, flash, request, redirect, url_for, send_file, send_from_directory, safe_join, abort
-from dummydata import dummydata
-from werkzeug.utils import secure_filename
+from dao.daoDetections import daoDetections
 
 from tracking_module.tracking import Tracking
 
@@ -30,8 +28,8 @@ def upload_video():
     if file.filename == '':
         return abort(404, 'No selected file')
     if file and allowed_file(file.filename):
-        filename = str(uuid.uuid4()) + '.mp4'
-        video_path = os.path.join(UPLOAD_FOLDER, filename)
+        filename = str(uuid.uuid4())
+        video_path = os.path.join(UPLOAD_FOLDER, (filename + ".mp4"))
         file.save(video_path)
 
         tracker = Tracking(should_draw=True,
@@ -39,18 +37,17 @@ def upload_video():
                                      (600, 487)])
 
         detections = tracker.track(video_path)
+        res = daoDetections.insert_one(filename, detections)
+        return jsonify({'id': res.inserted_id, "cars": detections['total']})
 
-        return jsonify({'path': filename})
 
-
-@app.route('/video/<string:id>/video')
+@app.route('/video/<string:id>/download')
 def get_video(id):
-    return send_from_directory(UPLOAD_FOLDER, id)
+    path = id + ".mp4"
+    return send_from_directory(UPLOAD_FOLDER, path)  #mp4 is hardcoded
 
 
 @app.route('/video/<string:id>')
 def get_count(id):
-    path = os.path.join(UPLOAD_FOLDER, 'tempDB.json')
-    with open(path, 'r') as file:
-        data = json.load(file)
-    return jsonify(data[id])
+    res = daoDetections.find_one(id)
+    return jsonify(res)
