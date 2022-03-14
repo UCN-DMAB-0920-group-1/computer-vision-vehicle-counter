@@ -1,4 +1,5 @@
 import os
+import sys
 import uuid
 import threading
 from flask import Flask, jsonify, flash, request, redirect, url_for, send_file, send_from_directory, safe_join, abort
@@ -6,6 +7,8 @@ from dao.daoDetections import daoDetections
 
 from tracking_module.tracking import Tracking
 
+global thread_list
+thread_list = []
 app = Flask(__name__)
 app.secret_key = "super secret key"
 UPLOAD_FOLDER = '../storage/'  # check if working, this changes often!
@@ -29,17 +32,18 @@ def upload_video():
     if file.filename == '':
         return abort(404, 'No selected file')
     if file and allowed_file(file.filename):
-        filename = str(uuid.uuid4())
-        video_path = os.path.join(UPLOAD_FOLDER, (filename + ".mp4"))
-        file.save(video_path)
-        if threading.active_count() < 10:
+        if checkThreadCount() < 2:
+            filename = str(uuid.uuid4())
+            video_path = os.path.join(UPLOAD_FOLDER, (filename + ".mp4"))
+            file.save(video_path)
             thread = threading.Thread(
-                target=threadVideoTracker, args=(filename, video_path))
+                target=threadVideoTracker, args=(filename, video_path), daemon=True)
+            thread_list.append(thread)
             thread.start()
             return jsonify({'id': filename})
         else:
             return abort(503, 'Queue is full, try again latorz count:' + str(threading.active_count()))
-        # return jsonify({'id': res.inserted_id, "cars": detections['total']})
+    return abort(502, 'File is not allowed to be uploaded')
 
 
 @app.route('/video/<string:id>/download')
@@ -61,3 +65,12 @@ def threadVideoTracker(filename, video_path):
     detections = tracker.track(video_path)
     res = daoDetections.insert_one(filename, detections)
     return
+
+
+def checkThreadCount():
+    count = 0
+    for t in thread_list:
+        if t.is_alive():
+            count += 1
+    print('Threads running: ' + str(count))
+    return count
