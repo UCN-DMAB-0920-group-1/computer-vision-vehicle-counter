@@ -1,5 +1,6 @@
 import os
 import uuid
+import threading
 from flask import Flask, jsonify, flash, request, redirect, url_for, send_file, send_from_directory, safe_join, abort
 from dao.daoDetections import daoDetections
 
@@ -31,23 +32,32 @@ def upload_video():
         filename = str(uuid.uuid4())
         video_path = os.path.join(UPLOAD_FOLDER, (filename + ".mp4"))
         file.save(video_path)
-
-        tracker = Tracking(should_draw=True,
-                           roi_area=[(100, 400), (100, 200), (600, 200),
-                                     (600, 487)])
-
-        detections = tracker.track(video_path)
-        res = daoDetections.insert_one(filename, detections)
-        return jsonify({'id': res.inserted_id, "cars": detections['total']})
+        if threading.active_count() < 10:
+            thread = threading.Thread(
+                target=threadVideoTracker, args=(filename, video_path))
+            thread.start()
+            return jsonify({'id': filename})
+        else:
+            return abort(503, 'Queue is full, try again latorz count:' + str(threading.active_count()))
+        # return jsonify({'id': res.inserted_id, "cars": detections['total']})
 
 
 @app.route('/video/<string:id>/download')
 def get_video(id):
     path = id + ".mp4"
-    return send_from_directory(UPLOAD_FOLDER, path)  #mp4 is hardcoded
+    return send_from_directory(UPLOAD_FOLDER, path)  # mp4 is hardcoded
 
 
 @app.route('/video/<string:id>')
 def get_count(id):
     res = daoDetections.find_one(id)
     return jsonify(res)
+
+
+def threadVideoTracker(filename, video_path):
+    tracker = Tracking(should_draw=True,
+                       roi_area=[(100, 400), (100, 200), (600, 200),
+                                 (600, 487)])
+    detections = tracker.track(video_path)
+    res = daoDetections.insert_one(filename, detections)
+    return
