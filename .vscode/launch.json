@@ -26,7 +26,7 @@
             "name": "Python: ML tracker",
             "type": "python",
             "request": "launch",
-            "program": "${workspacefolder}",
+            "program": "${workspaceFolder}/api/src/main.py",
             "console": "integratedTerminal",
             "args": []
         }
