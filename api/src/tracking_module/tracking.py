@@ -1,4 +1,5 @@
 from asyncore import read
+from importlib.resources import path
 import cv2
 import time
 import torch
@@ -18,20 +19,29 @@ class Tracking:
         self,
         should_draw: bool = True,
         device: str = "cuda",  # Device (CPU or GPU)
-        detector_path: str = "yolov5m6",  # YOLO version
+        model_path: str = "yolov5m6",  # YOLO version
+        custom_model: bool = False,
         # How confidence should YOLO be, before labeling
         confidence_threshold: float = 0.5,
         track_points: str = "bbox",  # Can be centroid or bbox
-        label_offset:
-        int = 50,  # Offset from center point to classification label
+        label_offset: int = 50,  # Offset from center point to classification label
         max_distance_between_points: int = 30,
         # TOP LEFT, BOTTOM LEFT, BOTTOM RIGHT, TOP RIGHT,
-        roi_area: np.ndarray[int,int] = [[(0,250), (520,90), (640,90), (640,719), (0,719)]]
+        roi_area: np.ndarray[int, int] = [
+            [(0, 250), (520, 90), (640, 90), (640, 719), (0, 719)]]
     ):
 
         # Load yolo model
-        self.model = torch.hub.load(repo_or_dir="ultralytics/yolov5",
-                                    model=detector_path)
+        if(custom_model):
+            self.model = torch.hub.load(
+                repo_or_dir='ultralytics/yolov5',
+                model='custom',
+                path=model_path)
+        else:
+            self.model = torch.hub.load(  # downloads model to root folder, fix somehow
+                repo_or_dir="ultralytics/yolov5",
+                model=model_path)
+
         self.model.conf = confidence_threshold
 
         self.inside_roi = []  # Int array
@@ -128,13 +138,16 @@ class Tracking:
 
         # Open stream
         video_stream = cv2.VideoCapture(stream_url)
+
         # Open file writer
-        fourcc = cv2.VideoWriter_fourcc('F', 'M', 'P', '4')
+        fourcc = video_stream.get(cv2.CAP_PROP_FOURCC)
         out = cv2.VideoWriter(
-            stream_location, fourcc, 20.0,
+            stream_location + "_processed.mp4",
+            int(fourcc), video_stream.get(cv2.CAP_PROP_FPS),
             (int(video_stream.get(3)), int(video_stream.get(4))))
 
-        if(video_stream.isOpened()): ref_frame = video_stream.read()[1]
+        if(video_stream.isOpened()):
+            ref_frame = video_stream.read()[1]
         mask, roi_offset = self.mask_create(ref_frame)
 
         # As long as the video stream is open, run the YOLO model on the frame, and show the output
@@ -145,18 +158,8 @@ class Tracking:
             if(not ret):
                 break
 
-            # apply the mask
-            masked_image = cv2.bitwise_and(frame, mask)
-            #cv2.imwrite('image_masked.png', masked_image)
-            #cv2.imwrite('image.png', frame)
-
-            # crop frame to masked area
-            b_rect = cv2.boundingRect(self.roi_area) # returns (x,y,w,h) of the rect
-            cropped_image = masked_image[b_rect[1]: b_rect[1] + b_rect[3], b_rect[0]: b_rect[0] + b_rect[2]]
-
-            comb_image = cv2.addWeighted(frame, 1, masked_image, 0, 0)
-            #cv2.imwrite('image_overlayed.png', comb_image)
-            #cv2.imwrite('image_cropped.png', cropped_image)
+            # Crop frame to ROI area
+            cropped_image = self.crop_frame(frame, mask)
 
             # Detect objects inside the frame
             #yolo_detections = self.model(frame)
@@ -164,7 +167,8 @@ class Tracking:
 
             # Convert to norfair detections
             #detections = yolo_detections_to_norfair_detections(yolo_detections, track_points=self.track_points)
-            detections = yolo_detections_to_norfair_detections(yolo_detections, track_points=self.track_points, offset=roi_offset)
+            detections = yolo_detections_to_norfair_detections(
+                yolo_detections, track_points=self.track_points, offset=roi_offset)
 
             # Update tracker
             tracked_objects = self.tracker.update(detections=detections)
@@ -191,11 +195,11 @@ class Tracking:
             if(self.should_draw):
                 self.draw(frame, yolo_detections, detections, tracked_objects)
                 #self.draw(cropped_image, yolo_detections, detections, tracked_objects)
-            # Wait for ESC to be pressed (then exit)
 
-            # Write file
+            # Write to filesystem
             out.write(frame)
 
+            # Wait for ESC to be pressed (then exit)
             if (cv2.waitKey(10) == 27):
                 break
         # Safely disposed any used resources
@@ -213,14 +217,28 @@ class Tracking:
         # automatically find lowest offsets
         min_x = min(p[0] for p in self.roi_area)[0]
         min_y = min(p[1] for p in self.roi_area)[1]
-        roi_offset = (min_x,min_y)
+        roi_offset = (min_x, min_y)
 
         # fill the ROI so it doesn't get wiped out when the mask is applied
         channel_count = image.shape[2]  # channel count on image
-        ignore_mask_color = (255,)*channel_count # array of white color, sized to channels count
+
+        # array of white color, sized to channels count
+        ignore_mask_color = (255,)*channel_count
 
         # draw desired area on mask
         cv2.fillConvexPoly(mask, self.roi_area, ignore_mask_color)
         #cv2.drawContours(mask, [roi_corners], -1, ignore_mask_color, -1, cv2.LINE_AA)
 
         return mask, roi_offset
+
+    def crop_frame(self, frame, mask):
+        # apply the mask
+        masked_image = cv2.bitwise_and(frame, mask)
+
+        # crop frame to masked area
+        # returns (x,y,w,h) of the rect
+        b_rect = cv2.boundingRect(self.roi_area)
+        cropped_image = masked_image[b_rect[1]: b_rect[1] + b_rect[3],
+                                     b_rect[0]: b_rect[0] + b_rect[2]]
+
+        return cropped_image
