@@ -1,12 +1,18 @@
 import os
+
 import uuid
 from flask import Flask, jsonify, flash, request, redirect, url_for, send_file, send_from_directory, safe_join, abort
+from flask_cors import CORS
 from dao.daoDetections import daoDetections
+
 
 from tracking_module.tracking import Tracking
 
 app = Flask(__name__)
 app.secret_key = "super secret key"
+cors = CORS(app, resources={r"*": {"origins": "*"}})
+
+
 UPLOAD_FOLDER = '../storage/'  # check if working, this changes often!
 ALLOWED_EXTENSIONS = {'mp4'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -44,7 +50,7 @@ def upload_video():
 @app.route('/video/<string:id>/download')
 def get_video(id):
     path = id + ".mp4"
-    return send_from_directory(UPLOAD_FOLDER, path)  #mp4 is hardcoded
+    return send_from_directory(UPLOAD_FOLDER, path)  # mp4 is hardcoded
 
 
 @app.route('/video/<string:id>')
