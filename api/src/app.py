@@ -15,10 +15,7 @@ UPLOAD_FOLDER = '../storage/'  # check if working, this changes often!
 ALLOWED_EXTENSIONS = {'mp4'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+############# - ROUTES - #############
 
 
 @app.route('/video', methods=['POST'])
@@ -31,19 +28,25 @@ def upload_video():
     # empty file without a filename.
     if file.filename == '':
         return abort(404, 'No selected file')
-    if file and allowed_file(file.filename):
-        if checkThreadCount() < 2:
-            filename = str(uuid.uuid4())
-            video_path = os.path.join(UPLOAD_FOLDER, (filename + ".mp4"))
-            file.save(video_path)
-            thread = threading.Thread(
-                target=threadVideoTracker, args=(filename, video_path), daemon=True)
-            thread_list.append(thread)
-            thread.start()
-            return jsonify({'id': filename})
-        else:
-            return abort(503, 'Queue is full, try again latorz count:' + str(threading.active_count()))
-    return abort(502, 'File is not allowed to be uploaded')
+    if not file and not allowed_file(file.filename):
+        return abort(403, 'File is not allowed to be uploaded')
+
+    threadCount = checkThreadCount()
+    if threadCount > 2:
+        return abort(503, 'Queue is full, try again latorz. Job count:' + str(threadCount))
+
+    id = str(uuid.uuid4())
+    video_path = os.path.join(UPLOAD_FOLDER, (id + ".mp4"))
+    file.save(video_path)
+    try:
+        thread = threading.Thread(
+            target=threadVideoTracker, args=(id, video_path), daemon=True)
+        thread_list.append(thread)
+        thread.start()
+    except Exception as e:
+        print(e)
+        return abort(500, 'Internal error while starting video task, try again')
+    return jsonify({'id': id})
 
 
 @app.route('/video/<string:id>/download')
@@ -57,14 +60,20 @@ def get_count(id):
     res = daoDetections.find_one(id)
     return jsonify(res)
 
+############# - METHODS - #############
 
-def threadVideoTracker(filename, video_path):
-    tracker = Tracking(should_draw=True,
-                       roi_area=[(100, 400), (100, 200), (600, 200),
-                                 (600, 487)])
-    detections = tracker.track(video_path)
-    res = daoDetections.insert_one(filename, detections)
-    return
+
+def threadVideoTracker(id, video_path):
+    try:
+        tracker = Tracking(should_draw=True,
+                           roi_area=[(100, 400), (100, 200), (600, 200),
+                                     (600, 487)])
+        detections = tracker.track(video_path)
+        res = daoDetections.insert_one(id, detections)
+    except Exception as e:
+        print(e)
+    finally:
+        return 'Thread Done'
 
 
 def checkThreadCount():
@@ -74,3 +83,8 @@ def checkThreadCount():
             count += 1
     print('Threads running: ' + str(count))
     return count
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
