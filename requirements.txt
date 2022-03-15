@@ -44,7 +44,6 @@ oauthlib==3.2.0
 opencv-contrib-python==4.5.5.62
 opencv-python==4.5.5.62
 packaging==21.3
-pafy @ git+https://github.com/Cupcakus/pafy@45f0deb067bf7c420cdf83a0529fd5274c12de18
 pandas==1.4.1
 parso==0.8.3
 pickleshare==0.7.5
