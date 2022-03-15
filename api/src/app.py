@@ -1,9 +1,10 @@
 import os
-import sys
 import uuid
 import threading
 from flask import Flask, jsonify, flash, request, redirect, url_for, send_file, send_from_directory, safe_join, abort
+from flask_cors import CORS
 from dao.daoDetections import daoDetections
+
 
 from tracking_module.tracking import Tracking
 
@@ -11,6 +12,9 @@ global thread_list
 thread_list = []
 app = Flask(__name__)
 app.secret_key = "super secret key"
+cors = CORS(app, resources={r"*": {"origins": "*"}})
+
+
 UPLOAD_FOLDER = '../storage/'  # check if working, this changes often!
 ALLOWED_EXTENSIONS = {'mp4'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
