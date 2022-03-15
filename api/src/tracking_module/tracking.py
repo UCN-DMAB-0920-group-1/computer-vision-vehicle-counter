@@ -1,3 +1,4 @@
+from asyncore import read
 import cv2
 import time
 import torch
@@ -23,7 +24,7 @@ class Tracking:
         label_offset: int = 50,  # Offset from center point to classification label
         max_distance_between_points: int = 30,
         # TOP LEFT, BOTTOM LEFT, BOTTOM RIGHT, TOP RIGHT,
-        roi_area=[(250, 300), (10, 387), (516, 558), (525, 327)]
+        roi_area: np.ndarray[int,int] = [[(0,250), (520,90), (640,90), (640,719), (0,719)]]
     ):
 
         # Load yolo model
@@ -41,7 +42,7 @@ class Tracking:
 
         self.track_points = track_points
         self.label_offset = label_offset
-        self.roi_area = roi_area
+        self.roi_area = np.array(roi_area, dtype=np.int32)
         self.should_draw = should_draw
 
     def draw(self, frame, yolo_detections, norfair_detections, tracked_objects):
@@ -125,45 +126,34 @@ class Tracking:
         # Open stream
         video_stream = cv2.VideoCapture(stream_url)
 
+        width = video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)
+        height = video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        channels = video_stream.get(cv2.CAP_PROP_CHANNEL)
+
+        if(video_stream.isOpened()): ref_frame = video_stream.read()[1]
+
+        mask, roi_offset = self.mask_create(ref_frame)
+
         # As long as the video stream is open, run the YOLO model on the frame, and show the output
         while video_stream.isOpened():
             ret, frame = video_stream.read()
 
             # Ensures no error occur, even when there is no more frames to check for
-            if(ret is False):
+            if(not ret):
                 break
-
-            # mask defaulting to black for 3-channel and transparent for 4-channel
-            # (of course replace corners with yours)
-            mask = np.zeros(frame.shape, dtype=np.uint8)
-            roi_corners = np.array([[(0,250), (520,90), (640,90), (640,719), (0,719)]], dtype=np.int32)
-
-            # automatically find lowest offsets
-            min_x = min(p[0] for p in roi_corners)[0]
-            min_y = min(p[1] for p in roi_corners)[1]
-            roi_offset = (min_x,min_y)
-
-
-            # fill the ROI so it doesn't get wiped out when the mask is applied
-            channel_count = frame.shape[2]  # channel count on image
-            ignore_mask_color = (255,)*channel_count # array of white color, sized to channels count
-
-            # draw desired area on mask
-            cv2.fillConvexPoly(mask, roi_corners, ignore_mask_color)
-            #cv2.drawContours(mask, [roi_corners], -1, ignore_mask_color, -1, cv2.LINE_AA)
 
             # apply the mask
             masked_image = cv2.bitwise_and(frame, mask)
-            cv2.imwrite('image_masked.png', masked_image)
-            cv2.imwrite('image.png', frame)
+            #cv2.imwrite('image_masked.png', masked_image)
+            #cv2.imwrite('image.png', frame)
 
             # crop frame to masked area
-            b_rect = cv2.boundingRect(roi_corners) # returns (x,y,w,h) of the rect
+            b_rect = cv2.boundingRect(self.roi_area) # returns (x,y,w,h) of the rect
             cropped_image = masked_image[b_rect[1]: b_rect[1] + b_rect[3], b_rect[0]: b_rect[0] + b_rect[2]]
 
             comb_image = cv2.addWeighted(frame, 1, masked_image, 0, 0)
-            cv2.imwrite('image_overlayed.png', comb_image)
-            cv2.imwrite('image_cropped.png', cropped_image)
+            #cv2.imwrite('image_overlayed.png', comb_image)
+            #cv2.imwrite('image_cropped.png', cropped_image)
 
             # Detect objects inside the frame
             #yolo_detections = self.model(frame)
@@ -207,3 +197,23 @@ class Tracking:
         # cv2.destroyAllWindows()
 
         return {"total": self.vehicle_count}
+
+    def mask_create(self, image):
+        # mask defaulting to black for 3-channel and transparent for 4-channel
+        # (of course replace corners with yours)
+        mask = np.zeros(image.shape, dtype=np.uint8)
+
+        # automatically find lowest offsets
+        min_x = min(p[0] for p in self.roi_area)[0]
+        min_y = min(p[1] for p in self.roi_area)[1]
+        roi_offset = (min_x,min_y)
+
+        # fill the ROI so it doesn't get wiped out when the mask is applied
+        channel_count = image.shape[2]  # channel count on image
+        ignore_mask_color = (255,)*channel_count # array of white color, sized to channels count
+
+        # draw desired area on mask
+        cv2.fillConvexPoly(mask, self.roi_area, ignore_mask_color)
+        #cv2.drawContours(mask, [roi_corners], -1, ignore_mask_color, -1, cv2.LINE_AA)
+
+        return mask, roi_offset
