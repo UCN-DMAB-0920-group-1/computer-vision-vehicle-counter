@@ -6,6 +6,7 @@ import json
 with open("conf.json", "r") as config:
     data = json.load(config)
 
+
 class daoDetections(IDao):
 
     global collection

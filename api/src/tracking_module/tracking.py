@@ -13,6 +13,7 @@ from tracking_module.norfair_helpers import euclidean_distance, yolo_detections_
 
 
 class Tracking:
+
     def __init__(
         self,
         should_draw: bool = True,
@@ -21,15 +22,16 @@ class Tracking:
         # How confidence should YOLO be, before labeling
         confidence_threshold: float = 0.5,
         track_points: str = "bbox",  # Can be centroid or bbox
-        label_offset: int = 50,  # Offset from center point to classification label
+        label_offset:
+        int = 50,  # Offset from center point to classification label
         max_distance_between_points: int = 30,
         # TOP LEFT, BOTTOM LEFT, BOTTOM RIGHT, TOP RIGHT,
         roi_area: np.ndarray[int,int] = [[(0,250), (520,90), (640,90), (640,719), (0,719)]]
     ):
 
         # Load yolo model
-        self.model = torch.hub.load(
-            repo_or_dir="ultralytics/yolov5", model=detector_path)
+        self.model = torch.hub.load(repo_or_dir="ultralytics/yolov5",
+                                    model=detector_path)
         self.model.conf = confidence_threshold
 
         self.inside_roi = []  # Int array
@@ -45,7 +47,8 @@ class Tracking:
         self.roi_area = np.array(roi_area, dtype=np.int32)
         self.should_draw = should_draw
 
-    def draw(self, frame, yolo_detections, norfair_detections, tracked_objects):
+    def draw(self, frame, yolo_detections, norfair_detections,
+             tracked_objects):
         frame_scale = frame.shape[0] / 100
         id_size = frame_scale / 10
         id_thickness = int(frame_scale / 5)
@@ -59,8 +62,8 @@ class Tracking:
         norfair.draw_tracked_objects(frame, tracked_objects, id_thickness=3)
 
         # Draw ROI
-        cv2.polylines(frame, [np.array(self.roi_area, np.int32)],
-                      True, (15, 220, 10), 6)
+        cv2.polylines(frame, [np.array(self.roi_area, np.int32)], True,
+                      (15, 220, 10), 6)
 
         # Draw detected label
         frame_scale = frame.shape[0] / 100
@@ -125,13 +128,13 @@ class Tracking:
 
         # Open stream
         video_stream = cv2.VideoCapture(stream_url)
-
-        width = video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)
-        height = video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT)
-        channels = video_stream.get(cv2.CAP_PROP_CHANNEL)
+        # Open file writer
+        fourcc = cv2.VideoWriter_fourcc('F', 'M', 'P', '4')
+        out = cv2.VideoWriter(
+            stream_location, fourcc, 20.0,
+            (int(video_stream.get(3)), int(video_stream.get(4))))
 
         if(video_stream.isOpened()): ref_frame = video_stream.read()[1]
-
         mask, roi_offset = self.mask_create(ref_frame)
 
         # As long as the video stream is open, run the YOLO model on the frame, and show the output
@@ -176,7 +179,7 @@ class Tracking:
                 is_inside_roi = cv2.pointPolygonTest(
                     np.array(self.roi_area, np.int32), track_position, False)
 
-                if(is_inside_roi >= 0):
+                if (is_inside_roi >= 0):
                     if not obj.id in self.inside_roi:
                         self.inside_roi.append(obj.id)
                         self.vehicle_count += 1
@@ -189,11 +192,15 @@ class Tracking:
                 self.draw(frame, yolo_detections, detections, tracked_objects)
                 #self.draw(cropped_image, yolo_detections, detections, tracked_objects)
             # Wait for ESC to be pressed (then exit)
-            if(cv2.waitKey(10) == 27):
-                break
 
+            # Write file
+            out.write(frame)
+
+            if (cv2.waitKey(10) == 27):
+                break
         # Safely disposed any used resources
         video_stream.release()
+        out.release()
         # cv2.destroyAllWindows()
 
         return {"total": self.vehicle_count}
