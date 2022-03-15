@@ -10,7 +10,8 @@ def euclidean_distance(detection, tracked_object):
 
 def yolo_detections_to_norfair_detections(
     yolo_detections: torch.tensor,
-    track_points: str = 'bbox'  # bbox or centroid
+    track_points: str = 'bbox',  # bbox or centroid
+    offset: tuple[int,int] = (0,0)
 ) -> List[Detection]:
     """convert detections_as_xywh to norfair detections
     """
@@ -34,8 +35,8 @@ def yolo_detections_to_norfair_detections(
         for detection_as_xyxy in detections_as_xyxy:
             bbox = np.array(
                 [
-                    [detection_as_xyxy[0].item(), detection_as_xyxy[1].item()],
-                    [detection_as_xyxy[2].item(), detection_as_xyxy[3].item()]
+                    [detection_as_xyxy[0].item() + offset[0], detection_as_xyxy[1].item() + offset[1]],
+                    [detection_as_xyxy[2].item() + offset[0], detection_as_xyxy[3].item() + offset[1]]
                 ]
             )
             scores = np.array([detection_as_xyxy[4].item(),
