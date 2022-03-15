@@ -23,8 +23,11 @@
 
 <script>
 import { ref } from "vue";
+import { useStore } from "vuex";
 export default {
   setup() {
+    const store = useStore();
+
     let file = ref("");
     let error = ref("");
     let loading = ref(false);
@@ -42,27 +45,7 @@ export default {
 
       try {
         loading.value = true;
-        /*
-        const response = await fetch(process.env.VUE_APP_PROCESSING_ENDPOINT, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json;charset=utf-8",
-          },
-          body: JSON.stringify(file.value),
-        }); */
-
-        const fd = new FormData();
-        fd.append("file", file.value);
-
-        const response = await fetch(
-          process.env.VUE_APP_PROCESSING_ENDPOINT + "/video",
-          {
-            method: "POST",
-            body: fd,
-          }
-        );
-
-        console.log("RESPONSE: " + response.statusCode);
+        store.dispatch("FileProcessing/uploadVideo", file.value);
       } catch (e) {
         error.value = e;
       } finally {
