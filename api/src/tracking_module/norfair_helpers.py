@@ -1,6 +1,7 @@
 from collections import namedtuple
-import torch
+
 import numpy as np
+import torch
 from norfair import Detection
 
 
@@ -19,8 +20,8 @@ def yolo_detections_to_norfair_detections(
     """
     norfair_detections: list[Detection] = []
 
-    Point = namedtuple('Point', ['x', 'y'])
-    offset = Point(*offset)
+    point = namedtuple('Point', ['x', 'y'])
+    offset = point(*offset)
 
     if track_points == 'centroid':
         # defines namedtuple to hold relevant values from detection objects xyxy

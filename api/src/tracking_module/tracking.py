@@ -1,14 +1,14 @@
-import imp
-import cv2
-import torch
-import norfair
-import numpy as np
 from functools import reduce
 
+import cv2
+import norfair
+import numpy as np
+import torch
 from norfair import Tracker
 
-from .util import get_stream, center_pos
-from .norfair_helpers import euclidean_distance, yolo_detections_to_norfair_detections
+from .norfair_helpers import (euclidean_distance,
+                              yolo_detections_to_norfair_detections)
+from .util import center_pos, get_stream
 
 
 class Tracking:
@@ -36,11 +36,13 @@ class Tracking:
             self.model = torch.hub.load(
                 repo_or_dir='ultralytics/yolov5',
                 model='custom',
-                path=model_path)
+                path=model_path,
+                force_reload=True)
         else:
             self.model = torch.hub.load(  # downloads model to root folder, fix somehow
                 repo_or_dir="ultralytics/yolov5",
-                model=model_path)
+                model=model_path,
+                force_reload=True)
 
         self.model.conf = confidence_threshold
         self.model.iou
@@ -198,6 +200,7 @@ class Tracking:
             # Wait for ESC to be pressed (then exit)
             if (cv2.waitKey(1) == 27):
                 break
+            
         # Safely disposed any used resources
         video_stream.release()
         out.release()
