@@ -3,6 +3,7 @@ import cv2
 import torch
 import norfair
 import numpy as np
+from functools import reduce
 
 from norfair import Tracker
 
@@ -45,7 +46,7 @@ class Tracking:
         self.model.iou
 
         self.inside_roi = []  # Int array
-        self.vehicle_count = 0
+        self.detections = {"car": 0}
 
         self.tracker = Tracker(
             distance_function=euclidean_distance,
@@ -110,9 +111,12 @@ class Tracking:
         """
 
         # Draw vehicle counter
+
+        total_vehicles = reduce(lambda a, b: a+b, self.detections.values())
+
         cv2.putText(
             img=frame,
-            text="total: " + str(self.vehicle_count),
+            text="total: " + str(total_vehicles),
             org=(25, 50),
             fontFace=cv2.FONT_HERSHEY_SIMPLEX,
             fontScale=id_size,
@@ -199,7 +203,7 @@ class Tracking:
         out.release()
         # cv2.destroyAllWindows()
 
-        return {"total": self.vehicle_count}
+        return self.detections
 
     def count_objects(self, tracked_objects):
         """counts objects inside tracked inside the ROI
@@ -217,11 +221,15 @@ class Tracking:
             if (is_inside_roi >= 0):
                 if not obj.id in self.inside_roi:
                     self.inside_roi.append(obj.id)
-                    self.vehicle_count += 1
+
+                    if(obj.label in self.detections):
+                        self.detections[obj.label] += 1
+                    else:
+                        self.detections[obj.label] = 1
             else:
                 if obj.id in self.inside_roi:
                     self.inside_roi.remove(obj.id)
-            print(self.inside_roi)
+            print(self.detections)
 
     def mask_create(self, image: np.ndarray):
         """Creates mask based on image and ROI

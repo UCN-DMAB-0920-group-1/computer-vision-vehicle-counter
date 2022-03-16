@@ -11,7 +11,7 @@ const actions = {
     fd.append("file", file);
 
     const response = await fetch(
-      process.env.VUE_APP_PROCESSING_ENDPOINT + "/video",
+      process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection",
       {
         method: "POST",
         body: fd,
