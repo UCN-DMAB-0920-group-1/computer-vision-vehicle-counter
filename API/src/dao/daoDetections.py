@@ -23,6 +23,10 @@ class daoDetections(IDao):
         res = collection.insert_one({
             "_id": id,
             "video": video,
-            "detections": object['total']
+            "length": "" ,
+            "cars detected": "",
+            "persons detected": "",
+            "trucks detected": "",
+            "Total detections": object['total']
         })
         return res
