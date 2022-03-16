@@ -34,6 +34,7 @@ def yolo_detections_to_norfair_detections(
     elif track_points == 'bbox':
         detections_as_xyxy = yolo_detections.xyxy[0]
         for detection_as_xyxy in detections_as_xyxy:
+            _label = yolo_detections.names[int(detection_as_xyxy[5])]
             bbox = np.array(
                 [
                     [detection_as_xyxy[0].item() + offset[0],
@@ -45,7 +46,7 @@ def yolo_detections_to_norfair_detections(
             scores = np.array([detection_as_xyxy[4].item(),
                               detection_as_xyxy[4].item()])
             norfair_detections.append(
-                Detection(points=bbox, scores=scores)
+                Detection(points=bbox, scores=scores, label=_label)
             )
 
     return norfair_detections

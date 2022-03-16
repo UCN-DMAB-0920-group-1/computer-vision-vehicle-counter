@@ -67,9 +67,11 @@ class Tracking:
         if self.track_points == 'centroid':
             norfair.draw_points(frame, norfair_detections)
         elif self.track_points == 'bbox':
-            norfair.draw_boxes(frame, norfair_detections, line_width=3)
+            norfair.draw_boxes(frame, norfair_detections,
+                               line_width=3, draw_labels=True)
 
-        norfair.draw_tracked_objects(frame, tracked_objects, id_thickness=3)
+        norfair.draw_tracked_objects(
+            frame, tracked_objects, id_thickness=3, label_size=5)
 
         # Draw ROI
         cv2.polylines(frame, [np.array(self.roi_area, np.int32)], True,
