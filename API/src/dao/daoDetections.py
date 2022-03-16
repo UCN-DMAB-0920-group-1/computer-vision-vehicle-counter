@@ -25,7 +25,12 @@ class daoDetections(IDao):
         res = collection.insert_one({
             "_id": id,
             "video": video,
+            "length": "",
+            "cars_detected": "",
+            "persons_detected": "",
+            "trucks_detected": "",
             "detections": object['total'],
             "date": date
+
         })
         return res
