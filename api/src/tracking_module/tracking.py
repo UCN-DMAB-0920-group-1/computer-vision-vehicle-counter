@@ -6,7 +6,7 @@ import numpy as np
 
 from norfair import Tracker
 
-from .util import get_stream, centroid
+from .util import get_stream, center_pos
 from .norfair_helpers import euclidean_distance, yolo_detections_to_norfair_detections
 
 
@@ -18,7 +18,7 @@ class Tracking:
         self,
         should_draw: bool = True,
         device: str = "cuda",  # Device (CPU or GPU)
-        model_path: str = "yolov5m6",  # YOLO version
+        model_path: str = "yolov5m",  # YOLO version
         custom_model: bool = False,
         # How confidence should YOLO be, before labeling
         confidence_threshold: float = 0.6,
@@ -57,25 +57,10 @@ class Tracking:
         self.roi_area = np.array(roi_area, dtype=np.int32)
         self.should_draw = should_draw
 
-    def draw(self, frame, yolo_detections, norfair_detections,
-             tracked_objects):
+    def draw(self, frame, yolo_detections, norfair_detections, tracked_objects):
         frame_scale = frame.shape[0] / 100
         id_size = frame_scale / 10
         id_thickness = int(frame_scale / 5)
-
-        # Draw detections, ids and center point/ bounding box
-        if self.track_points == 'centroid':
-            norfair.draw_points(frame, norfair_detections)
-        elif self.track_points == 'bbox':
-            norfair.draw_boxes(frame, norfair_detections,
-                               line_width=3, draw_labels=True)
-
-        norfair.draw_tracked_objects(
-            frame, tracked_objects, id_thickness=3, label_size=5)
-
-        # Draw ROI
-        cv2.polylines(frame, [np.array(self.roi_area, np.int32)], True,
-                      (15, 220, 10), 6)
 
         # Draw detected label
         frame_scale = frame.shape[0] / 100
@@ -84,6 +69,22 @@ class Tracking:
         pand = yolo_detections.pandas().xyxy[0]
         length = len(pand.name)
 
+        # Draw detections, ids and center point/ bounding box
+        if self.track_points == 'centroid':
+            norfair.draw_points(frame, norfair_detections,
+                                thickness=3, draw_labels=True, label_size=id_size)
+        elif self.track_points == 'bbox':
+            norfair.draw_boxes(frame, norfair_detections,
+                               line_width=3, draw_labels=True, label_size=id_size)
+
+        norfair.draw_tracked_objects(
+            frame, tracked_objects, id_thickness=2, id_size=id_size, color=[0, 255, 0])
+
+        # Draw ROI
+        cv2.polylines(frame, [np.array(self.roi_area, np.int32)], True,
+                      (15, 220, 10), 6)
+
+        """
         for i in range(length):
             name = pand.name[i]
             xmin = pand.xmin[i]
@@ -106,6 +107,7 @@ class Tracking:
                 thickness=id_thickness,
                 lineType=cv2.LINE_AA,
             )
+        """
 
         # Draw vehicle counter
         cv2.putText(
@@ -207,7 +209,7 @@ class Tracking:
             if not obj.live_points.any():
                 continue
 
-            track_position = centroid(obj.estimate[obj.live_points])
+            track_position = center_pos(obj.estimate[obj.live_points])
             # Is this object inside ROI?
             is_inside_roi = cv2.pointPolygonTest(
                 np.array(self.roi_area, np.int32), track_position, False)

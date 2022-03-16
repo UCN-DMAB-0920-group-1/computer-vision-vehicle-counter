@@ -16,7 +16,7 @@ def get_stream(url: str) -> str:
         return url  # url is most likely a file, return path
 
 
-def centroid(tracked_points: np.ndarray) -> tuple[int, int]:
+def center_pos(tracked_points: np.ndarray) -> tuple[int, int]:
     num_points = tracked_points.shape[0]
     sum_x = np.sum(tracked_points[:, 0])
     sum_y = np.sum(tracked_points[:, 1])
