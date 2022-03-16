@@ -15,7 +15,7 @@ app.secret_key = "super secret key"
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 
 
-UPLOAD_FOLDER = '../storage/'  # check if working, this changes often!
+UPLOAD_FOLDER = './api/storage/'  # check if working, this changes often!
 ALLOWED_EXTENSIONS = {'mp4'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -70,8 +70,7 @@ def get_count(id):
 def threadVideoTracker(id, video_path):
     try:
         tracker = Tracking(should_draw=True,
-                           roi_area=[(100, 400), (100, 200), (600, 200),
-                                     (600, 487)])
+                           roi_area=[[(0, 250), (520, 90), (640, 90), (640, 719), (0, 719)]])
         detections = tracker.track(video_path)
         res = daoDetections.insert_one(id, detections)
     except Exception as e:

@@ -11,7 +11,7 @@
       </div>
     </section>
     <section class="bg-blue-200 rounded-xl p-3" v-else>
-      <h1>Upload video</h1>
+      <h1 class="font-bold text-lg">Upload video {{ loading }}</h1>
       <p>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illum sint
         accusamus aliquam commodi quisquam beatae tempore vitae quo iste sit!
@@ -29,6 +29,7 @@
       >
         Upload
       </button>
+      <p>{{ error }}</p>
     </section>
   </div>
 </template>
@@ -53,7 +54,11 @@ export default {
     }
 
     async function onUploadFile() {
-      if (!this.file) error.value = "Please select a file";
+      if (!file.value) {
+        error.value = "Please select a file!";
+
+        return;
+      }
 
       try {
         loading.value = true;
@@ -69,6 +74,8 @@ export default {
       file: file,
       onFileChange: onFileChange,
       onUploadFile: onUploadFile,
+      loading,
+      error,
     };
   },
 };

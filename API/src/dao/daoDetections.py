@@ -4,7 +4,7 @@ from datetime import datetime
 import json
 
 # Load config
-with open("conf.json", "r") as config:
+with open("api/conf.json", "r") as config:
     data = json.load(config)
 
 
