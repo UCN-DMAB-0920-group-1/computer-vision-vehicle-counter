@@ -1,6 +1,7 @@
 import { createStore } from "vuex";
 
 import FileProcessing from "./module/FileProcessing";
+import Detections from "./module/Detections";
 
 export default createStore({
   state: {},
@@ -9,5 +10,6 @@ export default createStore({
   actions: {},
   modules: {
     FileProcessing,
+    Detections,
   },
 });

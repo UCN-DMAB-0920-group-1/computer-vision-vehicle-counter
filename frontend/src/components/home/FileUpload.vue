@@ -1,23 +1,36 @@
 <template>
-  <div class="bg-blue-200 rounded-xl p-3">
-    <h1>Upload video</h1>
-    <p>
-      Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illum sint
-      accusamus aliquam commodi quisquam beatae tempore vitae quo iste sit!
-      Cumque ducimus distinctio pariatur doloremque reiciendis repellat amet sed
-      iste?
-    </p>
-    <input
-      class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
-      type="file"
-      @change="onFileChange"
-    />
-    <button
-      class="block w-full rounded-full bg-blue-300 p-2 text-white mt-4"
-      @click="onUploadFile"
-    >
-      Upload
-    </button>
+  <div>
+    <section v-if="loading">
+      <div class="flex justify-center items-center">
+        <div
+          class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full"
+          role="status"
+        >
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    </section>
+    <section class="bg-blue-200 rounded-xl p-3" v-else>
+      <h1 class="font-bold text-lg">Upload video {{ loading }}</h1>
+      <p>
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illum sint
+        accusamus aliquam commodi quisquam beatae tempore vitae quo iste sit!
+        Cumque ducimus distinctio pariatur doloremque reiciendis repellat amet
+        sed iste?
+      </p>
+      <input
+        class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+        type="file"
+        @change="onFileChange"
+      />
+      <button
+        class="block w-full rounded-full bg-blue-300 p-2 text-white mt-4"
+        @click="onUploadFile"
+      >
+        Upload
+      </button>
+      <p>{{ error }}</p>
+    </section>
   </div>
 </template>
 
@@ -41,7 +54,11 @@ export default {
     }
 
     async function onUploadFile() {
-      if (!this.file) error.value = "Please select a file";
+      if (!file.value) {
+        error.value = "Please select a file!";
+
+        return;
+      }
 
       try {
         loading.value = true;
@@ -57,6 +74,8 @@ export default {
       file: file,
       onFileChange: onFileChange,
       onUploadFile: onUploadFile,
+      loading,
+      error,
     };
   },
 };

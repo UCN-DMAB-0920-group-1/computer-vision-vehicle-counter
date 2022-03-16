@@ -17,7 +17,7 @@ UPLOAD_FOLDER = 'api/storage/'  # check if working, this changes often!
 ALLOWED_EXTENSIONS = {'mp4'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-#detections routes init
+# detections routes init
 detections = Detections(thread_list, UPLOAD_FOLDER, Tracking, dao_detections)
 
 ############# - ROUTES - #############

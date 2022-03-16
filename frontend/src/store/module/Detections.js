@@ -1,12 +1,24 @@
 const state = {
-  videoIds: [],
+  videoData: [],
 };
 
 const mutations = {
-  setVideoIds: (state, videoIds) => (state.videoIds = videoIds),
+  setVideoData: (state, videoData) => (state.videoData = videoData),
 };
 const actions = {
-  async uploadVideo({ commit, state }, file) {
+  async getVideoData({ commit }, { id }) {
+    const response = await fetch(
+      process.env.VUE_APP_PROCESSING_ENDPOINT + "/video/" + id,
+      {
+        method: "GET",
+      }
+    );
+
+    const json = await response.json();
+
+    commit("setVideoData", json);
+  },
+  async downloadVideo({ commit }, file) {
     const fd = new FormData();
     fd.append("file", file);
 
@@ -25,7 +37,7 @@ const actions = {
   },
 };
 const getters = {
-  videoIds: (state) => state.videoIds,
+  videoData: (state) => state.videoData,
 };
 
 export default {
