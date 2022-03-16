@@ -1,5 +1,4 @@
 import os
-import sys
 import uuid
 import threading
 from flask import Flask, jsonify, flash, request, redirect, url_for, send_file, send_from_directory, safe_join, abort

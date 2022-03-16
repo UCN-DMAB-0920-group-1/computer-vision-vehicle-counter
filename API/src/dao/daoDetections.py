@@ -1,5 +1,6 @@
 from interfaces.IDao import IDao
 from pymongo import MongoClient
+from datetime import datetime
 import json
 
 # Load config
@@ -20,13 +21,16 @@ class daoDetections(IDao):
 
     def insert_one(id: int, object):
         video = id + '.mp4'
+        date = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         res = collection.insert_one({
             "_id": id,
             "video": video,
-            "length": "" ,
+            "length": "",
             "cars detected": "",
             "persons detected": "",
             "trucks detected": "",
-            "Total detections": object['total']
+            "detections": object['total'],
+            "date": date
+
         })
         return res
