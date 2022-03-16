@@ -26,9 +26,9 @@ class daoDetections(IDao):
             "_id": id,
             "video": video,
             "length": "",
-            "cars detected": "",
-            "persons detected": "",
-            "trucks detected": "",
+            "cars_detected": "",
+            "persons_detected": "",
+            "trucks_detected": "",
             "detections": object['total'],
             "date": date
 
