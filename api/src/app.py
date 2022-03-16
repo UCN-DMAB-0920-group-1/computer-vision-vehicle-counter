@@ -1,4 +1,5 @@
 import os
+from time import strftime, strptime
 import uuid
 import threading
 from flask import Flask, jsonify, flash, request, redirect, url_for, send_file, send_from_directory, safe_join, abort
@@ -62,6 +63,7 @@ def get_video(id):
 @app.route('/video/<string:id>')
 def get_count(id):
     res = daoDetections.find_one(id)
+    res["date"] = res["date"].strftime("%Y-%m-%d %H:%M:%S")
     return jsonify(res)
 
 ############# - METHODS - #############
