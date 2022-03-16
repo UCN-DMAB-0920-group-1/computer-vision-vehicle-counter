@@ -1,10 +1,8 @@
-
 import pafy
 import numpy as np
-from typing import Tuple
 
 
-def get_stream(url):
+def get_stream(url: str) -> str:
 
     # If the url is a m3u8 stream, return url
     if(str.endswith(url, ".m3u8")):
@@ -18,7 +16,7 @@ def get_stream(url):
         return url  # url is most likely a file, return path
 
 
-def centroid(tracked_points: np.array) -> Tuple[int, int]:
+def centroid(tracked_points: np.ndarray) -> tuple[int, int]:
     num_points = tracked_points.shape[0]
     sum_x = np.sum(tracked_points[:, 0])
     sum_y = np.sum(tracked_points[:, 1])
