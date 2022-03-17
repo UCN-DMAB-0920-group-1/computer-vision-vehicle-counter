@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Vue: npm run",
+            "command": "npm run serve",
+            "request": "launch",
+            "type": "node-terminal",
+            "cwd": "${workspaceRoot}/frontend/src/",
+        },
+        {
             "name": "Python: Flask",
             "type": "python",
             "request": "launch",
