@@ -44,14 +44,14 @@ class Detections:
 
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
-            task = {"video_path": video_path, "id": id}
+            task = {"video_path": video_path, "id": id, "options": options}
             self.task_queue.append(task)
             return abort(
                 503,
                 'Task added to queue, check result again latorz. you are number:'
                 + str(len(self.task_queue)))
         try:
-            self.startVideoTracker(id, video_path)
+            self.startVideoTracker(id, video_path, options)
         except Exception as e:
             print(e)
             return abort(
@@ -69,9 +69,9 @@ class Detections:
 
     ############# - METHODS - #############
 
-    def startVideoTracker(self, id, video_path):
+    def startVideoTracker(self, id, video_path, options: map):
         thread = threading.Thread(target=self.threadVideoTracker,
-                                  args=(id, video_path),
+                                  args=(id, video_path, options),
                                   daemon=True)
         self.thread_list.append(thread)
         thread.start()
@@ -139,5 +139,6 @@ class Detections:
                 self.task_queue) > 0:
             print("Starting new task")
             task = self.task_queue.pop(0)
-            self.startVideoTracker(task["id"], task["video_path"])
+            self.startVideoTracker(task["id"], task["video_path"],
+                                   task["options"])
         return len(self.task_queue)
