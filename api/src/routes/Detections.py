@@ -38,19 +38,19 @@ class Detections:
 
         id = str(uuid.uuid4())
         video_path = os.path.join(self.UPLOAD_FOLDER, (id + ".mp4"))
-
-        try:
-            os.mkdir(self.UPLOAD_FOLDER)
-        except FileExistsError as e:
-            print("path already exists")
-
-        file.save(video_path)
+        file = request.files['file']
+        self.save_video_file(video_path, file)
+        # Add pending task to database
         self.dao_detections.insert_task(id, {"Pending"})
 
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
+
             task = {"video_path": video_path, "id": id,
                     "options": options, "bbox": bbox}
+
+            task = {"id": id, "video_path": video_path, "options": options}
+
             self.task_queue.append(task)
             return abort(
                 503,
@@ -139,16 +139,33 @@ class Detections:
         if not file and not self.allowed_file(file.filename):
             return abort(403, 'File is not allowed to be uploaded')
 
-        threadCount = self.checkThreadCount()
-        if threadCount > 2:
-            return abort(
-                503, 'Queue is full, try again latorz. Job count:' +
-                str(threadCount))
+        if request.content_length > 30000000:
+            return abort(403, 'File is too large - try a smaller video')
+
+    def create_options(self, request):
+        if 'enabled' not in request.form:
+            return {'enabled': 'false'}
+        return {
+            'enabled': request.form['enabled'],
+            'startX': request.form['startX'],
+            'endX': request.form['endX'],
+            'startY': request.form['startY'],
+            'endY': request.form['endY'],
+            'confidence': request.form['confidence']
+        }
+
+    def save_video_file(self, video_path, file):
+        try:
+            os.mkdir(self.UPLOAD_FOLDER)
+        except FileExistsError as e:
+            print("path already exists")
+
+        file.save(video_path)
+        return "File saved"
 
     def checkQueue(self):
         print("Checking task list...")
-        if self.checkThreadCount() < self.MAX_THREADS and len(
-                self.task_queue) > 0:
+        if self.checkThreadCount() < self.MAX_THREADS and len(self.task_queue) > 0:
             print("Starting new task")
             task = self.task_queue.pop(0)
             self.startVideoTracker(task["id"], task["video_path"],
