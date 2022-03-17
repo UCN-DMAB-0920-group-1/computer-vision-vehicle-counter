@@ -16,30 +16,29 @@
 
       
       <label class="m-2">Advanced Options</label>
-      <input type="checkbox" v-model="advanced" >
+      <input type="checkbox" v-model="advancedOptions.enabled" >
       
 
-      <section class="w-full px-6 mx-auto bg-violet-400 rounded-xl p-4 shadow-xl" v-if="advanced">
+      <section class="w-full px-6 mx-auto bg-violet-400 rounded-xl p-4 shadow-xl" v-if="advancedOptions.enabled">
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <div>
             <label class="text-white font-bold">start X:</label>
-            <input class="w-full rounded-md" type="number" name="startX" />
+            <input v-model="advancedOptions.startX" class="w-full rounded-md" type="number" name="startX" />
           </div>
        <div>
             <label class="text-white font-bold">end X:</label>
-            <input class="w-full rounded-md" type="text" name="endX" />
+            <input v-model="advancedOptions.endX" class="w-full rounded-md" type="text" name="endX" />
           </div><div>
             <label class="text-white font-bold">start Y:</label>
-            <input class="w-full rounded-md" type="number" name="startY" />
+            <input v-model="advancedOptions.startY" class="w-full rounded-md" type="number" name="startY" />
           </div><div>
             <label class="text-white font-bold">end Y:</label>
-            <input class="w-full rounded-md" type="number" name="endY" />
+            <input v-model="advancedOptions.endY" class="w-full rounded-md" type="number" name="endY" />
           </div>
         </div>
-
-        <div class="pt-2">
-            <label class="text-white font-bold">Confidence:</label>
-            <input class="w-full rounded-md" type="number" name="confidence" />
+          <div class="w-full  mt-2">
+            <label class="text-white font-bold">Confidence: {{advancedOptions.confidence}}%</label>
+            <input v-model="advancedOptions.confidence" type="range" name="range" class="w-full h-1 shadow-xl bg-blue-100 appearance-none rounded-lg" />
           </div>
       </section>
       <p class="m-5">
@@ -65,8 +64,9 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref} from "vue";
 import { useStore } from "vuex";
+
 export default {
   setup() {
     const store = useStore();
@@ -74,7 +74,15 @@ export default {
     let file = ref("");
     let error = ref("");
     let loading = ref(false);
-    let advanced = ref(false);
+    let advancedOptions = ref({
+      enabled:false,
+      startX: 0,
+      endX: 0,
+      startY: 0,
+      endY: 0,
+      confidence:0,
+    });
+    
 
     function onFileChange(e) {
       var files = e.target.files || e.dataTransfer.files;
@@ -93,7 +101,9 @@ export default {
 
       try {
         loading.value = true;
-        store.dispatch("FileProcessing/uploadVideo", file.value);
+        advancedOptions.value.confidence /= 100 
+        store.dispatch("FileProcessing/uploadVideo", {file:file.value, advancedOptions:advancedOptions.value});
+        advancedOptions.value.confidence *= 100
       } catch (e) {
         error.value = e;
       } finally {
@@ -107,7 +117,7 @@ export default {
       onUploadFile: onUploadFile,
       loading,
       error,
-      advanced,
+      advancedOptions,
     };
   },
 };

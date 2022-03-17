@@ -10,7 +10,8 @@ import threading
 class Detections:
 
     def __init__(self, thread_list: list, UPLOAD_FOLDER: str,
-                 Tracking: Tracking, dao_detections: dao_detections, MAX_THREADS: int):
+                 Tracking: Tracking, dao_detections: dao_detections,
+                 MAX_THREADS: int):
 
         self.thread_list = thread_list
         self.MAX_THREADS = MAX_THREADS
@@ -20,15 +21,16 @@ class Detections:
         self.dao_detections = dao_detections
 
     def upload_video(self, request):
-        # Check if file is uploaded, and accept requirements
-        if 'file' not in request.files:
-            return abort(404, 'No file part')
+        self.validate_video_post(request)
         file = request.files['file']
-        if file.filename == '':
-            return abort(404, 'No selected file')
-        if not file and not self.allowed_file(file.filename):
-            return abort(403, 'File is not allowed to be uploaded')
-
+        options = {
+            'enabled': request.form['enabled'],
+            'startX': request.form['startX'],
+            'endX': request.form['endX'],
+            'startY': request.form['startY'],
+            'endY': request.form['endY'],
+            'confidence': request.form['confidence']
+        }
         id = str(uuid.uuid4())
         video_path = os.path.join(self.UPLOAD_FOLDER, (id + ".mp4"))
 
@@ -42,13 +44,14 @@ class Detections:
 
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
-            task = {"video_path": video_path, "id": id}
+            task = {"video_path": video_path, "id": id, "options": options}
             self.task_queue.append(task)
             return abort(
-                503, 'Task added to queue, check result again latorz. you are number:' +
-                str(len(self.task_queue)))
+                503,
+                'Task added to queue, check result again latorz. you are number:'
+                + str(len(self.task_queue)))
         try:
-            self.startVideoTracker(id, video_path)
+            self.startVideoTracker(id, video_path, options)
         except Exception as e:
             print(e)
             return abort(
@@ -66,19 +69,28 @@ class Detections:
 
     ############# - METHODS - #############
 
-    def startVideoTracker(self, id, video_path):
+    def startVideoTracker(self, id, video_path, options: map):
         thread = threading.Thread(target=self.threadVideoTracker,
-                                  args=(id, video_path),
+                                  args=(id, video_path, options),
                                   daemon=True)
         self.thread_list.append(thread)
         thread.start()
         return "Thread started"
 
-    def threadVideoTracker(self, id, video_path):
+    def threadVideoTracker(self, id, video_path, options: map):
+        if options['enabled'] == 'false':
+            roi = [[(0, 0), (1920, 0), (1920, 1080), (0, 1080)]]
+            confidence = 0.6
+        else:
+            roi = [[(options['startX'], options['startY']),
+                    (options['endX'], options['startY']),
+                    (options['endX'], options['endY']),
+                    (options['startX'], options['endY'])]]
+            confidence = float(options['confidence'])
         try:
             tracker = self.Tracking(should_draw=True,
-                                    roi_area=[[(100, 400), (100, 200),
-                                               (600, 200), (600, 487)]])
+                                    roi_area=roi,
+                                    confidence_threshold=confidence)
             detections = tracker.track(video_path)
             res = self.dao_detections.update_one(id, detections)
         except Exception as e:
@@ -100,10 +112,33 @@ class Detections:
         return '.' in filename and \
             filename.rsplit('.', 1)[1].lower() in self.ALLOWED_EXTENSIONS
 
+    def validate_video_post(self, request):
+
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            return abort(404, 'No file part')
+        file = request.files['file']
+
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        if file.filename == '':
+            return abort(404, 'No selected file')
+
+        if not file and not self.allowed_file(file.filename):
+            return abort(403, 'File is not allowed to be uploaded')
+
+        threadCount = self.checkThreadCount()
+        if threadCount > 2:
+            return abort(
+                503, 'Queue is full, try again latorz. Job count:' +
+                str(threadCount))
+
     def checkQueue(self):
         print("Checking task list...")
-        if self.checkThreadCount() < self.MAX_THREADS and len(self.task_queue) > 0:
+        if self.checkThreadCount() < self.MAX_THREADS and len(
+                self.task_queue) > 0:
             print("Starting new task")
             task = self.task_queue.pop(0)
-            self.startVideoTracker(task["id"], task["video_path"])
+            self.startVideoTracker(task["id"], task["video_path"],
+                                   task["options"])
         return len(self.task_queue)
