@@ -11,7 +11,7 @@
       </div>
     </section>
     <section>
-      <div class="bg-blue-200 rounded-xl p-3">
+      <div class="bg-violet-200 rounded-xl p-3">
         <h1 class="font-bold text-lg">Video result ({{ videoIds.length }})</h1>
         <p v-for="entity in Object.entries(videoData)" :key="entity[0]">
           {{ entity[0] }}: {{ entity[1] }}
@@ -19,7 +19,7 @@
         <!-- <p>Total vehicles: {{ totalCars }}</p> -->
 
         <button
-          class="block w-full rounded-full bg-blue-300 p-2 text-white mt-4"
+          class="shadow-xl block w-full rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
           @click="downloadNewestData"
         >
           Download newest data
@@ -27,6 +27,7 @@
       </div>
     </section>
   </div>
+  
 </template>
 
 <script>

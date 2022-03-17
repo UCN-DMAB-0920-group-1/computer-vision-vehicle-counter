@@ -49,12 +49,12 @@
         sed iste?
       </p>
       <input
-        class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+        class="text-slate-500 file:shadow-xl file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
         type="file"
         @change="onFileChange"
       />
       <button
-        class="block w-full rounded-full bg-blue-300 p-2 text-white mt-4"
+        class="shadow-xl block w-full rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
         @click="onUploadFile"
       >
         Upload
