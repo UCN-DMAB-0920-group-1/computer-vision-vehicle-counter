@@ -23,26 +23,25 @@ class Tracking:
         # How confidence should YOLO be, before labeling
         confidence_threshold: float = 0.6,
         track_points: str = "bbox",  # Can be centroid or bbox
-        label_offset: int = 50,  # Offset from center point to classification label
+        label_offset:
+        int = 50,  # Offset from center point to classification label
         max_distance_between_points: int = 30,
         # TOP LEFT, BOTTOM LEFT, BOTTOM RIGHT, TOP RIGHT,
-        roi_area: np.ndarray[int, int] = [
-            [(0, 250), (520, 90), (640, 90), (640, 719), (0, 719)]]
-    ):
+        roi_area: np.ndarray[int, int] = [[(0, 250), (520, 90), (640, 90),
+                                           (640, 719), (0, 719)]]):
 
         # Load yolo model
-        if(custom_model):
-            self.model = torch.hub.load(
-                repo_or_dir='ultralytics/yolov5',
-                model='custom',
-                path=model_path)
+        if (custom_model):
+            self.model = torch.hub.load(repo_or_dir='ultralytics/yolov5',
+                                        model='custom',
+                                        path=model_path)
         else:
             self.model = torch.hub.load(  # downloads model to root folder, fix somehow
                 repo_or_dir="ultralytics/yolov5",
                 model=model_path)
 
         self.model.conf = confidence_threshold
-        self.model.iou
+        self.model.iou = 0.45
 
         self.inside_roi = []  # Int array
         self.vehicle_count = 0
@@ -67,11 +66,15 @@ class Tracking:
         if self.track_points == 'centroid':
             norfair.draw_points(frame, norfair_detections)
         elif self.track_points == 'bbox':
-            norfair.draw_boxes(frame, norfair_detections,
-                               line_width=3, draw_labels=True)
+            norfair.draw_boxes(frame,
+                               norfair_detections,
+                               line_width=3,
+                               draw_labels=True)
 
-        norfair.draw_tracked_objects(
-            frame, tracked_objects, id_thickness=3, label_size=5)
+        norfair.draw_tracked_objects(frame,
+                                     tracked_objects,
+                                     id_thickness=3,
+                                     label_size=5)
 
         # Draw ROI
         cv2.polylines(frame, [np.array(self.roi_area, np.int32)], True,
@@ -147,13 +150,11 @@ class Tracking:
             # fourcc=int(video_stream.get(cv2.CAP_PROP_FOURCC)), # original codec from video
             fourcc=cv2.VideoWriter_fourcc(*'FMP4'),  # FFMPEG codec
             fps=video_stream.get(cv2.CAP_PROP_FPS),
-            frameSize=(
-                int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                int(video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            ))
+            frameSize=(int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
+                       int(video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT))))
 
         # Get first frame for masking
-        if(video_stream.isOpened()):
+        if (video_stream.isOpened()):
             ref_frame = video_stream.read()[1]
         mask, roi_offset = self.mask_create(ref_frame)
 
@@ -162,7 +163,7 @@ class Tracking:
             ret, frame = video_stream.read()
 
             # Ensures no error occur, even when there is no more frames to check for
-            if(not ret):
+            if (not ret):
                 break
 
             # Crop frame to ROI area
@@ -175,14 +176,16 @@ class Tracking:
             # Convert to norfair detections
             # detections = yolo_detections_to_norfair_detections(yolo_detections, track_points=self.track_points)
             detections = yolo_detections_to_norfair_detections(
-                yolo_detections, track_points=self.track_points, offset=roi_offset)
+                yolo_detections,
+                track_points=self.track_points,
+                offset=roi_offset)
 
             # Update tracker
             tracked_objects = self.tracker.update(detections=detections)
 
             self.count_objects(tracked_objects)
 
-            if(self.should_draw):
+            if (self.should_draw):
                 self.draw(frame, yolo_detections, detections, tracked_objects)
                 # self.draw(cropped_image, yolo_detections, detections, tracked_objects)
 
@@ -237,7 +240,7 @@ class Tracking:
         channel_count = image.shape[2]  # channel count on image
 
         # array of white color, sized to channels count
-        ignore_mask_color = (255,)*channel_count
+        ignore_mask_color = (255, ) * channel_count
 
         # draw desired area on mask
         cv2.fillConvexPoly(mask, self.roi_area, ignore_mask_color)
@@ -254,7 +257,7 @@ class Tracking:
         # crop frame to masked area
         # returns (x,y,w,h) of the rect
         b_rect = cv2.boundingRect(self.roi_area)
-        cropped_image = masked_image[b_rect[1]: b_rect[1] + b_rect[3],
-                                     b_rect[0]: b_rect[0] + b_rect[2]]
+        cropped_image = masked_image[b_rect[1]:b_rect[1] + b_rect[3],
+                                     b_rect[0]:b_rect[0] + b_rect[2]]
 
         return cropped_image

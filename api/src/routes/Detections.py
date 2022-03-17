@@ -25,6 +25,7 @@ class Detections:
             'endX': request.form['endX'],
             'startY': request.form['startY'],
             'endY': request.form['endY'],
+            'confidence': request.form['confidence']
         }
         id = str(uuid.uuid4())
         video_path = os.path.join(self.UPLOAD_FOLDER, (id + ".mp4"))
@@ -52,17 +53,21 @@ class Detections:
 
     ############# - METHODS - #############
 
-    def threadVideoTracker(self, id: str, video_path: str, options: map):
-        if not options['enabled']:
+    def threadVideoTracker(self, id, video_path, options: map):
+        if options['enabled'] == 'false':
             roi = [[(0, 0), (1920, 0), (1920, 1080), (0, 1080)]]
+            confidence = 0.6
         else:
             roi = [[(options['startX'], options['startY']),
                     (options['endX'], options['startY']),
                     (options['endX'], options['endY']),
                     (options['startX'], options['endY'])]]
+            confidence = options['confidence']
 
         try:
-            tracker = self.Tracking(should_draw=True, roi_area=roi)
+            tracker = self.Tracking(should_draw=True,
+                                    roi_area=roi,
+                                    confidence_threshold=confidence)
             detections = tracker.track(video_path)
             res = self.dao_detections.insert_one(id, detections)
         except Exception as e:

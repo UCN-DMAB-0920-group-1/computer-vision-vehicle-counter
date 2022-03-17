@@ -36,10 +36,9 @@
             <input v-model="advancedOptions.endY" class="w-full rounded-md" type="number" name="endY" />
           </div>
         </div>
-
-        <div class="pt-2">
-            <label class="text-white font-bold">Confidence:</label>
-            <input v-model="advancedOptions.confidence" class="w-full rounded-md" type="number" name="confidence" />
+          <div class="w-full  mt-2">
+            <label class="text-white font-bold">Confidence: {{advancedOptions.confidence}}%</label>
+            <input v-model="advancedOptions.confidence" type="range" name="range" class="w-full h-1 shadow-xl bg-blue-100 appearance-none rounded-lg" />
           </div>
       </section>
       <p class="m-5">
@@ -102,7 +101,9 @@ export default {
 
       try {
         loading.value = true;
+        advancedOptions.value.confidence /= 100 
         store.dispatch("FileProcessing/uploadVideo", {file:file.value, advancedOptions:advancedOptions.value});
+        advancedOptions.value.confidence *= 100
       } catch (e) {
         error.value = e;
       } finally {
