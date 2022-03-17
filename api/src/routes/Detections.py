@@ -17,29 +17,21 @@ class Detections:
         self.dao_detections = dao_detections
 
     def upload_video(self, request):
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            return abort(404, 'No file part')
+        self.validate_video_post(request)
         file = request.files['file']
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename.
-        if file.filename == '':
-            return abort(404, 'No selected file')
-        if not file and not self.allowed_file(file.filename):
-            return abort(403, 'File is not allowed to be uploaded')
-
-        threadCount = self.checkThreadCount()
-        if threadCount > 2:
-            return abort(
-                503, 'Queue is full, try again latorz. Job count:' +
-                str(threadCount))
-
+        options = {
+            'enabled': request.form['enabled'],
+            'startX': request.form['startX'],
+            'endX': request.form['endX'],
+            'startY': request.form['startY'],
+            'endY': request.form['endY'],
+        }
         id = str(uuid.uuid4())
         video_path = os.path.join(self.UPLOAD_FOLDER, (id + ".mp4"))
         file.save(video_path)
         try:
             thread = threading.Thread(target=self.threadVideoTracker,
-                                      args=(id, video_path),
+                                      args=(id, video_path, options),
                                       daemon=True)
             self.thread_list.append(thread)
             thread.start()
@@ -60,11 +52,17 @@ class Detections:
 
     ############# - METHODS - #############
 
-    def threadVideoTracker(self, id, video_path):
+    def threadVideoTracker(self, id: str, video_path: str, options: map):
+        if not options['enabled']:
+            roi = [[(0, 0), (1920, 0), (1920, 1080), (0, 1080)]]
+        else:
+            roi = [[(options['startX'], options['startY']),
+                    (options['endX'], options['startY']),
+                    (options['endX'], options['endY']),
+                    (options['startX'], options['endY'])]]
+
         try:
-            tracker = self.Tracking(should_draw=True,
-                                    roi_area=[[(100, 400), (100, 200),
-                                               (600, 200), (600, 487)]])
+            tracker = self.Tracking(should_draw=True, roi_area=roi)
             detections = tracker.track(video_path)
             res = self.dao_detections.insert_one(id, detections)
         except Exception as e:
@@ -84,3 +82,24 @@ class Detections:
     def allowed_file(self, filename):
         return '.' in filename and \
             filename.rsplit('.', 1)[1].lower() in self.ALLOWED_EXTENSIONS
+
+    def validate_video_post(self, request):
+
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            return abort(404, 'No file part')
+        file = request.files['file']
+
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        if file.filename == '':
+            return abort(404, 'No selected file')
+
+        if not file and not self.allowed_file(file.filename):
+            return abort(403, 'File is not allowed to be uploaded')
+
+        threadCount = self.checkThreadCount()
+        if threadCount > 2:
+            return abort(
+                503, 'Queue is full, try again latorz. Job count:' +
+                str(threadCount))
