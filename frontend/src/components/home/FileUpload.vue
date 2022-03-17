@@ -10,21 +10,51 @@
         </div>
       </div>
     </section>
-    <section class="bg-blue-200 rounded-xl p-3" v-else>
-      <h1 class="font-bold text-lg">Upload video {{ loading }}</h1>
-      <p>
+
+    <section class="p-3" v-else>
+      <h1 class="font-bold text-lg p-2 ">Upload video {{ loading }}</h1>
+
+      
+      <label class="m-2">Advanced Options</label>
+      <input type="checkbox" v-model="advanced" >
+      
+
+      <section class="w-full px-6 mx-auto bg-violet-400 rounded-xl p-4 shadow-xl" v-if="advanced">
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div>
+            <label class="text-white font-bold">start X:</label>
+            <input class="w-full rounded-md" type="number" name="startX" />
+          </div>
+       <div>
+            <label class="text-white font-bold">end X:</label>
+            <input class="w-full rounded-md" type="text" name="endX" />
+          </div><div>
+            <label class="text-white font-bold">start Y:</label>
+            <input class="w-full rounded-md" type="number" name="startY" />
+          </div><div>
+            <label class="text-white font-bold">end Y:</label>
+            <input class="w-full rounded-md" type="number" name="endY" />
+          </div>
+        </div>
+
+        <div class="pt-2">
+            <label class="text-white font-bold">Confidence:</label>
+            <input class="w-full rounded-md" type="number" name="confidence" />
+          </div>
+      </section>
+      <p class="m-5">
         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Illum sint
         accusamus aliquam commodi quisquam beatae tempore vitae quo iste sit!
         Cumque ducimus distinctio pariatur doloremque reiciendis repellat amet
         sed iste?
       </p>
       <input
-        class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+        class="text-slate-500 file:shadow-xl file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
         type="file"
         @change="onFileChange"
       />
       <button
-        class="block w-full rounded-full bg-blue-300 p-2 text-white mt-4"
+        class="shadow-xl block w-full rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
         @click="onUploadFile"
       >
         Upload
@@ -44,6 +74,7 @@ export default {
     let file = ref("");
     let error = ref("");
     let loading = ref(false);
+    let advanced = ref(false);
 
     function onFileChange(e) {
       var files = e.target.files || e.dataTransfer.files;
@@ -76,6 +107,7 @@ export default {
       onUploadFile: onUploadFile,
       loading,
       error,
+      advanced,
     };
   },
 };
