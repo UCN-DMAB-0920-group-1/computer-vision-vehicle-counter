@@ -20,12 +20,10 @@ class Detections:
         self.dao_detections = dao_detections
 
     def upload_video(self, request):
-        # check if the post request has the file part
+        # Check if file is uploaded, and accept requirements
         if 'file' not in request.files:
             return abort(404, 'No file part')
         file = request.files['file']
-        # If the user does not select a file, the browser submits an
-        # empty file without a filename.
         if file.filename == '':
             return abort(404, 'No selected file')
         if not file and not self.allowed_file(file.filename):
@@ -34,6 +32,7 @@ class Detections:
         id = str(uuid.uuid4())
         video_path = os.path.join(self.UPLOAD_FOLDER, (id + ".mp4"))
         file.save(video_path)
+        self.dao_detections.insert_task(id, {"Pending"})
 
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
@@ -75,7 +74,7 @@ class Detections:
                                     roi_area=[[(100, 400), (100, 200),
                                                (600, 200), (600, 487)]])
             detections = tracker.track(video_path)
-            res = self.dao_detections.insert_one(id, detections)
+            res = self.dao_detections.update_one(id, detections)
         except Exception as e:
             print(e)
         finally:
