@@ -1,3 +1,4 @@
+from cmath import rect
 from collections import namedtuple
 from functools import reduce
 
@@ -61,15 +62,56 @@ class Tracking:
         self.roi_area = np.array(roi_area, dtype=np.int32)
         self.should_draw = should_draw
 
-    def draw(self, frame, yolo_detections, norfair_detections, tracked_objects):
-        frame_scale = frame.shape[0] / 100
-        id_size = frame_scale / 10
-        id_thickness = int(frame_scale / 5)
+    def draw_label(self, frame, detection, text: str, font_face: int, font_scale: float, font_color: tuple[int, int, int], font_thickness: int):
+        text_size = cv2.getTextSize(
+            text,
+            font_face,
+            font_scale,
+            font_thickness)
 
+        points = detection.points
+        points[1][1] = points[0][1]
+        points[0][1] -= text_size[0][1]
+        points[1][0] = points[0][0] + text_size[0][0]
+        points = points.astype(int)
+        margin = 2
+        margin_top = 4
+
+        box = namedtuple("box", ['x_min', 'y_min', 'x_max', 'y_max'])
+        rectangle = box(points[0][0],
+                        points[0][1] - margin_top,
+                        points[1][0] + margin * 2,
+                        points[1][1] + margin_top)
+
+        test = tuple(points[0, :])
+        test2 = tuple(rectangle[:2])
+
+        cv2.rectangle(
+            img=frame,
+            pt1=tuple(rectangle[:2]),
+            pt2=tuple(rectangle[2:]),
+            color=(0, 0, 255),
+            thickness=cv2.FILLED
+        )
+
+        cv2.putText(
+            img=frame,
+            text=text,
+            org=(points[0][0] + margin, points[1][1] - 1),
+            fontFace=font_face,
+            fontScale=font_scale,
+            color=font_color,
+            thickness=font_thickness,
+            lineType=cv2.LINE_AA,
+        )
+
+    def draw(self, frame, yolo_detections, norfair_detections, tracked_objects):
         # Draw detected label
         frame_scale = frame.shape[0] / 100
-        id_size = frame_scale / 10
-        id_thickness = int(frame_scale / 5)
+        #id_size = frame_scale / 10
+        id_size = 0.5
+        #id_thickness = int(frame_scale / 3)
+        id_thickness = 1
         pand = yolo_detections.pandas().xyxy[0]
         length = len(pand.name)
 
@@ -88,35 +130,18 @@ class Tracking:
         cv2.polylines(frame, [np.array(self.roi_area, np.int32)], True,
                       (15, 220, 10), 6)
 
-        point = namedtuple(
+        Point = namedtuple(
             'Point', ['x_min', 'y_min', 'x_max', 'y_max'])
 
         for obj in norfair_detections:
-            points = obj.points.astype(int)
-            points[1][1] = points[0][1]
-
-            points[0][1] -= 10
-
-            cv2.rectangle(
-                img=frame,
-                pt1=tuple(points[0, :]),
-                pt2=tuple(points[1, :]),
-                color=(0, 0, 255),
-                thickness=-1
-            )
-
-            """            
-            cv2.putText(
-                img=frame,
-                text=name,
-                org=(pos["x"], pos["y"]),
-                fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-                fontScale=id_size,
-                color=[26, 188, 156],  # Dynamic?
-                thickness=id_thickness,
-                lineType=cv2.LINE_AA,
-            )
-            """
+            self.draw_label(
+                frame,
+                obj,
+                obj.label + " " + str(round(obj.scores[0], 2)),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                id_size,
+                (255, 255, 255),
+                id_thickness)
 
         # Draw vehicle counter
 
