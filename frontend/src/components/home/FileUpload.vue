@@ -122,7 +122,7 @@ export default {
       file.value = files[0];
 
       const fileURL = URL.createObjectURL(file.value);
-      videoSrc.value = fileURL;
+      store.dispatch("FileProcessing/saveVideoUrl", fileURL);
     }
 
     async function onUploadFile() {

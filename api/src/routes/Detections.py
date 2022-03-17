@@ -2,6 +2,7 @@ from time import sleep
 from tracking_module.tracking import Tracking
 from dao.dao_detections import dao_detections
 from flask import abort, jsonify, send_from_directory
+import json
 import uuid
 import os
 import threading
@@ -23,14 +24,18 @@ class Detections:
     def upload_video(self, request):
         self.validate_video_post(request)
         file = request.files['file']
+
         options = {
-            'enabled': request.form['enabled'],
-            'startX': request.form['startX'],
-            'endX': request.form['endX'],
-            'startY': request.form['startY'],
+            'enabled': request.form['enabled'],  # obsolete, see bbox
+            'startX': request.form['startX'],  # obsolete, see bbox
+            'endX': request.form['endX'],  # obsolete, see bbox
+            'startY': request.form['startY'],  # obsolete, see bbox
             'endY': request.form['endY'],
             'confidence': request.form['confidence']
         }
+
+        bbox = json.loads(request.form["bbox"])
+
         id = str(uuid.uuid4())
         video_path = os.path.join(self.UPLOAD_FOLDER, (id + ".mp4"))
 
@@ -44,14 +49,15 @@ class Detections:
 
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
-            task = {"video_path": video_path, "id": id, "options": options}
+            task = {"video_path": video_path, "id": id,
+                    "options": options, "bbox": bbox}
             self.task_queue.append(task)
             return abort(
                 503,
                 'Task added to queue, check result again latorz. you are number:'
                 + str(len(self.task_queue)))
         try:
-            self.startVideoTracker(id, video_path, options)
+            self.startVideoTracker(id, video_path, options, bbox)
         except Exception as e:
             print(e)
             return abort(
@@ -69,23 +75,29 @@ class Detections:
 
     ############# - METHODS - #############
 
-    def startVideoTracker(self, id, video_path, options: map):
+    def startVideoTracker(self, id, video_path, options: map, bbox):
         thread = threading.Thread(target=self.threadVideoTracker,
-                                  args=(id, video_path, options),
+                                  args=(id, video_path, options, bbox),
                                   daemon=True)
         self.thread_list.append(thread)
         thread.start()
         return "Thread started"
 
-    def threadVideoTracker(self, id, video_path, options: map):
+    def threadVideoTracker(self, id, video_path, options: map, bbox):
+        print("threadVideoTracker")
         if options['enabled'] == 'false':
             roi = [[(0, 0), (1920, 0), (1920, 1080), (0, 1080)]]
             confidence = 0.6
         else:
-            roi = [[(options['startX'], options['startY']),
-                    (options['endX'], options['startY']),
-                    (options['endX'], options['endY']),
-                    (options['startX'], options['endY'])]]
+
+            # obsolete, see bbox
+            # roi = [[(options['startX'], options['startY']),
+            #        (options['endX'], options['startY']),
+            #        (options['endX'], options['endY']),
+            #        (options['startX'], options['endY'])]]
+
+            roi = [tuple(map(tuple, bbox))]
+
             confidence = float(options['confidence'])
         try:
             tracker = self.Tracking(should_draw=True,

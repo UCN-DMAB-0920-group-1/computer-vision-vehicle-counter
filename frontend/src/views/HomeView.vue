@@ -8,7 +8,7 @@
       </div>
       <VideoResult></VideoResult>
     </div>
-    <VideoResult></VideoResult>
+
     <PictureThumbnail></PictureThumbnail>
   </div>
 </template>
