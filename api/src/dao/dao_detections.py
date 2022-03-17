@@ -1,3 +1,4 @@
+from tokenize import String
 from interfaces.IDao import IDao
 from pymongo import MongoClient
 from datetime import datetime
@@ -26,10 +27,40 @@ class dao_detections(IDao):
             "_id": id,
             "video": video,
             "length": "",
+            "status": "Done",
             "cars_detected": "",
             "persons_detected": "",
             "trucks_detected": "",
             "detections": object['total'],
             "date": date
         })
+        return res
+
+    def insert_task(id: int, status):
+        date = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+        try:
+            res = collection.insert_one({
+                "_id": id,
+                "status": status,
+                "date": date
+            })
+        except:
+            return "Could not insert new task"
+        return
+
+    def update_one(id: int, object):
+        video = id + '.mp4'
+        date = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
+        try:
+            res = collection.update_one({"_id": id}, {"$set": {
+                "video": video,
+                "length": "",
+                "status": "Done",
+                "cars_detected": "",
+                "persons_detected": "",
+                "trucks_detected": "",
+                "detections": object['total'],
+            }})
+        except:
+            res = "Could not update database value"
         return res
