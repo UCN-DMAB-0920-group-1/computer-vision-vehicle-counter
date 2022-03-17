@@ -31,6 +31,12 @@ class Detections:
 
         id = str(uuid.uuid4())
         video_path = os.path.join(self.UPLOAD_FOLDER, (id + ".mp4"))
+
+        try:
+            os.mkdir(self.UPLOAD_FOLDER)
+        except FileExistsError as e:
+            print("path already exists")
+
         file.save(video_path)
         self.dao_detections.insert_task(id, {"Pending"})
 
