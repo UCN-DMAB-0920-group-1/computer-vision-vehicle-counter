@@ -62,7 +62,7 @@ class Detections:
                     (options['endX'], options['startY']),
                     (options['endX'], options['endY']),
                     (options['startX'], options['endY'])]]
-            confidence = options['confidence']
+            confidence = float(options['confidence'])
 
         try:
             tracker = self.Tracking(should_draw=True,
