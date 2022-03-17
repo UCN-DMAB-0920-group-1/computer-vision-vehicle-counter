@@ -15,10 +15,12 @@ cors = CORS(app, resources={r"*": {"origins": "*"}})
 
 UPLOAD_FOLDER = 'api/storage/'  # check if working, this changes often!
 ALLOWED_EXTENSIONS = {'mp4'}
+MAX_THREADS = 3
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # detections routes init
-detections = Detections(thread_list, UPLOAD_FOLDER, Tracking, dao_detections)
+detections = Detections(thread_list, UPLOAD_FOLDER,
+                        Tracking, dao_detections, MAX_THREADS)
 
 ############# - ROUTES - #############
 

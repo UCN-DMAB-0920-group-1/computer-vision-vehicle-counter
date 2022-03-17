@@ -1,3 +1,4 @@
+from time import sleep
 from tracking_module.tracking import Tracking
 from dao.dao_detections import dao_detections
 from flask import abort, jsonify, send_from_directory
@@ -9,9 +10,11 @@ import threading
 class Detections:
 
     def __init__(self, thread_list: list, UPLOAD_FOLDER: str,
-                 Tracking: Tracking, dao_detections: dao_detections):
+                 Tracking: Tracking, dao_detections: dao_detections, MAX_THREADS: int):
 
         self.thread_list = thread_list
+        self.MAX_THREADS = MAX_THREADS
+        self.task_queue = []
         self.UPLOAD_FOLDER = UPLOAD_FOLDER
         self.Tracking = Tracking
         self.dao_detections = dao_detections
@@ -28,21 +31,19 @@ class Detections:
         if not file and not self.allowed_file(file.filename):
             return abort(403, 'File is not allowed to be uploaded')
 
-        threadCount = self.checkThreadCount()
-        if threadCount > 2:
-            return abort(
-                503, 'Queue is full, try again latorz. Job count:' +
-                str(threadCount))
-
         id = str(uuid.uuid4())
         video_path = os.path.join(self.UPLOAD_FOLDER, (id + ".mp4"))
         file.save(video_path)
+
+        threadCount = self.checkThreadCount()
+        if threadCount >= self.MAX_THREADS:
+            task = {"video_path": video_path, "id": id}
+            self.task_queue.append(task)
+            return abort(
+                503, 'Task added to queue, check result again latorz. you are number:' +
+                str(len(self.task_queue)))
         try:
-            thread = threading.Thread(target=self.threadVideoTracker,
-                                      args=(id, video_path),
-                                      daemon=True)
-            self.thread_list.append(thread)
-            thread.start()
+            self.startVideoTracker(id, video_path)
         except Exception as e:
             print(e)
             return abort(
@@ -60,6 +61,14 @@ class Detections:
 
     ############# - METHODS - #############
 
+    def startVideoTracker(self, id, video_path):
+        thread = threading.Thread(target=self.threadVideoTracker,
+                                  args=(id, video_path),
+                                  daemon=True)
+        self.thread_list.append(thread)
+        thread.start()
+        return "Thread started"
+
     def threadVideoTracker(self, id, video_path):
         try:
             tracker = self.Tracking(should_draw=True,
@@ -71,6 +80,7 @@ class Detections:
             print(e)
         finally:
             os.remove(video_path)
+            self.checkQueue()
             return 'Thread Done'
 
     def checkThreadCount(self):
@@ -84,3 +94,11 @@ class Detections:
     def allowed_file(self, filename):
         return '.' in filename and \
             filename.rsplit('.', 1)[1].lower() in self.ALLOWED_EXTENSIONS
+
+    def checkQueue(self):
+        print("Checking task list...")
+        if self.checkThreadCount() < self.MAX_THREADS and len(self.task_queue) > 0:
+            print("Starting new task")
+            task = self.task_queue.pop(0)
+            self.startVideoTracker(task["id"], task["video_path"])
+        return len(self.task_queue)
