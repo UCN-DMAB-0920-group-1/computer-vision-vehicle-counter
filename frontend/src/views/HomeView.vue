@@ -4,10 +4,12 @@
       <FileUpload></FileUpload>
     </div>
     <VideoResult></VideoResult>
+    <PictureThumbnail></PictureThumbnail>
   </div>
 </template>
 
 <script setup>
+import PictureThumbnail from '@/components/home/PictureThumbnail.vue';
 import FileUpload from "@/components/home/FileUpload.vue";
 import VideoResult from "@/components/home/VideoResult.vue";
 </script>

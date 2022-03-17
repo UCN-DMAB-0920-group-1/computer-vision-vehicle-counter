@@ -60,10 +60,12 @@
       </button>
       <p>{{ error }}</p>
     </section>
+      <canvas id="prevImgCanvas">Your browser does not support the HTML5 canvas tag.</canvas>
   </div>
 </template>
 
 <script>
+
 import { ref} from "vue";
 import { useStore } from "vuex";
 
@@ -82,7 +84,8 @@ export default {
       endY: 0,
       confidence:0,
     });
-    
+    let imgSrc = ref("");
+   
 
     function onFileChange(e) {
       var files = e.target.files || e.dataTransfer.files;
@@ -90,7 +93,39 @@ export default {
 
       error.value = "";
       file.value = files[0];
+      console.log(file.value)
+
+      playSelectedFile(file)
+   
     }
+  
+    var video = document.createElement("video")
+
+    var canvas = document.querySelector("#prevImgCanvas");
+
+    video.addEventListener('loadeddata', function() {
+      reloadRandomFrame();
+    }, false);
+
+    video.addEventListener('seeked', function() {
+      var context = canvas.getContext('2d');
+      context.drawImage(video, 0, 0, window.innerWidth, window.innerHeight);
+    }, false);
+
+    var playSelectedFile = function() {
+      var fileURL = URL.createObjectURL(file.value);
+      video.src = fileURL;
+    }
+
+
+    function reloadRandomFrame() {
+      if (!isNaN(video.duration)) {
+        var rand = Math.round(Math.random() * video.duration * 1000) + 1;
+        video.currentTime = rand / 1000;
+      }
+    }
+
+    console.log(video, canvas)
 
     async function onUploadFile() {
       if (!file.value) {
@@ -118,7 +153,10 @@ export default {
       loading,
       error,
       advancedOptions,
+      imgSrc,
     };
   },
 };
+
+
 </script>
