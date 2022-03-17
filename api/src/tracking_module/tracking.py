@@ -1,3 +1,4 @@
+from collections import namedtuple
 from functools import reduce
 
 import cv2
@@ -45,7 +46,7 @@ class Tracking:
                 force_reload=True)
 
         self.model.conf = confidence_threshold
-        self.model.iou
+        self.model.iou = 0.2
 
         self.inside_roi = []  # Int array
         self.detections = {"car": 0}
@@ -78,7 +79,7 @@ class Tracking:
                                 thickness=3, draw_labels=True, label_size=id_size)
         elif self.track_points == 'bbox':
             norfair.draw_boxes(frame, norfair_detections,
-                               line_width=3, draw_labels=True, label_size=id_size)
+                               line_width=3, draw_labels=False, label_size=id_size)
 
         norfair.draw_tracked_objects(
             frame, tracked_objects, id_thickness=2, id_size=id_size, color=[0, 255, 0])
@@ -87,19 +88,24 @@ class Tracking:
         cv2.polylines(frame, [np.array(self.roi_area, np.int32)], True,
                       (15, 220, 10), 6)
 
-        """
-        for i in range(length):
-            name = pand.name[i]
-            xmin = pand.xmin[i]
-            xmax = pand.xmax[i]
-            ymin = pand.ymin[i]
-            ymax = pand.ymax[i]
+        point = namedtuple(
+            'Point', ['x_min', 'y_min', 'x_max', 'y_max'])
 
-            pos = {
-                "x": int((xmin + xmax + self.label_offset) / 2),
-                "y": int((ymin + ymax + self.label_offset) / 2),
-            }
+        for obj in norfair_detections:
+            points = obj.points.astype(int)
+            points[1][1] = points[0][1]
 
+            points[0][1] -= 10
+
+            cv2.rectangle(
+                img=frame,
+                pt1=tuple(points[0, :]),
+                pt2=tuple(points[1, :]),
+                color=(0, 0, 255),
+                thickness=-1
+            )
+
+            """            
             cv2.putText(
                 img=frame,
                 text=name,
@@ -110,7 +116,7 @@ class Tracking:
                 thickness=id_thickness,
                 lineType=cv2.LINE_AA,
             )
-        """
+            """
 
         # Draw vehicle counter
 
@@ -179,6 +185,7 @@ class Tracking:
             # Detect objects inside the cropped frame
             # yolo_detections = self.model(frame)
             yolo_detections = self.model(cropped_image)
+            # frame = np.squeeze(yolo_detections.render())
 
             # Convert to norfair detections
             # detections = yolo_detections_to_norfair_detections(yolo_detections, track_points=self.track_points)
@@ -191,6 +198,7 @@ class Tracking:
             self.count_objects(tracked_objects)
 
             if(self.should_draw):
+                # cv2.imshow("REALTIME!", frame)
                 self.draw(frame, yolo_detections, detections, tracked_objects)
                 # self.draw(cropped_image, yolo_detections, detections, tracked_objects)
 
@@ -200,7 +208,7 @@ class Tracking:
             # Wait for ESC to be pressed (then exit)
             if (cv2.waitKey(1) == 27):
                 break
-            
+
         # Safely disposed any used resources
         video_stream.release()
         out.release()
