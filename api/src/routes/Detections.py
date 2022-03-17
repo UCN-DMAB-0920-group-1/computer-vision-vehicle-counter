@@ -129,9 +129,9 @@ class Detections:
 
         threadCount = self.checkThreadCount()
         if threadCount > 2:
-            return abort(
-                503, 'Queue is full, try again latorz. Job count:' +
-                str(threadCount))
+            return abort(503, 'Queue is full, try again latorz. Job count:' + str(threadCount))
+        if request.content_length > 30000000:
+            return abort(403, 'File is too large - try a smaller video')
 
     def checkQueue(self):
         print("Checking task list...")
