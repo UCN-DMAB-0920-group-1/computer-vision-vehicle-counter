@@ -1,5 +1,7 @@
-import torch
+from collections import namedtuple
+
 import numpy as np
+import torch
 from norfair import Detection
 
 
@@ -18,35 +20,62 @@ def yolo_detections_to_norfair_detections(
     """
     norfair_detections: list[Detection] = []
 
+    point = namedtuple('Point', ['x', 'y'])
+    offset = point(*offset)
+
     if track_points == 'centroid':
-        detections_as_xywh = yolo_detections.xywh[0]
-        for detection_as_xywh in detections_as_xywh:
+        # defines namedtuple to hold relevant values from detection objects xyxy
+        detection = namedtuple(
+            'detection', ['x', 'y', 'score', 'type'])
+
+        detection_list_xywh = yolo_detections.xywh[0]
+        for detection_xywh in detection_list_xywh:
+            # create new detection with values from xyxy detection
+            object = detection(
+                *(tensor.item() for tensor in detection_xywh[:2]),
+                *(tensor.item() for tensor in detection_xywh[4:6]))
+
+            # find objects type name, based on type value
+            name = yolo_detections.names[int(object.type)]
+
             centroid = np.array(
                 [
-                    detection_as_xywh[0].item(),
-                    detection_as_xywh[1].item()
+                    object.x + offset.x,
+                    object.y + offset.y
                 ]
             )
-            scores = np.array([detection_as_xywh[4].item()])
+
+            scores = np.array([object.score])
+
             norfair_detections.append(
-                Detection(points=centroid, scores=scores)
+                Detection(points=centroid, scores=scores, label=name)
             )
     elif track_points == 'bbox':
-        detections_as_xyxy = yolo_detections.xyxy[0]
-        for detection_as_xyxy in detections_as_xyxy:
-            _label = yolo_detections.names[int(detection_as_xyxy[5])]
+        # defines namedtuple to hold relevant values from detection objects xyxy
+        detection = namedtuple(
+            'detection', ['x_min', 'y_min', 'x_max', 'y_max', 'score', 'type'])
+
+        # convert yolo detections to xyxy format
+        detection_list_xyxy = yolo_detections.xyxy[0]
+        for detection_xyxy in detection_list_xyxy:
+            # create new detection with values from xyxy detection
+            object = detection(
+                *(tensor.item() for tensor in detection_xyxy[:6]))
+
+            # find objects type name, based on type value
+            name = yolo_detections.names[int(object.type)]
+
+            # define bounding box for detected object, based on detection coordinates with given offset
             bbox = np.array(
                 [
-                    [detection_as_xyxy[0].item() + offset[0],
-                     detection_as_xyxy[1].item() + offset[1]],
-                    [detection_as_xyxy[2].item() + offset[0],
-                     detection_as_xyxy[3].item() + offset[1]]
+                    [object.x_min + offset.x, object.y_min + offset.y],
+                    [object.x_max + offset.x, object.y_max + offset.y]
                 ]
             )
-            scores = np.array([detection_as_xyxy[4].item(),
-                              detection_as_xyxy[4].item()])
+
+            scores = np.array([object.score, object.score])
+
             norfair_detections.append(
-                Detection(points=bbox, scores=scores, label=_label)
-            )
+                Detection(points=bbox, scores=scores, label=name))
 
     return norfair_detections
