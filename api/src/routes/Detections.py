@@ -41,7 +41,7 @@ class Detections:
         file = request.files['file']
         self.save_video_file(video_path, file)
         # Add pending task to database
-        self.dao_detections.insert_task(id, {"Pending"})
+        self.dao_detections.insert_one_task(id, {"Pending"})
 
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
@@ -109,7 +109,7 @@ class Detections:
                                     roi_area=roi,
                                     confidence_threshold=confidence)
             detections = tracker.track(video_path)
-            res = self.dao_detections.update_one(id, detections)
+            res = self.dao_detections.update_one_task(id, detections)
         except Exception as e:
             print(e)
         finally:
