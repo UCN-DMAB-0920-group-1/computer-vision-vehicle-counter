@@ -17,7 +17,7 @@
       id="video-frame"
       @loadeddata="onImageLoaded"
       :src="videoUrl"
-      alt="Pølsemand"
+      alt="UploadedVid"
     />
     <svg  style="position:absolute; z-index: 3;"
     :height="imageSize.height" :width="imageSize.width" @click="onClick">
