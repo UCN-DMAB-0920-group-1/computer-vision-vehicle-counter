@@ -44,7 +44,7 @@ class dao_detections(IDao):
             "cars_detected": "",
             "persons_detected": "",
             "trucks_detected": "",
-            "detections": object['total'],
+            "detections": total,
             "date": date
         })
         return res

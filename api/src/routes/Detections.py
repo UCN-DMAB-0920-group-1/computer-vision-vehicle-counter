@@ -26,11 +26,7 @@ class Detections:
         file = request.files['file']
 
         options = {
-            'enabled': request.form['enabled'],  # obsolete, see bbox
-            'startX': request.form['startX'],  # obsolete, see bbox
-            'endX': request.form['endX'],  # obsolete, see bbox
-            'startY': request.form['startY'],  # obsolete, see bbox
-            'endY': request.form['endY'],
+            'enabled': request.form['enabled'],
             'confidence': request.form['confidence']
         }
 
@@ -94,15 +90,7 @@ class Detections:
             roi = [[(0, 0), (1920, 0), (1920, 1080), (0, 1080)]]
             confidence = 0.6
         else:
-
-            # obsolete, see bbox
-            # roi = [[(options['startX'], options['startY']),
-            #        (options['endX'], options['startY']),
-            #        (options['endX'], options['endY']),
-            #        (options['startX'], options['endY'])]]
-
             roi = [tuple(map(tuple, bbox))]
-
             confidence = float(options['confidence'])
         try:
             tracker = self.Tracking(should_draw=True,
@@ -110,8 +98,10 @@ class Detections:
                                     confidence_threshold=confidence)
             detections = tracker.track(video_path)
             res = self.dao_detections.update_one_task(id, detections)
+
         except Exception as e:
             print("EXCEPTION: " + e)
+
         finally:
             os.remove(video_path)
             self.checkQueue()
