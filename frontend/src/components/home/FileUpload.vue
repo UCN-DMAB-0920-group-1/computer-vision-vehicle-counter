@@ -106,7 +106,7 @@ export default {
     let advancedOptions = ref({
       enabled: false,
       drawBoundingBox: true,
-      confidence: 0,
+      confidence: 60,
     });
 
     let bboxCoordinates = ref({
@@ -114,7 +114,6 @@ export default {
       endX: 0,
       startY: 0,
       endY: 0,
-      confidence: 60,
     });
 
     watch(advancedOptions.value, (currentValue) => {

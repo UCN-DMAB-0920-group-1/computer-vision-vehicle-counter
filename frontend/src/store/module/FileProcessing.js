@@ -28,10 +28,12 @@ const actions = {
     const formData = new FormData();
     formData.append("file", file);
 
+    state.advancedOptions["confidence"] /= 100;
     Object.entries(state.advancedOptions).forEach(([key, value]) => {
       formData.append(key, value);
       console.log(key, value);
     });
+    state.advancedOptions["confidence"] *= 100;
 
     let bbox = [];
     if (state.advancedOptions.drawBoundingBox) {
