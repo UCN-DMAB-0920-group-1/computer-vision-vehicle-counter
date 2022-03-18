@@ -49,7 +49,12 @@ class Detections:
                 "bbox": bbox
             }
 
-            task = {"id": id, "video_path": video_path, "options": options}
+            task = {
+                "id": id,
+                "video_path": video_path,
+                "options": options,
+                "bbox": bbox
+            }
 
             self.task_queue.append(task)
             return abort(
@@ -164,5 +169,5 @@ class Detections:
             print("Starting new task")
             task = self.task_queue.pop(0)
             self.startVideoTracker(task["id"], task["video_path"],
-                                   task["options"])
+                                   task["options"], task["bbox"])
         return len(self.task_queue)
