@@ -77,7 +77,7 @@
       </section>
 
       <input
-        class="text-slate-500 file:shadow-xl file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
+        class="text-slate-500 file:mt-3 file:shadow-xl file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
         type="file"
         @change="onFileChange"
       />
@@ -114,6 +114,7 @@ export default {
       endX: 0,
       startY: 0,
       endY: 0,
+      confidence: 60,
     });
 
     watch(advancedOptions.value, (currentValue) => {

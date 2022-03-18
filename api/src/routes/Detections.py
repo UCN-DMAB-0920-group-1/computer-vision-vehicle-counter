@@ -41,13 +41,17 @@ class Detections:
         file = request.files['file']
         self.save_video_file(video_path, file)
         # Add pending task to database
-        self.dao_detections.insert_task(id, {"Pending"})
+        self.dao_detections.insert_one_task(id, {"Pending"})
 
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
 
-            task = {"video_path": video_path, "id": id,
-                    "options": options, "bbox": bbox}
+            task = {
+                "video_path": video_path,
+                "id": id,
+                "options": options,
+                "bbox": bbox
+            }
 
             task = {"id": id, "video_path": video_path, "options": options}
 
@@ -66,6 +70,7 @@ class Detections:
 
     def get_video(self, id):
         path = id + ".mp4"
+        path += "_processed.mkv"
         return send_from_directory(self.UPLOAD_FOLDER,
                                    path)  # mp4 is hardcoded
 
@@ -104,7 +109,7 @@ class Detections:
                                     roi_area=roi,
                                     confidence_threshold=confidence)
             detections = tracker.track(video_path)
-            res = self.dao_detections.update_one(id, detections)
+            res = self.dao_detections.update_one_task(id, detections)
         except Exception as e:
             print(e)
         finally:
@@ -165,7 +170,8 @@ class Detections:
 
     def checkQueue(self):
         print("Checking task list...")
-        if self.checkThreadCount() < self.MAX_THREADS and len(self.task_queue) > 0:
+        if self.checkThreadCount() < self.MAX_THREADS and len(
+                self.task_queue) > 0:
             print("Starting new task")
             task = self.task_queue.pop(0)
             self.startVideoTracker(task["id"], task["video_path"],
