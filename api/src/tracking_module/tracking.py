@@ -1,6 +1,7 @@
 from cmath import rect
 from collections import namedtuple
 from functools import reduce
+import threading
 from typing import Iterable
 
 import cv2
@@ -31,8 +32,8 @@ class Tracking:
         int = 50,  # Offset from center point to classification label
         max_distance_between_points: int = 30,
         # TOP LEFT, BOTTOM LEFT, BOTTOM RIGHT, TOP RIGHT,
-        roi_area: np.ndarray[int, int] = [[(0, 250), (520, 90), (640, 90),
-                                           (640, 719), (0, 719)]]):
+        roi_area: np.ndarray[int, int] = [[0, 250], [520, 90], [640, 90],
+                                          [640, 719], [0, 719]]):
 
         # Load yolo model
         if(custom_model):
@@ -40,13 +41,15 @@ class Tracking:
                 repo_or_dir='ultralytics/yolov5',
                 model='custom',
                 path=model_path,
-                force_reload=True)
+                force_reload=True,
+                skip_validation=True)
 
         else:
             self.model = torch.hub.load(  # downloads model to root folder, fix somehow
                 repo_or_dir="ultralytics/yolov5",
                 model=model_path,
-                force_reload=True)
+                force_reload=True,
+                skip_validation=True)
 
         self.model.conf = confidence_threshold
         self.model.iou = 0.45
@@ -76,11 +79,10 @@ class Tracking:
                    box_margin: int = 2):
 
         # get size of label to draw
-        text_size = cv2.getTextSize(
-            text,
-            font_face,
-            font_scale,
-            font_thickness)
+        text_size = cv2.getTextSize(text,
+                                    font_face,
+                                    font_scale,
+                                    font_thickness)
 
         # Define tuples
         point = namedtuple("point", ['x', 'y'])
@@ -106,7 +108,7 @@ class Tracking:
             img=frame,
             text=text,
             org=(label_container.x_min + box_margin,
-                 label_container.y_max - box_margin * 2),
+                 label_container.y_max - box_margin * 3),
             fontFace=font_face,
             fontScale=font_scale,
             color=font_color,
@@ -184,7 +186,9 @@ class Tracking:
         )
 
         # Draw the model classifications on a gui
-        cv2.imshow("REALTIME!", np.squeeze(frame))
+        cv2.imshow("REALTIME! " +
+                   threading.currentThread().getName(),
+                   np.squeeze(frame))
 
     def track(self, stream_location):
 
@@ -303,7 +307,7 @@ class Tracking:
         return mask, roi_offset
 
     def crop_frame(self, frame: np.ndarray, mask: np.ndarray) -> np.ndarray:
-        """crops the gives frame to fit the mask, based on ROI area
+        """crops the given frame to fit the mask, based on ROI area
         """
         # apply the mask
         masked_image = cv2.bitwise_and(frame, mask)
