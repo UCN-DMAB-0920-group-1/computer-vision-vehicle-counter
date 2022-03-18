@@ -13,9 +13,14 @@
       id="video-frame"
       @loadeddata="onImageLoaded"
       :src="videoUrl"
-      alt="Pølsemand"
+      alt="Video source"
     />
-    <svg :height="imageSize.height" :width="imageSize.width" @click="onClick">
+    <svg
+      :height="imageSize.height"
+      :width="imageSize.width"
+      @click="onClick"
+      v-if="options.drawBoundingBox"
+    >
       <line
         v-for="(point, i) in drawPoints"
         :key="i"
@@ -35,6 +40,36 @@
         stroke="black"
         stroke-width="1"
         fill="red"
+      />
+    </svg>
+    <svg v-else :height="imageSize.height" :width="imageSize.width">
+      <line
+        :x1="bboxCoordinates.startX"
+        :y1="bboxCoordinates.startY"
+        :x2="bboxCoordinates.endX"
+        :y2="bboxCoordinates.startY"
+        style="stroke: rgb(255, 0, 0); stroke-width: 2"
+      />
+      <line
+        :x1="bboxCoordinates.endX"
+        :y1="bboxCoordinates.startY"
+        :x2="bboxCoordinates.endX"
+        :y2="bboxCoordinates.endY"
+        style="stroke: rgb(255, 0, 0); stroke-width: 2"
+      />
+      <line
+        :x1="bboxCoordinates.endX"
+        :y1="bboxCoordinates.endY"
+        :x2="bboxCoordinates.startX"
+        :y2="bboxCoordinates.endY"
+        style="stroke: rgb(255, 0, 0); stroke-width: 2"
+      />
+      <line
+        :x1="bboxCoordinates.startX"
+        :y1="bboxCoordinates.endY"
+        :x2="bboxCoordinates.startX"
+        :y2="bboxCoordinates.startY"
+        style="stroke: rgb(255, 0, 0); stroke-width: 2"
       />
     </svg>
   </div>
@@ -106,6 +141,10 @@ export default {
       drawPoints,
       imageSize,
       videoUrl: computed(() => store.getters["FileProcessing/videoUrl"]),
+      options: computed(() => store.getters["FileProcessing/advancedOptions"]),
+      bboxCoordinates: computed(
+        () => store.getters["FileProcessing/bboxCoordinates"]
+      ),
       duration,
       timestampValue,
       changeTime,

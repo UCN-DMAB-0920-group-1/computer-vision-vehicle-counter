@@ -2,26 +2,50 @@ const state = {
   videoIds: [],
   videoUrl: "",
   videoBBox: [],
+  advancedOptions: {
+    enabled: false,
+    drawBoundingBox: true,
+    confidence: 0,
+  },
+  bboxCoordinates: {
+    startX: 0,
+    endX: 0,
+    startY: 0,
+    endY: 0,
+  },
 };
 
 const mutations = {
   setVideoIds: (state, videoIds) => (state.videoIds = videoIds),
   setVideoUrl: (state, url) => (state.videoUrl = url),
   setVideoBbox: (state, videoBBox) => (state.videoBBox = videoBBox),
+  saveOptions: (state, options) => (state.advancedOptions = options),
+  saveBboxCoordinates: (state, coordinates) =>
+    (state.bboxCoordinates = coordinates),
 };
 const actions = {
-  async uploadVideo({ commit, state }, { file, advancedOptions }) {
+  async uploadVideo({ commit, state }, { file }) {
     const formData = new FormData();
     formData.append("file", file);
 
-    Object.entries(advancedOptions).forEach(([key, value]) => {
+    Object.entries(state.advancedOptions).forEach(([key, value]) => {
       formData.append(key, value);
       console.log(key, value);
     });
 
-    const bbox = state.videoBBox.map(function (point) {
-      return [parseInt(point.scaledX), parseInt(point.scaledY)];
-    });
+    let bbox = [];
+    if (state.advancedOptions.drawBoundingBox) {
+      bbox = state.videoBBox.map(function (point) {
+        return [parseInt(point.scaledX), parseInt(point.scaledY)];
+      });
+    } else {
+      bbox = [
+        [state.bboxCoordinates.startX, state.bboxCoordinates.startY],
+        [state.bboxCoordinates.endX, state.bboxCoordinates.startY],
+        [state.bboxCoordinates.endX, state.bboxCoordinates.endY],
+        [state.bboxCoordinates.startX, state.bboxCoordinates.endY],
+      ];
+    }
 
     formData.append("bbox", JSON.stringify(bbox));
 
@@ -46,6 +70,8 @@ const actions = {
 const getters = {
   videoIds: (state) => state.videoIds,
   videoUrl: (state) => state.videoUrl,
+  advancedOptions: (state) => state.advancedOptions,
+  bboxCoordinates: (state) => state.bboxCoordinates,
 };
 
 export default {
