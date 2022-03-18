@@ -286,8 +286,8 @@ class Tracking:
         mask = np.zeros(image.shape, dtype=np.uint8)
 
         # automatically find lowest offsets
-        min_x = min(p[0] for p in self.roi_area)[0]
-        min_y = min(p[1] for p in self.roi_area)[1]
+        min_x = min(p[0] for p in self.roi_area)
+        min_y = min(p[1] for p in self.roi_area)
         roi_offset = (min_x, min_y)
 
         # fill the ROI so it doesn't get wiped out when the mask is applied
