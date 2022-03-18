@@ -2,6 +2,7 @@ from time import sleep
 from tracking_module.tracking import Tracking
 from dao.dao_detections import dao_detections
 from flask import abort, jsonify, send_from_directory
+import json
 import uuid
 import os
 import threading
@@ -22,25 +23,41 @@ class Detections:
 
     def upload_video(self, request):
         self.validate_video_post(request)
-        options = self.create_options(request)
+        file = request.files['file']
+
+        options = {
+            'enabled': request.form['enabled'],
+            'confidence': request.form['confidence']
+        }
+
+        bbox = json.loads(request.form["bbox"])
 
         id = str(uuid.uuid4())
         video_path = os.path.join(self.UPLOAD_FOLDER, (id + ".mp4"))
         file = request.files['file']
         self.save_video_file(video_path, file)
         # Add pending task to database
-        self.dao_detections.insert_task(id, {"Pending"})
+        self.dao_detections.insert_one_task(id, {"Pending"})
 
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
+
+            task = {
+                "video_path": video_path,
+                "id": id,
+                "options": options,
+                "bbox": bbox
+            }
+
             task = {"id": id, "video_path": video_path, "options": options}
+
             self.task_queue.append(task)
             return abort(
                 503,
                 'Task added to queue, check result again latorz. you are number:'
                 + str(len(self.task_queue)))
         try:
-            self.startVideoTracker(id, video_path, options)
+            self.startVideoTracker(id, video_path, options, bbox)
         except Exception as e:
             print(e)
             return abort(
@@ -49,6 +66,7 @@ class Detections:
 
     def get_video(self, id):
         path = id + ".mp4"
+        path += "_processed.mkv"
         return send_from_directory(self.UPLOAD_FOLDER,
                                    path)  # mp4 is hardcoded
 
@@ -57,32 +75,33 @@ class Detections:
         return jsonify(res)
 
     ############# - METHODS - #############
-    def startVideoTracker(self, id, video_path, options: map):
+
+    def startVideoTracker(self, id, video_path, options: map, bbox):
         thread = threading.Thread(target=self.threadVideoTracker,
-                                  args=(id, video_path, options),
+                                  args=(id, video_path, options, bbox),
                                   daemon=True)
         self.thread_list.append(thread)
         thread.start()
         return "Thread started"
 
-    def threadVideoTracker(self, id, video_path, options: map):
+    def threadVideoTracker(self, id, video_path, options: map, bbox):
+        print("threadVideoTracker")
         if options['enabled'] == 'false':
             roi = [[(0, 0), (1920, 0), (1920, 1080), (0, 1080)]]
             confidence = 0.6
         else:
-            roi = [[(options['startX'], options['startY']),
-                    (options['endX'], options['startY']),
-                    (options['endX'], options['endY']),
-                    (options['startX'], options['endY'])]]
+            roi = [tuple(map(tuple, bbox))]
             confidence = float(options['confidence'])
         try:
             tracker = self.Tracking(should_draw=True,
                                     roi_area=roi,
                                     confidence_threshold=confidence)
             detections = tracker.track(video_path)
-            res = self.dao_detections.update_one(id, detections)
+            res = self.dao_detections.update_one_task(id, detections)
+
         except Exception as e:
             print("EXCEPTION: " + e)
+
         finally:
             os.remove(video_path)
             self.checkQueue()
@@ -141,7 +160,8 @@ class Detections:
 
     def checkQueue(self):
         print("Checking task list...")
-        if self.checkThreadCount() < self.MAX_THREADS and len(self.task_queue) > 0:
+        if self.checkThreadCount() < self.MAX_THREADS and len(
+                self.task_queue) > 0:
             print("Starting new task")
             task = self.task_queue.pop(0)
             self.startVideoTracker(task["id"], task["video_path"],

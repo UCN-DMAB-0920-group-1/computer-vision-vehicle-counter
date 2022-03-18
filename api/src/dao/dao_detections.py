@@ -44,7 +44,7 @@ class dao_detections(IDao):
             "cars_detected": "",
             "persons_detected": "",
             "trucks_detected": "",
-            "detections": object['total'],
+            "detections": total,
             "date": date
         })
         return res
@@ -61,19 +61,21 @@ class dao_detections(IDao):
             return "Could not insert new task"
         return
 
-    def update_one(id: int, object):
+    def update_one_task(id: int, object):
         video = id + '.mp4'
         date = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         try:
-            res = collection.update_one({"_id": id}, {"$set": {
-                "video": video,
-                "length": "",
-                "status": "Done",
-                "cars_detected": "",
-                "persons_detected": "",
-                "trucks_detected": "",
-                "detections": object['total'],
-            }})
+            res = collection.update_one({"_id": id}, {
+                "$set": {
+                    "video": video,
+                    "length": "",
+                    "status": "Done",
+                    "cars_detected": "",
+                    "persons_detected": "",
+                    "trucks_detected": "",
+                    "detections": object['total'],
+                }
+            })
         except:
             res = "Could not update database value"
         return res
