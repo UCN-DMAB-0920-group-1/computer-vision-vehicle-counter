@@ -2,14 +2,14 @@
 
 <div class="relative" > 
   <div oncontextmenu="return false;">
-    <label class="text-center text-white"> {{timestampValue}} / {{parseInt(duration)}}  </label>
+    <label class="text-center  font-bold border-2 p-1 rounded-lg bg-white">Seconds: {{timestampValue}} / {{parseInt(duration)}}</label>
     <input
       type="range"
       name="range"
       @change="changeTime"
       v-model="timestampValue"
       :max="duration"
-      class="w-sfull h-1 shadow-xl bg-blue-100 appearance-none rounded-lg"
+      class="w-full h-1 shadow-xl bg-blue-100 appearance-none rounded-lg"
     />
     <div class="pt-4 h-64 sm:h-80 md:h-72 rounded-xl shadow-xl">
       <video

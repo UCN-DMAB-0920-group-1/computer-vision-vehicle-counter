@@ -12,7 +12,7 @@
     </section>
 
     <section class="p-3" v-else>
-      <h1 class="font-bold text-lg p-2">Upload video {{ loading }}</h1>
+      <h1 class="font-bold text-lg p-2">Upload video</h1>
 
       <label class="m-2">Advanced Options</label>
       <input type="checkbox" v-model="advancedOptions.enabled" />
@@ -74,7 +74,7 @@
       </section >
 
       <input
-        class="text-slate-500 file:shadow-xl file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
+        class="text-slate-500 file:mt-3 file:shadow-xl file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
         type="file"
         @change="onFileChange"
       />
