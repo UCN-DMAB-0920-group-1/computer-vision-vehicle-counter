@@ -35,7 +35,8 @@
             "request": "launch",
             "program": "${workspaceFolder}/api/src/main.py",
             "console": "integratedTerminal",
-            "args": []
+            "args": [],
+            "justMyCode": false
         }
     ]
 }

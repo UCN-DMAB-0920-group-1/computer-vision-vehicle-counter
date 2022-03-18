@@ -16,9 +16,9 @@ const actions = {
 
         const response = await fetch(
             process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection", {
-                method: "POST",
-                body: fd,
-            }
+            method: "POST",
+            body: fd,
+        }
         );
 
         const json = await response.json();

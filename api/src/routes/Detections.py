@@ -82,7 +82,7 @@ class Detections:
             detections = tracker.track(video_path)
             res = self.dao_detections.update_one(id, detections)
         except Exception as e:
-            print(e)
+            print("EXCEPTION: " + e)
         finally:
             os.remove(video_path)
             self.checkQueue()
