@@ -40,7 +40,8 @@ class Tracking:
                 repo_or_dir='ultralytics/yolov5',
                 model='custom',
                 path=model_path,
-                force_reload=True)
+                force_reload=True,
+                skip_validation=True)
 
         else:
             self.model = torch.hub.load(  # downloads model to root folder, fix somehow
