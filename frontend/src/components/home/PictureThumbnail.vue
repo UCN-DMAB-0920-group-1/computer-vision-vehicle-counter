@@ -23,8 +23,9 @@
           id="video-frame"
           @loadeddata="onImageLoaded"
           :src="videoUrl"
-          alt="Video source"
+          alt="UploadedVid"
         />
+
         <svg
           style="position: absolute; z-index: 3"
           :height="imageSize.height"
