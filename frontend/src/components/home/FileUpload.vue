@@ -71,7 +71,7 @@
             class="w-full h-1 shadow-xl bg-blue-100 appearance-none rounded-lg"
           />
         </div>
-      </section>
+      </section >
 
       <input
         class="text-slate-500 file:shadow-xl file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
@@ -85,9 +85,6 @@
         Upload
       </button>
       <p>{{ error }}</p>
-    </section>
-    <section>
-      <video :src="videoSrc" alt="" v-if="videoSrc != null" />
     </section>
   </div>
 </template>

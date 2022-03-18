@@ -46,8 +46,12 @@ class Detections:
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
 
-            task = {"video_path": video_path, "id": id,
-                    "options": options, "bbox": bbox}
+            task = {
+                "video_path": video_path,
+                "id": id,
+                "options": options,
+                "bbox": bbox
+            }
 
             task = {"id": id, "video_path": video_path, "options": options}
 
@@ -66,6 +70,7 @@ class Detections:
 
     def get_video(self, id):
         path = id + ".mp4"
+        path += "_processed.mkv"
         return send_from_directory(self.UPLOAD_FOLDER,
                                    path)  # mp4 is hardcoded
 
@@ -165,7 +170,8 @@ class Detections:
 
     def checkQueue(self):
         print("Checking task list...")
-        if self.checkThreadCount() < self.MAX_THREADS and len(self.task_queue) > 0:
+        if self.checkThreadCount() < self.MAX_THREADS and len(
+                self.task_queue) > 0:
             print("Starting new task")
             task = self.task_queue.pop(0)
             self.startVideoTracker(task["id"], task["video_path"],
