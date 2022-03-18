@@ -1,21 +1,26 @@
 <template>
+
+<div class="relative" > 
   <div oncontextmenu="return false;">
+    <label class="text-center text-white"> {{timestampValue}} / {{parseInt(duration)}}  </label>
     <input
       type="range"
       name="range"
       @change="changeTime"
       v-model="timestampValue"
       :max="duration"
-      class="w-full h-1 shadow-xl bg-blue-100 appearance-none rounded-lg"
+      class="w-sfull h-1 shadow-xl bg-blue-100 appearance-none rounded-lg"
     />
-    <video
-      style="position: absolute; z-index: -99"
+    <div class="pt-4 h-64 sm:h-80 md:h-72 rounded-xl shadow-xl">
+      <video
+      style="position: absolute; z-index:2; border-radius:12px; border:solid 2px rgb(109 40 217 / var(--tw-bg-opacity)); "
       id="video-frame"
       @loadeddata="onImageLoaded"
       :src="videoUrl"
       alt="Pølsemand"
     />
-    <svg :height="imageSize.height" :width="imageSize.width" @click="onClick">
+    <svg  style="position:absolute; z-index: 3;"
+    :height="imageSize.height" :width="imageSize.width" @click="onClick">
       <line
         v-for="(point, i) in drawPoints"
         :key="i"
@@ -37,6 +42,8 @@
         fill="red"
       />
     </svg>
+    </div>
+  </div>
   </div>
 </template>
 

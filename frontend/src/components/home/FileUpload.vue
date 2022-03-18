@@ -106,7 +106,7 @@ export default {
       endX: 0,
       startY: 0,
       endY: 0,
-      confidence: 0,
+      confidence: 60,
     });
 
     let videoSrc = ref("");
