@@ -1,12 +1,13 @@
 <template>
   <div>
-    <nav>
-      <p>Nav skal være her</p>
-    </nav>
+    <NavBar></NavBar>
     <router-view></router-view>
   </div>
 </template>
 
+<script setup>
+  import NavBar from "./components/NavBar.vue"
+</script>
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

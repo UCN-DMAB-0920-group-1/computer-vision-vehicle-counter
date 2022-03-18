@@ -14,7 +14,7 @@
     <section class="p-2" v-else>
       <h1 class="font-bold text-lg p-2">Upload video</h1>
 
-      <label class="m-2">Advanced Options</label>
+      <label class="m-2 w-full">Advanced Options</label>
       <input class="text-violet-700 rounded-md focus:ring-violet-300" type="checkbox" v-model="advancedOptions.enabled" />
 
       <section
@@ -27,7 +27,7 @@
             <label class="text-white font-bold">start X:</label>
             <input
               v-model="bboxCoordinates.startX"
-              class="w-full rounded-md border-violet-300"
+              class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
               type="number"
               name="startX"
             />
@@ -36,7 +36,7 @@
             <label class="text-white font-bold">end X:</label>
             <input
               v-model="bboxCoordinates.endX"
-              class="w-full rounded-md"
+              class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
               type="number"
               name="endX"
             />
@@ -45,7 +45,7 @@
             <label class="text-white font-bold">start Y:</label>
             <input
               v-model="bboxCoordinates.startY"
-              class="w-full rounded-md"
+              class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
               type="number"
               name="startY"
             />
@@ -54,7 +54,7 @@
             <label class="text-white font-bold">end Y:</label>
             <input
               v-model="bboxCoordinates.endY"
-              class="w-full rounded-md"
+              class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
               type="number"
               name="endY"
             />
@@ -82,7 +82,7 @@
       </section>
 
       <input
-        class="text-slate-500 file:m-4 file:shadow-md file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
+        class="text-slate-500 w-full file:m-4 file:shadow-md file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
         type="file"
         @change="onFileChange"
       />
