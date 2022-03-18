@@ -92,7 +92,7 @@ class Detections:
     def threadVideoTracker(self, id, video_path, options: map, bbox):
         print("threadVideoTracker")
         if options['enabled'] == 'false':
-            bbox = [[(0, 0), (1920, 0), (1920, 1080), (0, 1080)]]
+            bbox = [[0, 0], [1920, 0], [1920, 1080], [0, 1080]]
             confidence = 0.6
         else:
             confidence = float(options['confidence'])
