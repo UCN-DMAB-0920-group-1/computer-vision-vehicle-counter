@@ -49,7 +49,7 @@ class dao_detections(IDao):
         })
         return res
 
-    def insert_task(id: int, status):
+    def insert_one_task(id: int, status):
         date = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         try:
             res = collection.insert_one({

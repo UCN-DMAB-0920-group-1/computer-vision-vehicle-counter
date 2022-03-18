@@ -87,14 +87,13 @@ class Detections:
     def threadVideoTracker(self, id, video_path, options: map, bbox):
         print("threadVideoTracker")
         if options['enabled'] == 'false':
-            roi = [[(0, 0), (1920, 0), (1920, 1080), (0, 1080)]]
+            bbox = [[(0, 0), (1920, 0), (1920, 1080), (0, 1080)]]
             confidence = 0.6
         else:
-            roi = [tuple(map(tuple, bbox))]
             confidence = float(options['confidence'])
         try:
             tracker = self.Tracking(should_draw=True,
-                                    roi_area=roi,
+                                    roi_area=bbox,
                                     confidence_threshold=confidence)
             detections = tracker.track(video_path)
             res = self.dao_detections.update_one_task(id, detections)
