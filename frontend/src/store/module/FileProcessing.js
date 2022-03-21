@@ -3,7 +3,7 @@ const state = {
     videoUrl: "",
     videoBBox: [],
     advancedOptions: {
-        enabled: false,
+        enabled: true,
         drawBoundingBox: true,
         confidence: 0,
         maxDistanceBetweenPoints: 0,
