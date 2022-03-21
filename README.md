@@ -23,14 +23,13 @@ where the results will be sent to a database, and showed in the frontend oncec c
 ### On windows:
 Automatically setup python environment and install dependencies
 ```bash
-{project_folder}/scripts setup_env.bat
+{project_folder} scripts/setup_env.bat
 ```
 or manually run:
 ```bash
 python -m venv .env
 pip install -r requirements.txt
 ```
-
 ## Run Flask API
 ```bash
 cd api/src
