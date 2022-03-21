@@ -37,7 +37,7 @@ class Detections:
         file = request.files['file']
         self.save_video_file(video_path, file)
         # Add pending task to database
-        self.dao_detections.insert_one_task(id, {"Pending"})
+        self.dao_detections.insert_one_task(id, "Pending")
 
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
@@ -45,13 +45,6 @@ class Detections:
             task = {
                 "video_path": video_path,
                 "id": id,
-                "options": options,
-                "bbox": bbox
-            }
-
-            task = {
-                "id": id,
-                "video_path": video_path,
                 "options": options,
                 "bbox": bbox
             }
@@ -64,7 +57,7 @@ class Detections:
         try:
             self.startVideoTracker(id, video_path, options, bbox)
         except Exception as e:
-            print(e)
+            print("Exception in uploading video: " + str(e))
             return abort(
                 500, 'Internal error while starting video task, try again')
         return jsonify({'id': id})
@@ -87,10 +80,10 @@ class Detections:
                                   daemon=True)
         self.thread_list.append(thread)
         thread.start()
+        print("Thread Started: " + thread.getName())
         return "Thread started"
 
     def threadVideoTracker(self, id, video_path, options: map, bbox):
-        print("threadVideoTracker")
         if options['enabled'] == 'false':
             bbox = [[0, 0], [1920, 0], [1920, 1080], [0, 1080]]
             confidence = 0.6
@@ -101,13 +94,15 @@ class Detections:
                                     roi_area=bbox,
                                     confidence_threshold=confidence)
             detections = tracker.track(video_path)
-            res = self.dao_detections.update_one_task(id, detections)
+            self.dao_detections.update_one_task(id, detections)
 
         except Exception as e:
-            print("EXCEPTION: " + e)
+            print("EXCEPTION in thread: " + str(e))
 
         finally:
             os.remove(video_path)
+            
+            print("Thread Done")
             self.checkQueue()
             return 'Thread Done'
 
