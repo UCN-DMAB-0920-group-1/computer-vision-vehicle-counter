@@ -1,11 +1,11 @@
 # computer-vision-vehicle-counter
 
-This project includes a frontend built with with Vue and a backend API built with Python.
+This project includes a frontend built with Vue and a backend API built with Python.
 The API will detect objects using a machine learning model, currently it's configured to use the Yolov5 model, but can be configured
 to use a custom model.
 
 Via the frontend, you can upload a video with different options like ROI (region of interest) and it will be sent to the backend,
-where the results will be sent to a database, and showed in the frontend oncec complete.
+where the results will be sent to a database, and showed in the frontend once complete.
 
 ## Platform support:
 - [x] windows
