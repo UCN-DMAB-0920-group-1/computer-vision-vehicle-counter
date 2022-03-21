@@ -26,8 +26,12 @@ class Detections:
         file = request.files['file']
 
         options = {
-            'enabled': request.form['enabled'],
-            'confidence': request.form['confidence']
+            'enabled':
+            request.form['enabled'],
+            'confidence':
+            request.form['confidence'],
+            'max_distance_between_points':
+            request.form['maxDistanceBetweenPoints'],
         }
 
         bbox = json.loads(request.form["bbox"])
@@ -45,13 +49,6 @@ class Detections:
             task = {
                 "video_path": video_path,
                 "id": id,
-                "options": options,
-                "bbox": bbox
-            }
-
-            task = {
-                "id": id,
-                "video_path": video_path,
                 "options": options,
                 "bbox": bbox
             }
@@ -96,10 +93,15 @@ class Detections:
             confidence = 0.6
         else:
             confidence = float(options['confidence'])
+            max_distance_between_points = float(
+                options['max_distance_between_points'])
         try:
-            tracker = self.Tracking(should_draw=True,
-                                    roi_area=bbox,
-                                    confidence_threshold=confidence)
+            tracker = self.Tracking(
+                should_draw=True,
+                roi_area=bbox,
+                confidence_threshold=confidence,
+                max_distance_between_points=max_distance_between_points)
+
             detections = tracker.track(video_path)
             res = self.dao_detections.update_one_task(id, detections)
 
