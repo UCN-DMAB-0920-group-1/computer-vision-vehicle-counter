@@ -1,7 +1,7 @@
 <template>
-  <div class="relative">
+  <div class="relative pt-1">
     <div oncontextmenu="return false;">
-      <label class="text-center font-bold border-2 p-1 rounded-lg bg-white"
+      <label class="text-center shadow-md font-bold border-1 text-violet-700 p-1 rounded-lg bg-white"
         >Seconds: {{ timestampValue }} / {{ parseInt(duration) }}</label
       >
       <input
@@ -12,7 +12,7 @@
         :max="duration"
         class="w-full h-1 shadow-xl bg-blue-100 appearance-none rounded-lg"
       />
-      <div class="pt-4 h-64 sm:h-80 md:h-72 rounded-xl shadow-xl">
+      <div class="pt-4 h-52 sm:h-72">
         <video
           style="
             position: absolute;

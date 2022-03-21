@@ -11,7 +11,7 @@
       </div>
     </section>
 
-    <section class="p-3" v-else>
+    <section class="p-2" v-else>
       <h1 class="font-bold text-lg p-2">Upload video</h1>
 
       <label class="m-2 w-full">Advanced Options</label>
@@ -29,37 +29,37 @@
         <div v-if="!advancedOptions.drawBoundingBox" class="grid grid-cols-1 gap-2 mb-2 sm:grid-cols-2 bg-violet-800 rounded-lg
          p-4">
           <div>
-            <label class="text-white font-bold">start X:</label>
+            <label class="text-white text-center font-bold">start X:</label>
             <input
               v-model="bboxCoordinates.startX"
-              class="w-full rounded-md"
+              class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
               type="number"
               name="startX"
             />
           </div>
           <div>
-            <label class="text-white font-bold">end X:</label>
+            <label class="text-white text-center font-bold">end X:</label>
             <input
               v-model="bboxCoordinates.endX"
-              class="w-full rounded-md"
+              class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
               type="number"
               name="endX"
             />
           </div>
           <div>
-            <label class="text-white font-bold">start Y:</label>
+            <label class="text-white text-center font-bold">start Y:</label>
             <input
               v-model="bboxCoordinates.startY"
-              class="w-full rounded-md"
+              class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
               type="number"
               name="startY"
             />
           </div>
           <div>
-            <label class="text-white font-bold">end Y:</label>
+            <label class="text-white text-center font-bold">end Y:</label>
             <input
               v-model="bboxCoordinates.endY"
-              class="w-full rounded-md"
+              class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
               type="number"
               name="endY"
             />
@@ -91,7 +91,7 @@
       </section>
 
       <input
-        class="text-slate-500 file:mt-3 file:shadow-xl file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
+        class="text-slate-500 w-full file:m-4 file:shadow-md file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
         type="file"
         @change="onFileChange"
       />
@@ -107,10 +107,12 @@
 </template>
 
 <script>
-import { ref, watch } from "vue";
+import { ref, watch,computed } from "vue";
 import { useStore } from "vuex";
+import PictureThumbnail from './PictureThumbnail.vue';
 
 export default {
+  components: { PictureThumbnail },
   setup() {
     const store = useStore();
 
@@ -118,11 +120,13 @@ export default {
     let error = ref("");
     let loading = ref(false);
     let advancedOptions = ref({
-      enabled: false,
+      enabled: true,
       drawBoundingBox: true,
       confidence: 60,
       maxDistanceBetweenPoints:30,
     });
+    let videoUrl = computed(() => store.getters["FileProcessing/videoUrl"])
+
 
     let bboxCoordinates = ref({
       startX: 0,
@@ -177,6 +181,7 @@ export default {
       error,
       advancedOptions,
       bboxCoordinates,
+      videoUrl,
     };
   },
 };
