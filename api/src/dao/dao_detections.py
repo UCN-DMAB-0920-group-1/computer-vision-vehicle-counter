@@ -49,7 +49,7 @@ class dao_detections(IDao):
         })
         return res
 
-    def insert_one_task(id: int, status):
+    def insert_one_task(id: str, status):
         date = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         try:
             res = collection.insert_one({
@@ -57,25 +57,28 @@ class dao_detections(IDao):
                 "status": status,
                 "date": date
             })
-        except:
-            print("Could not insert new task")
+        except Exception as e:
+            print("Could not insert new task " + str(e))
             return "Could not insert new task"
         return res
 
-    def update_one_task(id: int, detection_result):
+    def update_one_task(id: str, detection_result):
         video = id + '.mp4'
+        cars_detected = detection_result['car'] if 'car' in detection_result else 0
+        trucks_detected = detection_result['truck'] if 'truck' in detection_result else 0
         try:
+
             res = collection.update_one({"_id": id}, {
                 "$set": {
                     "video": video,
                     "length": "",
                     "status": "Done",
-                    "cars_detected": detection_result['car'],
-                    "trucks_detected": detection_result['truck'],
-                    "total_detections": "",
+                    "cars_detected": cars_detected,
+                    "trucks_detected": trucks_detected,
+                    "total_detections": cars_detected + trucks_detected,
                 }
             })
-        except:
-            print("Could not update database value")
+        except Exception as e:
+            print("Could not update database value " + str(e))
             res = "Could not update database value"
         return res
