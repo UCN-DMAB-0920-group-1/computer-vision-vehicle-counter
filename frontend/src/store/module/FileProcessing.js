@@ -5,8 +5,8 @@ const state = {
     advancedOptions: {
         enabled: true,
         drawBoundingBox: true,
-        confidence: 0,
-        maxDistanceBetweenPoints: 0,
+        confidence: 60,
+        maxDistanceBetweenPoints: 30,
     },
     bboxCoordinates: {
         startX: 0,
