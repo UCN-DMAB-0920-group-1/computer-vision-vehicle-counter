@@ -15,16 +15,21 @@
       <h1 class="font-bold text-lg p-2">Upload video</h1>
 
       <label class="m-2 w-full">Advanced Options</label>
-      <input class="text-violet-700 rounded-md focus:ring-violet-300" type="checkbox" v-model="advancedOptions.enabled" />
+      <input class=" text-violet-700 rounded-md focus:ring-violet-300" type="checkbox" v-model="advancedOptions.enabled" />
 
       <section
-        class="w-full px--1 mx-auto bg-violet-400 rounded-xl p-4 shadow-xl"
+        class="w-full mt-2  bg-violet-400 rounded-xl p-4 shadow-xl"
         v-if="advancedOptions.enabled"
       >
+        
+        <div class="px-1 w-max  mx-auto shadow-md text-violet-700 mb-3 text-center font-bold border-1 rounded-lg bg-white">
+          <label class="m-2">Draw your own ROI</label>
+          <input type="checkbox" class="text-violet-700 rounded-md focus:ring-violet-300" v-model="advancedOptions.drawBoundingBox" />
+        </div>
         <div v-if="!advancedOptions.drawBoundingBox" class="grid grid-cols-1 gap-2 mb-2 sm:grid-cols-2 bg-violet-800 rounded-lg
          p-4">
           <div>
-            <label class="text-white font-bold">start X:</label>
+            <label class="text-white text-center font-bold">start X:</label>
             <input
               v-model="bboxCoordinates.startX"
               class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
@@ -33,7 +38,7 @@
             />
           </div>
           <div>
-            <label class="text-white font-bold">end X:</label>
+            <label class="text-white text-center font-bold">end X:</label>
             <input
               v-model="bboxCoordinates.endX"
               class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
@@ -42,7 +47,7 @@
             />
           </div>
           <div>
-            <label class="text-white font-bold">start Y:</label>
+            <label class="text-white text-center font-bold">start Y:</label>
             <input
               v-model="bboxCoordinates.startY"
               class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
@@ -51,7 +56,7 @@
             />
           </div>
           <div>
-            <label class="text-white font-bold">end Y:</label>
+            <label class="text-white text-center font-bold">end Y:</label>
             <input
               v-model="bboxCoordinates.endY"
               class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
@@ -59,26 +64,30 @@
               name="endY"
             />
           </div>
-        </div>
-       
-        <div class="px-1 w-max  mx-auto shadow-md text-violet-700 mb-3 text-center font-bold border-1 rounded-lg bg-white">
-          <label class="m-2">Draw your own ROI</label>
-          <input type="checkbox" class="text-violet-700 rounded-md focus:ring-violet-300" v-model="advancedOptions.drawBoundingBox" />
-        </div>
+        </div> 
         <div v-if="videoUrl" class="my-2">
         <PictureThumbnail></PictureThumbnail>
         </div>
-          <div class="w-full">
+          <div class="my-4  mt-6 w-full">
            <label class="text-violet-700 shadow-md m-1 p-1 text-center font-bold border-1 rounded-lg bg-white"
             >Confidence: {{ advancedOptions.confidence }}%</label
-           >
-           <input
-              v-model="advancedOptions.confidence"
-              type="range"
-              name="range"
-              class="w-full h-1 shadow-xl bg-blue-100 appearance-none rounded-lg"
-           />
+          >
+          <input
+            v-model="advancedOptions.confidence"
+            type="range"
+            name="range"
+            class="w-full h-1 shadow-xl bg-blue-100 appearance-none rounded-lg"
+          />
         </div>
+          <div class="my-2">
+            <label class="text-white font-bold">Max Distance Between Trackings:</label>
+            <input
+              v-model="advancedOptions.maxDistanceBetweenPoints"
+              class=" w-1/2 mx-auto text-center rounded-md border-violet-300 text-violet-700 font-bold"
+              type="number"
+              name="startX"
+            />
+          </div>
       </section>
 
       <input
@@ -114,6 +123,7 @@ export default {
       enabled: true,
       drawBoundingBox: true,
       confidence: 60,
+      maxDistanceBetweenPoints:30,
     });
     let videoUrl = computed(() => store.getters["FileProcessing/videoUrl"])
 
