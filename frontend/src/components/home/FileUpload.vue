@@ -11,22 +11,23 @@
       </div>
     </section>
 
-    <section class="p-3" v-else>
+    <section class="p-2" v-else>
       <h1 class="font-bold text-lg p-2">Upload video</h1>
 
-      <label class="m-2">Advanced Options</label>
-      <input type="checkbox" v-model="advancedOptions.enabled" />
+      <label class="m-2 w-full">Advanced Options</label>
+      <input class="text-violet-700 rounded-md focus:ring-violet-300" type="checkbox" v-model="advancedOptions.enabled" />
 
       <section
-        class="w-full px-6 mx-auto bg-violet-400 rounded-xl p-4 shadow-xl"
+        class="w-full px--1 mx-auto bg-violet-400 rounded-xl p-4 shadow-xl"
         v-if="advancedOptions.enabled"
       >
-        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <div v-if="!advancedOptions.drawBoundingBox" class="grid grid-cols-1 gap-2 mb-2 sm:grid-cols-2 bg-violet-800 rounded-lg
+         p-4">
           <div>
             <label class="text-white font-bold">start X:</label>
             <input
               v-model="bboxCoordinates.startX"
-              class="w-full rounded-md"
+              class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
               type="number"
               name="startX"
             />
@@ -35,7 +36,7 @@
             <label class="text-white font-bold">end X:</label>
             <input
               v-model="bboxCoordinates.endX"
-              class="w-full rounded-md"
+              class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
               type="number"
               name="endX"
             />
@@ -44,7 +45,7 @@
             <label class="text-white font-bold">start Y:</label>
             <input
               v-model="bboxCoordinates.startY"
-              class="w-full rounded-md"
+              class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
               type="number"
               name="startY"
             />
@@ -53,31 +54,35 @@
             <label class="text-white font-bold">end Y:</label>
             <input
               v-model="bboxCoordinates.endY"
-              class="w-full rounded-md"
+              class="w-full rounded-md border-violet-300 text-violet-700 font-bold"
               type="number"
               name="endY"
             />
           </div>
         </div>
-        <div class="w-full mt-2">
-          <label class="text-white font-bold"
-            >Confidence: {{ advancedOptions.confidence }}%</label
-          >
-          <input
-            v-model="advancedOptions.confidence"
-            type="range"
-            name="range"
-            class="w-full h-1 shadow-xl bg-blue-100 appearance-none rounded-lg"
-          />
+       
+        <div class="px-1 w-max  mx-auto shadow-md text-violet-700 mb-3 text-center font-bold border-1 rounded-lg bg-white">
+          <label class="m-2">Draw your own ROI</label>
+          <input type="checkbox" class="text-violet-700 rounded-md focus:ring-violet-300" v-model="advancedOptions.drawBoundingBox" />
         </div>
-        <div>
-          <label class="m-2">Use bounding box</label>
-          <input type="checkbox" v-model="advancedOptions.drawBoundingBox" />
+        <div v-if="videoUrl" class="my-2">
+        <PictureThumbnail></PictureThumbnail>
+        </div>
+          <div class="w-full">
+           <label class="text-violet-700 shadow-md m-1 p-1 text-center font-bold border-1 rounded-lg bg-white"
+            >Confidence: {{ advancedOptions.confidence }}%</label
+           >
+           <input
+              v-model="advancedOptions.confidence"
+              type="range"
+              name="range"
+              class="w-full h-1 shadow-xl bg-blue-100 appearance-none rounded-lg"
+           />
         </div>
       </section>
 
       <input
-        class="text-slate-500 file:mt-3 file:shadow-xl file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
+        class="text-slate-500 w-full file:m-4 file:shadow-md file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
         type="file"
         @change="onFileChange"
       />
@@ -93,10 +98,12 @@
 </template>
 
 <script>
-import { ref, watch } from "vue";
+import { ref, watch,computed } from "vue";
 import { useStore } from "vuex";
+import PictureThumbnail from './PictureThumbnail.vue';
 
 export default {
+  components: { PictureThumbnail },
   setup() {
     const store = useStore();
 
@@ -104,10 +111,12 @@ export default {
     let error = ref("");
     let loading = ref(false);
     let advancedOptions = ref({
-      enabled: false,
+      enabled: true,
       drawBoundingBox: true,
       confidence: 60,
     });
+    let videoUrl = computed(() => store.getters["FileProcessing/videoUrl"])
+
 
     let bboxCoordinates = ref({
       startX: 0,
@@ -162,6 +171,7 @@ export default {
       error,
       advancedOptions,
       bboxCoordinates,
+      videoUrl,
     };
   },
 };
