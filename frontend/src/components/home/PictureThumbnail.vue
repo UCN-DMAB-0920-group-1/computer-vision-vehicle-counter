@@ -12,7 +12,7 @@
         :max="duration"
         class="w-full h-1 shadow-xl bg-blue-100 appearance-none rounded-lg"
       />
-      <div class="pt-4 h-52 sm:h-96 sm:mb-96">
+      <div class="pt-4 h-52 sm:h-72">
         <video
           style="
             position: absolute;
