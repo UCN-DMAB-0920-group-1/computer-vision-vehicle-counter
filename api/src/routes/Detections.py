@@ -46,12 +46,7 @@ class Detections:
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
 
-            task = {
-                "video_path": video_path,
-                "id": id,
-                "options": options,
-                "bbox": bbox
-            }
+            task = Task(id, video_path, options, bbox)
 
             self.task_queue.append(task)
             return abort(
@@ -110,7 +105,7 @@ class Detections:
 
         finally:
             os.remove(video_path)
-            
+
             print("Thread Done")
             self.checkQueue()
             return 'Thread Done'
@@ -172,6 +167,17 @@ class Detections:
                 self.task_queue) > 0:
             print("Starting new task")
             task = self.task_queue.pop(0)
-            self.startVideoTracker(task["id"], task["video_path"],
-                                   task["options"], task["bbox"])
+            self.startVideoTracker(task.id, task.video_path,
+                                   task.options, task.bbox)
         return len(self.task_queue)
+
+###### CLASSES #####
+
+
+class Task:
+
+    def __init__(self, id: str, video_path: str, options: map, bbox):
+        self.id = id
+        self.options = options
+        self.video_path = video_path
+        self.bbox = bbox

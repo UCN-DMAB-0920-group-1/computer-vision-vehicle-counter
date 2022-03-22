@@ -1,17 +1,6 @@
 <template>
   <div>
-    <section v-if="loading">
-      <div class="flex justify-center items-center">
-        <div
-          class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full"
-          role="status"
-        >
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="p-2" v-else>
+    <section class="p-2">
       <h1 class="font-bold text-lg p-2">Upload video</h1>
 
       <label class="m-2 w-full">Advanced Options</label>
@@ -91,6 +80,7 @@
             class="w-full h-1 shadow-xl bg-blue-100 appearance-none rounded-lg"
           />
         </div>
+
         <div class="my-2">
           <label class="text-white font-bold"
             >Max Distance Between Trackings:</label
@@ -102,19 +92,51 @@
             name="startX"
           />
         </div>
+        =======
+        <div class="my-2">
+          <label class="text-white font-bold"
+            >Max Distance Between Trackings:</label
+          >
+          <br />
+          <input
+            v-model="advancedOptions.maxDistanceBetweenPoints"
+            class="w-1/2 mx-auto text-center rounded-md border-violet-300 text-violet-700 font-bold"
+            type="number"
+            name="startX"
+          />
+        </div>
+        >>>>>>> 64a3b3cf526f2996b4ef104baa6e99d71af8b59f
       </section>
 
-      <input
-        class="text-slate-500 w-full file:m-4 file:shadow-md file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
-        type="file"
-        @change="onFileChange"
-      />
+      <div class="mx-auto">
+        <input
+          class="text-slate-500 file:m-4 file:shadow-md file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
+          type="file"
+          @change="onFileChange"
+        />
+      </div>
       <button
+        v-if="loading"
+        class="shadow-xl block w-full rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
+      >
+        <div v-if="loading" class="flex justify-center items-center">
+          <div
+            class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full"
+            role="status"
+          >
+            <span>¤</span>
+          </div>
+          <p>Loading...</p>
+        </div>
+      </button>
+      <button
+        v-else
         class="shadow-xl block w-full rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
         @click="onUploadFile"
       >
         Upload
       </button>
+
       <p>{{ error }}</p>
     </section>
   </div>
@@ -133,7 +155,6 @@ export default {
     let file = ref("");
     let error = ref("");
     let loading = ref(false);
-
     let videoUrl = computed(() => store.getters["FileProcessing/videoUrl"]);
 
     let advancedOptions = computed(
@@ -178,7 +199,9 @@ export default {
       } catch (e) {
         error.value = e;
       } finally {
-        loading.value = false;
+        setTimeout(() => {
+          loading.value = false;
+        }, 2000);
       }
     }
 
