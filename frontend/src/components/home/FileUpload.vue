@@ -14,6 +14,7 @@
     <section class="p-2" v-else>
       <h1 class="font-bold text-lg p-2">Upload video</h1>
 
+      
       <label class="m-2 w-full">Advanced Options</label>
       <input class=" text-violet-700 rounded-md focus:ring-violet-300" type="checkbox" v-model="advancedOptions.enabled" />
 
@@ -65,10 +66,10 @@
             />
           </div>
         </div> 
-        <div v-if="videoUrl" class="my-2">
+        <div v-if="videoUrl" class="mt-2 ">
         <PictureThumbnail></PictureThumbnail>
         </div>
-          <div class="my-4  mt-6 w-full">
+          <div class="my-6 pt-8 lg:-mt-8 w-full">
            <label class="text-violet-700 shadow-md m-1 p-1 text-center font-bold border-1 rounded-lg bg-white"
             >Confidence: {{ advancedOptions.confidence }}%</label
           >
@@ -81,6 +82,7 @@
         </div>
           <div class="my-2">
             <label class="text-white font-bold">Max Distance Between Trackings:</label>
+            <br>
             <input
               v-model="advancedOptions.maxDistanceBetweenPoints"
               class=" w-1/2 mx-auto text-center rounded-md border-violet-300 text-violet-700 font-bold"
@@ -90,11 +92,13 @@
           </div>
       </section>
 
-      <input
-        class="text-slate-500 w-full file:m-4 file:shadow-md file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
+      <div class="mx-auto">
+        <input
+        class="text-slate-500  file:m-4 file:shadow-md file:px-4 file:py-2 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:text-violet-50 hover:file:bg-violet-700 file:transition ease-in-out"
         type="file"
         @change="onFileChange"
       />
+      </div>
       <button
         class="shadow-xl block w-full rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
         @click="onUploadFile"
