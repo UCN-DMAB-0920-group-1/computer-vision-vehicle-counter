@@ -14,6 +14,7 @@
     <section class="p-2" v-else>
       <h1 class="font-bold text-lg p-2">Upload video</h1>
 
+      
       <label class="m-2 w-full">Advanced Options</label>
       <input class=" text-violet-700 rounded-md focus:ring-violet-300" type="checkbox" v-model="advancedOptions.enabled" />
 
@@ -65,10 +66,10 @@
             />
           </div>
         </div> 
-        <div v-if="videoUrl" class="my-2">
+        <div v-if="videoUrl" class="mt-2 ">
         <PictureThumbnail></PictureThumbnail>
         </div>
-          <div class="my-4 lg:-mt-8 w-full">
+          <div class="my-6 pt-8 lg:-mt-8 w-full">
            <label class="text-violet-700 shadow-md m-1 p-1 text-center font-bold border-1 rounded-lg bg-white"
             >Confidence: {{ advancedOptions.confidence }}%</label
           >
