@@ -10,10 +10,7 @@
         v-model="advancedOptions.enabled"
       />
 
-      <section
-        class="w-full mt-2 bg-violet-400 rounded-xl p-4 shadow-xl"
-        v-if="advancedOptions.enabled"
-      >
+      <section class="w-full mt-2 bg-violet-400 rounded-xl p-4 shadow-xl" v-if="advancedOptions.enabled">
         <div
           class="px-1 w-max mx-auto shadow-md text-violet-700 mb-3 text-center font-bold border-1 rounded-lg bg-white"
         >
@@ -69,8 +66,7 @@
           <PictureThumbnail></PictureThumbnail>
         </div>
         <div class="my-4 mt-6 w-full">
-          <label
-            class="text-violet-700 shadow-md m-1 p-1 text-center font-bold border-1 rounded-lg bg-white"
+          <label class="text-violet-700 shadow-md m-1 p-1 text-center font-bold border-1 rounded-lg bg-white"
             >Confidence: {{ advancedOptions.confidence }}%</label
           >
           <input
@@ -82,21 +78,7 @@
         </div>
 
         <div class="my-2">
-          <label class="text-white font-bold"
-            >Max Distance Between Trackings:</label
-          >
-          <input
-            v-model="advancedOptions.maxDistanceBetweenPoints"
-            class="w-1/2 mx-auto text-center rounded-md border-violet-300 text-violet-700 font-bold"
-            type="number"
-            name="startX"
-          />
-        </div>
-        =======
-        <div class="my-2">
-          <label class="text-white font-bold"
-            >Max Distance Between Trackings:</label
-          >
+          <label class="text-white font-bold">Max Distance Between Trackings:</label>
           <br />
           <input
             v-model="advancedOptions.maxDistanceBetweenPoints"
@@ -105,7 +87,6 @@
             name="startX"
           />
         </div>
-        >>>>>>> 64a3b3cf526f2996b4ef104baa6e99d71af8b59f
       </section>
 
       <div class="mx-auto">
@@ -120,10 +101,7 @@
         class="shadow-xl block w-full rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
       >
         <div v-if="loading" class="flex justify-center items-center">
-          <div
-            class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full"
-            role="status"
-          >
+          <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" role="status">
             <span>¤</span>
           </div>
           <p>Loading...</p>
@@ -157,17 +135,13 @@ export default {
     let loading = ref(false);
     let videoUrl = computed(() => store.getters["FileProcessing/videoUrl"]);
 
-    let advancedOptions = computed(
-      () => store.getters["FileProcessing/advancedOptions"]
-    );
+    let advancedOptions = computed(() => store.getters["FileProcessing/advancedOptions"]);
 
     watch(advancedOptions.value, (currentValue) => {
       store.commit("FileProcessing/saveOptions", currentValue);
     });
 
-    let bboxCoordinates = computed(
-      () => store.getters["FileProcessing/bboxCoordinates"]
-    );
+    let bboxCoordinates = computed(() => store.getters["FileProcessing/bboxCoordinates"]);
 
     watch(bboxCoordinates.value, (currentValue) => {
       store.commit("FileProcessing/saveBboxCoordinates", currentValue);
