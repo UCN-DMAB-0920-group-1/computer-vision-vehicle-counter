@@ -36,13 +36,12 @@ class Tracking:
                                           [640, 719], [0, 719]]):
 
         # Load yolo model
-        if(custom_model):
-            self.model = torch.hub.load(
-                repo_or_dir='ultralytics/yolov5',
-                model='custom',
-                path=model_path,
-                force_reload=False,
-                skip_validation=True)
+        if (custom_model):
+            self.model = torch.hub.load(repo_or_dir='ultralytics/yolov5',
+                                        model='custom',
+                                        path=model_path,
+                                        force_reload=True,
+                                        skip_validation=True)
 
         else:
             self.model = torch.hub.load(  # downloads model to root folder, fix somehow
@@ -79,9 +78,7 @@ class Tracking:
                    box_margin: int = 2):
 
         # get size of label to draw
-        text_size = cv2.getTextSize(text,
-                                    font_face,
-                                    font_scale,
+        text_size = cv2.getTextSize(text, font_face, font_scale,
                                     font_thickness)
 
         # Define tuples
@@ -96,13 +93,11 @@ class Tracking:
                               bbox_corner.x + text_box.width + box_margin * 2,
                               bbox_corner.y)
 
-        cv2.rectangle(
-            img=frame,
-            pt1=(label_container.x_min, label_container.y_min),
-            pt2=(label_container.x_max, label_container.y_max),
-            color=box_color,
-            thickness=cv2.FILLED
-        )
+        cv2.rectangle(img=frame,
+                      pt1=(label_container.x_min, label_container.y_min),
+                      pt2=(label_container.x_max, label_container.y_max),
+                      color=box_color,
+                      thickness=cv2.FILLED)
 
         cv2.putText(
             img=frame,
@@ -129,11 +124,17 @@ class Tracking:
 
         # Draw detections, ids and center point/ bounding box
         if self.track_points == 'centroid':
-            norfair.draw_points(frame, norfair_detections,
-                                thickness=3, draw_labels=True, label_size=id_size)
+            norfair.draw_points(frame,
+                                norfair_detections,
+                                thickness=3,
+                                draw_labels=True,
+                                label_size=id_size)
         elif self.track_points == 'bbox':
-            norfair.draw_boxes(frame, norfair_detections,
-                               line_width=3, draw_labels=False, label_size=id_size)
+            norfair.draw_boxes(frame,
+                               norfair_detections,
+                               line_width=3,
+                               draw_labels=False,
+                               label_size=id_size)
 
         # norfair.draw_tracked_objects(
         #     frame, tracked_objects, id_thickness=2, id_size=id_size, color=[0, 255, 0])
@@ -146,22 +147,21 @@ class Tracking:
             tracked_object = self.detection_to_tracked_linker(
                 detection, tracked_objects)
 
-            if(tracked_object != None):
+            if (tracked_object != None):
                 object_id = str(tracked_object.id)
             else:
                 object_id = "-1"
 
-            text = "id: {id} type: {label} ({conf})".format(id=object_id,
-                                                            label=detection.label,
-                                                            conf=str(round(detection.scores[0], 2)))
+            text = "id: {id} type: {label} ({conf})".format(
+                id=object_id,
+                label=detection.label,
+                conf=str(round(detection.scores[0], 2)))
 
-            self.draw_label(frame,
-                            text,
-                            detection.points[0])
+            self.draw_label(frame, text, detection.points[0])
 
         # Draw vehicle counter
 
-        total_vehicles = reduce(lambda a, b: a+b, self.detections.values())
+        total_vehicles = reduce(lambda a, b: a + b, self.detections.values())
 
         cv2.putText(
             img=frame,
@@ -186,8 +186,7 @@ class Tracking:
         )
 
         # Draw the model classifications on a gui
-        cv2.imshow("REALTIME! " +
-                   threading.currentThread().getName(),
+        cv2.imshow("REALTIME! " + threading.currentThread().getName(),
                    np.squeeze(frame))
 
     def track(self, stream_location):
@@ -274,7 +273,7 @@ class Tracking:
                 if not obj.id in self.inside_roi:
                     self.inside_roi.append(obj.id)
 
-                    if(obj.label in self.detections):
+                    if (obj.label in self.detections):
                         self.detections[obj.label] += 1
                     else:
                         self.detections[obj.label] = 1
