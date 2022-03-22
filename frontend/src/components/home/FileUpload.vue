@@ -1,34 +1,34 @@
 <template>
   <div>
-    <section v-if="loading">
-      <div class="flex justify-center items-center">
-        <div
-          class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full"
-          role="status"
-        >
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="p-2" v-else>
+    <section class="p-2">
       <h1 class="font-bold text-lg p-2">Upload video</h1>
 
       
       <label class="m-2 w-full">Advanced Options</label>
-      <input class=" text-violet-700 rounded-md focus:ring-violet-300" type="checkbox" v-model="advancedOptions.enabled" />
+      <input
+        class="text-violet-700 rounded-md focus:ring-violet-300"
+        type="checkbox"
+        v-model="advancedOptions.enabled"
+      />
 
       <section
-        class="w-full mt-2  bg-violet-400 rounded-xl p-4 shadow-xl"
+        class="w-full mt-2 bg-violet-400 rounded-xl p-4 shadow-xl"
         v-if="advancedOptions.enabled"
       >
-        
-        <div class="px-1 w-max  mx-auto shadow-md text-violet-700 mb-3 text-center font-bold border-1 rounded-lg bg-white">
+        <div
+          class="px-1 w-max mx-auto shadow-md text-violet-700 mb-3 text-center font-bold border-1 rounded-lg bg-white"
+        >
           <label class="m-2">Draw your own ROI</label>
-          <input type="checkbox" class="text-violet-700 rounded-md focus:ring-violet-300" v-model="advancedOptions.drawBoundingBox" />
+          <input
+            type="checkbox"
+            class="text-violet-700 rounded-md focus:ring-violet-300"
+            v-model="advancedOptions.drawBoundingBox"
+          />
         </div>
-        <div v-if="!advancedOptions.drawBoundingBox" class="grid grid-cols-1 gap-2 mb-2 sm:grid-cols-2 bg-violet-800 rounded-lg
-         p-4">
+        <div
+          v-if="!advancedOptions.drawBoundingBox"
+          class="grid grid-cols-1 gap-2 mb-2 sm:grid-cols-2 bg-violet-800 rounded-lg p-4"
+        >
           <div>
             <label class="text-white text-center font-bold">start X:</label>
             <input
@@ -65,6 +65,7 @@
               name="endY"
             />
           </div>
+
         </div> 
         <div v-if="videoUrl" class="mt-2 ">
         <PictureThumbnail></PictureThumbnail>
@@ -100,20 +101,36 @@
       />
       </div>
       <button
+        v-if="loading"
+        class="shadow-xl block w-full rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
+      >
+        <div v-if="loading" class="flex justify-center items-center">
+          <div
+            class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full"
+            role="status"
+          >
+          <span>¤</span>
+          </div>
+          <p>Loading...</p>
+        </div>
+      </button>
+      <button
+        v-else
         class="shadow-xl block w-full rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
         @click="onUploadFile"
       >
         Upload
       </button>
+
       <p>{{ error }}</p>
     </section>
   </div>
 </template>
 
 <script>
-import { ref, watch,computed } from "vue";
+import { ref, watch, computed } from "vue";
 import { useStore } from "vuex";
-import PictureThumbnail from './PictureThumbnail.vue';
+import PictureThumbnail from "./PictureThumbnail.vue";
 
 export default {
   components: { PictureThumbnail },
@@ -127,10 +144,9 @@ export default {
       enabled: true,
       drawBoundingBox: true,
       confidence: 60,
-      maxDistanceBetweenPoints:30,
+      maxDistanceBetweenPoints: 30,
     });
-    let videoUrl = computed(() => store.getters["FileProcessing/videoUrl"])
-
+    let videoUrl = computed(() => store.getters["FileProcessing/videoUrl"]);
 
     let bboxCoordinates = ref({
       startX: 0,
@@ -173,7 +189,9 @@ export default {
       } catch (e) {
         error.value = e;
       } finally {
-        loading.value = false;
+        setTimeout(() => {
+          loading.value = false;
+        }, 2000);
       }
     }
 
