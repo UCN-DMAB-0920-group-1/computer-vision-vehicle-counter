@@ -41,14 +41,14 @@ class Tracking:
                 repo_or_dir='ultralytics/yolov5',
                 model='custom',
                 path=model_path,
-                force_reload=True,
+                force_reload=False,
                 skip_validation=True)
 
         else:
             self.model = torch.hub.load(  # downloads model to root folder, fix somehow
                 repo_or_dir="ultralytics/yolov5",
                 model=model_path,
-                force_reload=True,
+                force_reload=False,
                 skip_validation=True)
 
         self.model.conf = confidence_threshold
@@ -264,7 +264,8 @@ class Tracking:
             if not obj.live_points.any():
                 continue
 
-            track_position = center_pos(obj.estimate[obj.live_points])
+            # center_pos(obj.estimate[obj.live_points])
+            track_position = center_pos(obj.last_detection.points)
             # Is this object inside ROI?
             is_inside_roi = cv2.pointPolygonTest(
                 np.array(self.roi_area, np.int32), track_position, False)
@@ -280,7 +281,6 @@ class Tracking:
             else:
                 if obj.id in self.inside_roi:
                     self.inside_roi.remove(obj.id)
-            print(self.detections)
 
     def mask_create(self, image: np.ndarray):
         """Creates mask based on image and ROI
