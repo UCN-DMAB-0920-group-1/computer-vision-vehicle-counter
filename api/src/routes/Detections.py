@@ -110,7 +110,7 @@ class Detections:
 
         finally:
             os.remove(video_path)
-            
+
             print("Thread Done")
             self.checkQueue()
             return 'Thread Done'
