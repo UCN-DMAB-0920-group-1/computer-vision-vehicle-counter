@@ -58,8 +58,9 @@ class dao_detections(IDao):
                 "date": date
             })
         except Exception as e:
-            print("Could not insert new task " + str(e))
-            return "Could not insert new task"
+            errorTxt = "Could not insert new task "
+            print(errorTxt + str(e))
+            return errorTxt
         return res
 
     def update_one_task(id: str, detection_result):
@@ -79,6 +80,7 @@ class dao_detections(IDao):
                 }
             })
         except Exception as e:
-            print("Could not update database value " + str(e))
-            res = "Could not update database value"
+            errorTxt = "Could not update database value"
+            print(errorTxt + str(e))
+            res = errorTxt
         return res
