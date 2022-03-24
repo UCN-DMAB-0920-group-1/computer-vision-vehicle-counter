@@ -10,9 +10,9 @@ const state = {
   },
   bboxCoordinates: {
     startX: 0,
-    endX: 0,
+    endX: 1920,
     startY: 0,
-    endY: 0,
+    endY: 1080,
   },
 };
 
@@ -64,6 +64,7 @@ const actions = {
     state.videoIds.push(json.id); //Save ids for later use
 
     commit("setVideoIds", state.videoIds);
+    return json.id;
   },
   saveVideoUrl({ commit }, url) {
     console.log("VIDEO URL:", url);
