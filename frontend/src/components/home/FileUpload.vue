@@ -102,9 +102,9 @@
       >
         <div v-if="loading" class="flex justify-center items-center">
           <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" role="status">
-            <span>¤</span>
+            <span >¤ </span>
           </div>
-          <p>Loading...</p>
+          <p class="px-2"> Loading...</p>
         </div>
       </button>
       <button
