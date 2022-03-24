@@ -87,6 +87,8 @@ class Detections:
             bbox = [[0, 0], [1920, 0], [1920, 1080], [0, 1080]]
             confidence = 0.6
         else:
+            if len(bbox) == 0:
+                bbox = [[0, 0], [1920, 0], [1920, 1080], [0, 1080]]
             confidence = float(options['confidence'])
             max_distance_between_points = float(
                 options['max_distance_between_points'])
@@ -167,9 +169,10 @@ class Detections:
                 self.task_queue) > 0:
             print("Starting new task")
             task = self.task_queue.pop(0)
-            self.startVideoTracker(task.id, task.video_path,
-                                   task.options, task.bbox)
+            self.startVideoTracker(task.id, task.video_path, task.options,
+                                   task.bbox)
         return len(self.task_queue)
+
 
 ###### CLASSES #####
 

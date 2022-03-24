@@ -1,7 +1,6 @@
-from cmath import rect
+import threading
 from collections import namedtuple
 from functools import reduce
-import threading
 from typing import Iterable
 
 import cv2
@@ -68,46 +67,26 @@ class Tracking:
 
     def draw_label(self,
                    frame,
-                   text: str,
-                   bbox_location: Iterable,
-                   font_face: int = cv2.FONT_HERSHEY_SIMPLEX,
-                   font_scale: float = 0.5,
-                   font_color: tuple[int, int, int] = (255, 255, 255),
-                   font_thickness: int = 1,
-                   box_color: tuple[int, int, int] = (0, 0, 255),
-                   box_margin: int = 2):
+                   label):
 
-        # get size of label to draw
-        text_size = cv2.getTextSize(text, font_face, font_scale,
-                                    font_thickness)
+        label_container, label_text = label.get_label_location()
 
-        # Define tuples
-        point = namedtuple("point", ['x', 'y'])
-        box = namedtuple("box", ['x_min', 'y_min', 'x_max', 'y_max'])
-        text_dimension = namedtuple("text", ['width', 'height', 'char_count'])
-
-        bbox_corner = point(*(int(val) for val in bbox_location))
-        text_box = text_dimension(*text_size[0], text_size[1])
-        label_container = box(bbox_corner.x,
-                              bbox_corner.y - text_box.height - box_margin * 4,
-                              bbox_corner.x + text_box.width + box_margin * 2,
-                              bbox_corner.y)
-
-        cv2.rectangle(img=frame,
-                      pt1=(label_container.x_min, label_container.y_min),
-                      pt2=(label_container.x_max, label_container.y_max),
-                      color=box_color,
-                      thickness=cv2.FILLED)
+        cv2.rectangle(
+            img=frame,
+            pt1=(label_container.x_min, label_container.y_min),
+            pt2=(label_container.x_max, label_container.y_max),
+            color=label.box_color,
+            thickness=cv2.FILLED
+        )
 
         cv2.putText(
             img=frame,
-            text=text,
-            org=(label_container.x_min + box_margin,
-                 label_container.y_max - box_margin * 3),
-            fontFace=font_face,
-            fontScale=font_scale,
-            color=font_color,
-            thickness=font_thickness,
+            text=label.text,
+            org=label_text,
+            fontFace=label.font_face,
+            fontScale=label.font_scale,
+            color=label.font_color,
+            thickness=label.font_thickness,
             lineType=cv2.LINE_AA,
         )
 
@@ -157,7 +136,10 @@ class Tracking:
                 label=detection.label,
                 conf=str(round(detection.scores[0], 2)))
 
-            self.draw_label(frame, text, detection.points[0])
+            label = Label(text, detection.points[0])
+
+            self.draw_label(frame,
+                            label)
 
         # Draw vehicle counter
 
@@ -166,10 +148,10 @@ class Tracking:
         cv2.putText(
             img=frame,
             text="total: " + str(total_vehicles),
-            org=(25, 50),
+            org=(25, 100),
             fontFace=cv2.FONT_HERSHEY_SIMPLEX,
             fontScale=id_size,
-            color=[231, 76, 60],  # Dynamic?
+            color=[255, 255, 255],  # Dynamic?
             thickness=id_thickness,
             lineType=cv2.LINE_AA,
         )
@@ -177,10 +159,10 @@ class Tracking:
         cv2.putText(
             img=frame,
             text="now: " + str(len(self.inside_roi)),
-            org=(25, 100),
+            org=(25, 150),
             fontFace=cv2.FONT_HERSHEY_SIMPLEX,
             fontScale=id_size,
-            color=[231, 76, 60],  # Dynamic?
+            color=[255, 255, 255],  # Dynamic?
             thickness=id_thickness,
             lineType=cv2.LINE_AA,
         )
@@ -318,3 +300,51 @@ class Tracking:
                                      b_rect[0]:b_rect[0] + b_rect[2]]
 
         return cropped_image
+
+
+class Label:
+    def __init__(self,
+                 text: str,
+                 bbox_location: Iterable,
+                 font_face: int = cv2.FONT_HERSHEY_SIMPLEX,
+                 font_scale: float = 0.5,
+                 font_color: tuple[int, int, int] = (255, 255, 255),
+                 font_thickness: int = 1,
+                 box_color: tuple[int, int, int] = (0, 0, 255),
+                 box_margin: int = 2) -> None:
+
+        self.text = text
+        self.bbox_location = bbox_location
+        self.font_face = font_face
+        self.font_scale = font_scale
+        self.font_color = font_color
+        self.font_thickness = font_thickness
+        self.box_color = box_color
+        self.box_margin = box_margin
+
+    def get_text_size(self):
+        return cv2.getTextSize(self.text,
+                               self.font_face,
+                               self.font_scale,
+                               self.font_thickness)
+
+    def get_label_location(self):
+        # get size of label to draw
+        text_size = self.get_text_size()
+
+        # Define tuples
+        point = namedtuple("point", ['x', 'y'])
+        box = namedtuple("box", ['x_min', 'y_min', 'x_max', 'y_max'])
+        text_dimension = namedtuple("text", ['width', 'height'])
+
+        # define label location
+        bbox_corner = point(*(int(val) for val in self.bbox_location))
+        text_box = text_dimension(*text_size[0])
+        label_container = box(bbox_corner.x,
+                              bbox_corner.y - text_box.height - self.box_margin * 4,
+                              bbox_corner.x + text_box.width + self.box_margin * 2,
+                              bbox_corner.y)
+        label_text = point(label_container.x_min + self.box_margin,
+                           label_container.y_max - self.box_margin * 3)
+
+        return label_container, label_text

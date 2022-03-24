@@ -1,18 +1,19 @@
 const state = {
+
     videoIds: [],
     videoUrl: "",
     videoBBox: [],
     advancedOptions: {
         enabled: true,
         drawBoundingBox: true,
-        confidence: 60,
-        maxDistanceBetweenPoints: 30,
+        confidence: 70,
+        maxDistanceBetweenPoints: 20,
     },
     bboxCoordinates: {
         startX: 0,
-        endX: 0,
+        endX: 1920,
         startY: 0,
-        endY: 0,
+        endY: 1080,
     },
 };
 
@@ -37,7 +38,8 @@ const actions = {
         state.advancedOptions["confidence"] *= 100;
 
         let bbox = [];
-        if (state.advancedOptions.drawBoundingBox) {
+        //Check if draw is true and if there are more than 2 points drawn else make default box 
+        if (state.advancedOptions.drawBoundingBox && state.videoBBox.length > 2) {
             bbox = state.videoBBox.map(function(point) {
                 return [parseInt(point.scaledX), parseInt(point.scaledY)];
             });
@@ -62,12 +64,15 @@ const actions = {
         const json = await response.json();
         state.videoIds.push(json.id); //Save ids for later use
 
-        commit("setVideoIds", state.videoIds);
-    },
-    saveVideoUrl({ commit }, url) {
-        console.log("VIDEO URL:", url);
-        commit("setVideoUrl", url);
-    },
+
+    commit("setVideoIds", state.videoIds);
+    return json.id;
+  },
+  saveVideoUrl({ commit }, url) {
+    console.log("VIDEO URL:", url);
+    commit("setVideoUrl", url);
+  },
+
 };
 const getters = {
     videoIds: (state) => state.videoIds,
