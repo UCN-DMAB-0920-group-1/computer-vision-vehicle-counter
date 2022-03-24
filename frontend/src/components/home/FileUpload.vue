@@ -167,9 +167,10 @@ export default {
 
       try {
         loading.value = true;
-        store.dispatch("FileProcessing/uploadVideo", {
+        const id = await store.dispatch("FileProcessing/uploadVideo", {
           file: file.value,
         });
+        await store.dispatch("Detections/getVideoData", {id:id})
       } catch (e) {
         error.value = e;
       } finally {

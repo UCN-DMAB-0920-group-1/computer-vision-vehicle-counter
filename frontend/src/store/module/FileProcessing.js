@@ -1,4 +1,5 @@
 const state = {
+
     videoIds: [],
     videoUrl: "",
     videoBBox: [],
@@ -63,12 +64,15 @@ const actions = {
         const json = await response.json();
         state.videoIds.push(json.id); //Save ids for later use
 
-        commit("setVideoIds", state.videoIds);
-    },
-    saveVideoUrl({ commit }, url) {
-        console.log("VIDEO URL:", url);
-        commit("setVideoUrl", url);
-    },
+
+    commit("setVideoIds", state.videoIds);
+    return json.id;
+  },
+  saveVideoUrl({ commit }, url) {
+    console.log("VIDEO URL:", url);
+    commit("setVideoUrl", url);
+  },
+
 };
 const getters = {
     videoIds: (state) => state.videoIds,
