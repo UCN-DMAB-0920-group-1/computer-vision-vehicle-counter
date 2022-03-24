@@ -8,28 +8,30 @@ Via the frontend, you can upload a video with different options like ROI (region
 where the results will be sent to a database, and showed in the frontend once complete.
 
 ## Platform support:
-- [x] windows
+- [x] Windows
 - [ ] MacOS
 - [ ] Linux
 
 # Python Dependencies guide:
 > - [Python 3.9](https://www.python.org/downloads/release/python-3911/) (tested with 3.9.10+)
-> - [Node.js&reg;](https://nodejs.org/en/)
-> - [FFmpeg](https://github.com/BtbN/FFmpeg-Builds/releases)
-> - [PyTorch](https://pytorch.org/)
+> - [FFmpeg](https://github.com/BtbN/FFmpeg-Builds/releases) (!unused)
+> - [PyTorch](https://pytorch.org/) (Tensor Library)
+> - [YOLOv5](https://github.com/ultralytics/yolov5) (Deep Learning Algorithm)
+> - [Norfair](https://github.com/tryolabs/norfair) (Object tracking)
 > - (TODO: write more dependencies)
 
 ## Install python packages 
 ### On windows:
 Automatically setup python environment and install dependencies
 ```bash
-{project_folder} scripts/setup_env.bat
+scripts/setup_env.bat
 ```
 or manually run:
 ```bash
-python -m venv .env
+python -m venv .env # Creates environment, remeber to activate 
 pip install -r requirements.txt
 ```
+Note: if you don't have a CUDA supported device, Edit requirements.txt for pytorch install to use CPU instead
 ## Run Flask API
 ```bash
 cd api/src
@@ -38,16 +40,17 @@ flask run
 ```
 
 ### Due to pafy having a issue with dislike-count (see https://github.com/mps-youtube/pafy/pull/305#issuecomment-986212672)
-- pip install git+https://github.com/Cupcakus/pafy
-
-- install Pytorch (https://pytorch.org/) tested with both CPU and Cuda(GPU)
-- pip install -r requirements.txt (for all dependancy requirements)
-- https://github.com/ultralytics/yolov5
-- FFmpeg (https://github.com/BtbN/FFmpeg-Builds/releases)<br>
+```bash
+pip install git+https://github.com/Cupcakus/pafy
+```
 
 # Frontend vue guide:
-- Create .env file to the root of the frontend folder, containing the API url:<br>
-VUE_APP_PROCESSING_ENDPOINT="<INSERT_API_URL_HERE>"
+> - [Node.js&reg;](https://nodejs.org/en/)
+## Setup environment
+Create .env file to the root of the frontend folder, containing the API url:<br>
+```bash
+echo VUE_APP_PROCESSING_ENDPOINT="<INSERT_API_URL_HERE>" > frontend/.env       
+```
 ## Install Node packages and run app
 ### On windows:
 ```bash
