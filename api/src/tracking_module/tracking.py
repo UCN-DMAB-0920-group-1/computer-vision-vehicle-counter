@@ -6,11 +6,11 @@ from typing import Iterable
 import cv2
 import norfair
 import numpy as np
+import progress.bar as Bar
 import torch
 from norfair import Tracker
 
-from .norfair_helpers import (euclidean_distance,
-                              yolo_detections_to_norfair_detections)
+from .norfair_helpers import euclidean_distance, yolo_detections_to_norfair_detections
 from .util import center_pos, get_stream
 
 
@@ -21,6 +21,7 @@ class Tracking:
     def __init__(
         self,
         should_draw: bool = True,
+        save_file: bool = True,
         device: str = "cuda",  # Device (CPU or GPU)
         model_path: str = "yolov5m",  # YOLO version
         custom_model: bool = False,
@@ -39,14 +40,14 @@ class Tracking:
             self.model = torch.hub.load(repo_or_dir='ultralytics/yolov5',
                                         model='custom',
                                         path=model_path,
-                                        force_reload=True,
+                                        # force_reload=True,
                                         skip_validation=True)
 
         else:
             self.model = torch.hub.load(  # downloads model to root folder, fix somehow
                 repo_or_dir="ultralytics/yolov5",
                 model=model_path,
-                force_reload=True,
+                # force_reload=True,
                 skip_validation=True)
 
         self.model.conf = confidence_threshold
@@ -64,6 +65,7 @@ class Tracking:
         self.label_offset = label_offset
         self.roi_area = np.array(roi_area, dtype=np.int32)
         self.should_draw = should_draw
+        self.save_file = save_file
 
     def draw_label(self,
                    frame,
@@ -115,13 +117,6 @@ class Tracking:
                                draw_labels=False,
                                label_size=id_size)
 
-        # norfair.draw_tracked_objects(
-        #     frame, tracked_objects, id_thickness=2, id_size=id_size, color=[0, 255, 0])
-
-        # Draw ROI
-        cv2.polylines(frame, [np.array(self.roi_area, np.int32)], True,
-                      (15, 220, 10), 6)
-
         for detection in norfair_detections:
             tracked_object = self.detection_to_tracked_linker(
                 detection, tracked_objects)
@@ -140,6 +135,10 @@ class Tracking:
 
             self.draw_label(frame,
                             label)
+
+        # Draw ROI
+        cv2.polylines(frame, [np.array(self.roi_area, np.int32)], True,
+                      (15, 220, 10), 6)
 
         # Draw vehicle counter
 
@@ -167,10 +166,6 @@ class Tracking:
             lineType=cv2.LINE_AA,
         )
 
-        # Draw the model classifications on a gui
-        cv2.imshow("REALTIME! " + threading.currentThread().getName(),
-                   np.squeeze(frame))
-
     def track(self, stream_location):
 
         # Ready the stream
@@ -178,6 +173,9 @@ class Tracking:
 
         # Open stream
         video_stream = cv2.VideoCapture(stream_url)
+
+        # Get frame count for stream
+        stream_frame_count = video_stream.get(cv2.CAP_PROP_FRAME_COUNT)
 
         # Open file writer
         out = cv2.VideoWriter(
@@ -191,6 +189,9 @@ class Tracking:
         if (video_stream.isOpened()):
             ref_frame = video_stream.read()[1]
         mask, roi_offset = self.mask_create(ref_frame)
+
+        bar = Bar.IncrementalBar('Analyzing', max=stream_frame_count - 1,
+                                 suffix='%(percent).1f%% ETA: %(eta_td)s')
 
         # As long as the video stream is open, run the YOLO model on the frame, and show the output
         while video_stream.isOpened():
@@ -219,12 +220,18 @@ class Tracking:
 
             self.count_objects(tracked_objects)
 
+            self.draw(frame, detections, tracked_objects)
+
             if (self.should_draw):
-                self.draw(frame, detections, tracked_objects)
-                # self.draw(cropped_image, detections, tracked_objects)
+                # Draw the model classifications on a gui
+                cv2.imshow("REALTIME! " + threading.currentThread().getName(),
+                           np.squeeze(frame))
 
             # Write to filesystem
-            out.write(frame)
+            if(self.save_file):
+                out.write(frame)
+
+            bar.next()
 
             # Wait for ESC to be pressed (then exit)
             if (cv2.waitKey(1) == 27):
@@ -234,6 +241,10 @@ class Tracking:
         video_stream.release()
         out.release()
         # cv2.destroyAllWindows()
+
+        bar.finish()
+        print("cars found: {car_count}".format(
+            car_count=self.detections["car"]))
 
         return self.detections
 
@@ -261,7 +272,7 @@ class Tracking:
             else:
                 if obj.id in self.inside_roi:
                     self.inside_roi.remove(obj.id)
-            print(self.detections)
+            # print(self.detections)
 
     def mask_create(self, image: np.ndarray):
         """Creates mask based on image and ROI
