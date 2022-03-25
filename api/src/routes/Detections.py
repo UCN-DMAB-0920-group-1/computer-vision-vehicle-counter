@@ -139,7 +139,7 @@ class Detections:
         if not file and not self.allowed_file(file.filename):
             return abort(403, 'File is not allowed to be uploaded')
 
-        if request.content_length > 30000000:
+        if request.content_length > 1000000000:
             return abort(403, 'File is too large - try a smaller video')
 
     def create_options(self, request):
