@@ -23,6 +23,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 detections = Detections(thread_list, UPLOAD_FOLDER, Tracking, dao_detections,
                         MAX_THREADS)
 
+authenticator = Authenticator()
 ############# - ROUTES - #############
 
 
@@ -42,6 +43,8 @@ def get_count(id):
 
 
 @app.route('/auth', methods=["POST"])
-def auth(request):
-    res = Authenticator.authenticate(request)
-    if res == False: return Response("Failed to authenticate user", 401)
+def auth():
+    res = authenticator.authenticate(request)
+    if res == False:
+        return Response("Failed to authenticate user", 401)
+    return ("Success", 200)

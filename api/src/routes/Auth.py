@@ -1,12 +1,14 @@
 from google.oauth2 import id_token
 from google.auth.transport import requests as googleRequests
+from flask import request
 
 
 class Authenticator:
     CLIENT_ID = '512124053214-vpk9p42i9ls413asejsa9bg7j1b4nq61.apps.googleusercontent.com'
 
     def authenticate(self, request):
-        token = request["googleToken"]
+        token = request.get_json()
+        token = token["googleToken"]
         try:
             profile = id_token.verify_oauth2_token(token,
                                                    googleRequests.Request(),
