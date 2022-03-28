@@ -4,9 +4,12 @@ import uuid
 import threading
 from flask import Flask, jsonify, flash, request, redirect, url_for, send_file, send_from_directory, safe_join, abort
 from flask_cors import CORS
+
 from dao.dao_detections import dao_detections
 from routes.Detections import Detections
 from tracking_module.tracking import Tracking
+from pusher_socket import PusherSocket
+
 
 thread_list = []
 app = Flask(__name__)
@@ -38,3 +41,10 @@ def get_video(id):
 @app.route('/detection/<string:id>')
 def get_count(id):
     return detections.get_count(id)
+
+
+@app.route('/pusher/<string:toSend>', methods=['GET'])
+def pusher_test(toSend):
+    socket = PusherSocket("my-channel")
+    socket.send_notification("my-event", {"message": "123321"})
+    return "Send!"

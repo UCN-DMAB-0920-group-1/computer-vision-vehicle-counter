@@ -55,12 +55,7 @@
           />
         </svg>
 
-        <svg
-          v-else
-          :height="imageSize.height"
-          :width="imageSize.width"
-          style="position: absolute; z-index: 3"
-        >
+        <svg v-else :height="imageSize.height" :width="imageSize.width" style="position: absolute; z-index: 3">
           <line
             :x1="bboxCoordinates.startX / imageSize.scaleX"
             :y1="bboxCoordinates.startY / imageSize.scaleY"
@@ -155,6 +150,7 @@ export default {
     }
 
     watch(drawPoints.value, (currentValue) => {
+      console.log(currentValue);
       store.commit("FileProcessing/setVideoBbox", currentValue);
     });
 
@@ -163,9 +159,7 @@ export default {
       imageSize,
       videoUrl: computed(() => store.getters["FileProcessing/videoUrl"]),
       options: computed(() => store.getters["FileProcessing/advancedOptions"]),
-      bboxCoordinates: computed(
-        () => store.getters["FileProcessing/bboxCoordinates"]
-      ),
+      bboxCoordinates: computed(() => store.getters["FileProcessing/bboxCoordinates"]),
       duration,
       timestampValue,
       changeTime,
