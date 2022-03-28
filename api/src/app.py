@@ -17,13 +17,15 @@ cors = CORS(app, resources={r"*": {"origins": "*"}})
 UPLOAD_FOLDER = 'api/storage/'  # check if working, this changes often!
 ALLOWED_EXTENSIONS = {'mp4'}
 MAX_THREADS = 4
+CLIENT_ID = '512124053214-vpk9p42i9ls413asejsa9bg7j1b4nq61.apps.googleusercontent.com'
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # detections routes init
 detections = Detections(thread_list, UPLOAD_FOLDER, Tracking, dao_detections,
                         MAX_THREADS)
 
-authenticator = Authenticator()
+authenticator = Authenticator(CLIENT_ID)
 ############# - ROUTES - #############
 
 
@@ -43,8 +45,7 @@ def get_count(id):
 
 
 @app.route('/auth', methods=["POST"])
-def auth():
-    res = authenticator.authenticate(request)
-    if res == False:
-        return Response("Failed to authenticate user", 401)
+def auth(request):
+    res = Authenticator.authenticate_google(request)
+    if res == False: return Response("Failed to authenticate user", 401)
     return ("Success", 200)

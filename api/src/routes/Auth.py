@@ -1,20 +1,25 @@
 from google.oauth2 import id_token
 from google.auth.transport import requests as googleRequests
-from flask import request
 
 
 class Authenticator:
-    CLIENT_ID = '512124053214-vpk9p42i9ls413asejsa9bg7j1b4nq61.apps.googleusercontent.com'
+    CLIENT_ID = ""
+    
+    def __init__(self, client_id):
+        self.CLIENT_ID = client_id
 
-    def authenticate(self, request):
+    def authenticate_google(self, request, client_id):
         token = request.get_json()
         token = token["googleToken"]
+        
         try:
             profile = id_token.verify_oauth2_token(token,
                                                    googleRequests.Request(),
-                                                   self.CLIENT_ID)
+                                                   client_id)
             print("Authetication was a succes")
             return profile
         except:
             print("failed to authenticate profile")
             return False
+        
+    def jwt_generator
