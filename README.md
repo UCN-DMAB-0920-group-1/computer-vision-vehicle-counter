@@ -28,7 +28,7 @@ scripts/setup_env.bat
 ```
 or manually run:
 ```bash
-python -m venv .env # Creates environment, remeber to activate 
+python -m venv .env # Creates environment, remember to activate 
 pip install -r requirements.txt
 ```
 Note: if you don't have a CUDA supported device, Edit requirements.txt for pytorch install to use CPU instead
