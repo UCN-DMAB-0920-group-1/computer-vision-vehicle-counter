@@ -1,3 +1,4 @@
+import json
 import os
 from time import strftime, strptime
 import uuid
@@ -9,9 +10,13 @@ from routes.Detections import Detections
 from tracking_module.tracking import Tracking
 from routes.Auth import Authenticator
 
+# Load config
+with open("api/conf.json", "r") as config:
+    environment = json.load(config)
+
 thread_list = []
 app = Flask(__name__)
-app.secret_key = "super secret key"
+app.secret_key = environment["SECRET_KEY"]
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 
 UPLOAD_FOLDER = 'api/storage/'  # check if working, this changes often!
@@ -22,30 +27,31 @@ CLIENT_ID = '512124053214-vpk9p42i9ls413asejsa9bg7j1b4nq61.apps.googleuserconten
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # detections routes init
-detections = Detections(thread_list, UPLOAD_FOLDER, Tracking, dao_detections,
-                        MAX_THREADS)
+_detections = Detections(thread_list, UPLOAD_FOLDER, Tracking, dao_detections,
+                         MAX_THREADS)
 
-authenticator = Authenticator(CLIENT_ID)
+_authenticator = Authenticator(CLIENT_ID, app.secret_key,
+                               environment["JWT_algorithm"])
 ############# - ROUTES - #############
 
 
 @app.route('/detection', methods=['POST'])
 def upload_video():
-    return detections.upload_video(request)
+    return _detections.upload_video(request)
 
 
 @app.route('/detection/<string:id>/video')
 def get_video(id):
-    return detections.get_video(id)
+    return _detections.get_video(id)
 
 
 @app.route('/detection/<string:id>')
 def get_count(id):
-    return detections.get_count(id)
+    return _detections.get_count(id)
 
 
 @app.route('/auth', methods=["POST"])
-def auth(request):
-    res = Authenticator.authenticate_google(request)
+def auth():
+    res = _authenticator.authenticate_google(request)
     if res == False: return Response("Failed to authenticate user", 401)
-    return ("Success", 200)
+    return Response("Succes", 200, {"jwt": res})
