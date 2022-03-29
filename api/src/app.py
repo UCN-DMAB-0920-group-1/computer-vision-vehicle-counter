@@ -5,7 +5,7 @@ import threading
 from flask import Flask, jsonify, flash, request, redirect, url_for, send_file, send_from_directory, safe_join, abort
 from flask_cors import CORS
 from dao.dao_detections import dao_detections
-from routes.Detections import Detections
+from routes.detections import Detections
 from tracking_module.tracking import Tracking
 
 thread_list = []
