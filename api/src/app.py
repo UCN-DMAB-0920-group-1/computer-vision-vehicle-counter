@@ -3,7 +3,7 @@ import os
 from time import strftime, strptime
 import uuid
 import threading
-from flask import Flask, request, Response
+from flask import Flask, jsonify, request, Response
 from flask_cors import CORS
 from dao.dao_detections import dao_detections
 from routes.Detections import Detections
@@ -31,7 +31,8 @@ _detections = Detections(thread_list, UPLOAD_FOLDER, Tracking, dao_detections,
                          MAX_THREADS)
 
 _authenticator = Authenticator(CLIENT_ID, app.secret_key,
-                               environment["JWT_algorithm"])
+                               environment["JWT_algorithm"],
+                               environment["CLIENT_SECRET"])
 ############# - ROUTES - #############
 
 
@@ -55,3 +56,15 @@ def auth():
     res = _authenticator.authenticate_google(request)
     if res == False: return Response("Failed to authenticate user", 401)
     return Response("Succes", 200, {"jwt": res})
+
+
+@app.route("/auth", methods=["GET"])
+def login():
+    code = request.args.get('code')
+    #returns empty string if failed to authenticate
+    res = _authenticator.authenticate_google(code)
+
+    return jsonify({"jwt": res})
+
+
+#

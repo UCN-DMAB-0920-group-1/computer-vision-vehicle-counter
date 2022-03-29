@@ -23,11 +23,9 @@
         var params = {
             'client_id': '512124053214-vpk9p42i9ls413asejsa9bg7j1b4nq61.apps.googleusercontent.com',
             'redirect_uri': 'http://localhost:8080',
-            'response_type': 'token id_token',
+            'response_type': 'code',
             'scope': 'profile openid email',
-            'include_granted_scopes': 'true',
-            'state': 'pass-through value',
-            'nonce': '0394852-3190485-2490358'
+            'nonce': '0394852-3190485-2490358',
         };
 
         // Add form parameters as hidden input values.

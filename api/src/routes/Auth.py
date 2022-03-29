@@ -1,21 +1,34 @@
+import jwt
 from google.oauth2 import id_token
 from google.auth.transport import requests as googleRequests
-import jwt
+import requests
 
 
 class Authenticator:
 
-    def __init__(self, client_id, secret_key, algorithm):
+    def __init__(self, client_id, secret_key, algorithm, client_secret):
         self.CLIENT_ID = client_id
         self.SECRET_KEY = secret_key
         self.ALGORITHM = algorithm
+        self.CLIENT_SECRET = client_secret
 
-    def authenticate_google(self, request):
-        _token = request.get_json()
-        _token = _token["googleToken"]
+    def authenticate_google(self, code):
+
+        data = {
+            'code': code,
+            "client_id": self.CLIENT_ID,
+            "client_secret": self.CLIENT_SECRET,
+            "redirect_uri": "http://localhost:8080",
+            "grant_type": "authorization_code"
+        }
 
         try:
-            _profile = id_token.verify_oauth2_token(_token,
+            _google_res = requests.post("https://oauth2.googleapis.com/token",
+                                        data=data)
+            _google_res = _google_res.json()
+            _id_token = _google_res["id_token"]
+
+            _profile = id_token.verify_oauth2_token(_id_token,
                                                     googleRequests.Request(),
                                                     self.CLIENT_ID)
             _payload = {
@@ -29,7 +42,7 @@ class Authenticator:
             return _token
         except:
             print("failed to authenticate profile")
-            return False
+            return ""
 
     def JWT_creation(self, profile):
         user_jwt = jwt.encode(payload=profile,
