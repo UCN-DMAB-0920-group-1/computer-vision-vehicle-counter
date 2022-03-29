@@ -51,13 +51,6 @@ def get_count(id):
     return _detections.get_count(id)
 
 
-@app.route('/auth', methods=["POST"])
-def auth():
-    res = _authenticator.authenticate_google(request)
-    if res == False: return Response("Failed to authenticate user", 401)
-    return Response("Succes", 200, {"jwt": res})
-
-
 @app.route("/auth", methods=["GET"])
 def login():
     code = request.args.get('code')
