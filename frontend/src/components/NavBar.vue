@@ -13,6 +13,12 @@
     >
       About</router-link
     >
+    <router-link
+      to="/login"
+      class="shadow-xl block rounded-full bg-violet-700 p-4 px-8 text-white mx-2 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
+    >
+      Login</router-link
+    >
   </div>
 </template>
 
