@@ -36,7 +36,7 @@
             "program": "${workspaceFolder}/api/src/main.py",
             "console": "integratedTerminal",
             "args": [],
-            "justMyCode": false
+            "justMyCode": true
         }
     ]
 }
