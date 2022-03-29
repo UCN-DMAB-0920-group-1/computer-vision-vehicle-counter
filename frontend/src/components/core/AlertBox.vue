@@ -1,16 +1,15 @@
 <template>
-  <div
-    class="bg-teal-100 border-t-4 border-teal-500 rounded-b text-teal-900 px-4 py-3 shadow-md"
-    role="alert"
-    @click="onClick"
-  >
-    <div class="flex">
-      <div>
-        <p class="font-bold">Your video IST FINITO!</p>
-        <p class="text-sm">We found {{ video.detections.car }} cars in total, in video {{ video.id }}</p>
-      </div>
-    </div>
+<div class="grid grid-cols-1 gap-3 sm:grid-cols-1 max-w-7xl mx-auto">
+  <div class=" flex justify-center rounded-xl shadow-md overflow-hidden bg-green-100 m-2 border-solid	border-2	border-green-400" role="alert" @click="onClick">
+    <div class="">
+      <div class="p-4">
+        <div class="uppercase tracking-wide text-md text-indigo-500 font-semibold text-center text-black		">Your video is done </div>
+        <p class="block mt-1 text-lg leading-tight font-medium text-black hover:underline text-center	">Video: {{ video.id }} </p>
+        <p class="mt-2 text-gray-500 text-center">We found {{ video.detections.car }} cars in total.</p>
   </div>
+</div>
+</div>
+</div>
 </template>
 
 <script>

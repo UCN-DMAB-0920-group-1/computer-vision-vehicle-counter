@@ -63,6 +63,7 @@ export default {
       loading,
       downloadNewestData,
       videoData: computed(() => store.getters["Detections/videoData"]),
+      
       totalCars: computed(() => {
         return vehicleTypes.value.reduce(
           (total, item) => item.amount + total,
@@ -70,6 +71,7 @@ export default {
         );
       }),
       videoIds,
+
     };
   },
 };
