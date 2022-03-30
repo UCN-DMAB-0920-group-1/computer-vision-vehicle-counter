@@ -54,9 +54,9 @@ def get_count(id):
 @app.route("/auth", methods=["GET"])
 def login():
     code = request.args.get('code')
-    #returns empty string if failed to authenticate
+    # returns empty string if failed to authenticate
     res = _authenticator.authenticate_google(code)
-
+    print(res)
     return jsonify({"jwt": res})
 
 

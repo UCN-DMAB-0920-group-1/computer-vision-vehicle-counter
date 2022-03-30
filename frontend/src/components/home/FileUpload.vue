@@ -116,6 +116,7 @@
       </button>
 
       <p>{{ error }}</p>
+      <p>lOOK HERE DUM DUM {{jwt}}</p>
     </section>
   </div>
 </template>
@@ -134,6 +135,8 @@ export default {
     let error = ref("");
     let loading = ref(false);
     let videoUrl = computed(() => store.getters["FileProcessing/videoUrl"]);
+    let JWT = computed(() => store.getters["Authorization/Jwt"]);
+
 
     let advancedOptions = computed(() => store.getters["FileProcessing/advancedOptions"]);
 
@@ -161,14 +164,16 @@ export default {
     async function onUploadFile() {
       if (!file.value) {
         error.value = "Please select a file!";
-
         return;
       }
 
       try {
         loading.value = true;
+
+
         const id = await store.dispatch("FileProcessing/uploadVideo", {
           file: file.value,
+          jwt: JWT.value
         });
         await store.dispatch("Detections/getVideoData", {id:id})
       } catch (e) {
