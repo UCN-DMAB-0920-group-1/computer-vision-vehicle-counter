@@ -9,9 +9,9 @@ import numpy as np
 import torch
 from norfair import Tracker
 
-from norfair_helpers import (euclidean_distance,
-                             yolo_detections_to_norfair_detections)
-from util import center_pos, get_stream
+from .norfair_helpers import (euclidean_distance,
+                              yolo_detections_to_norfair_detections)
+from .util import center_pos, get_stream
 
 
 class Tracking:

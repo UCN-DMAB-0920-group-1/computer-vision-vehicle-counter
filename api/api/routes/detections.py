@@ -1,6 +1,6 @@
 from time import sleep
-from tracking_module.tracking import Tracking
-from dao.dao_detections import dao_detections
+from api.tracking_module.tracking import Tracking
+from api.dao.dao_detections import dao_detections
 from flask import abort, jsonify, send_from_directory
 import json
 import uuid
@@ -38,7 +38,6 @@ class Detections:
 
         id = str(uuid.uuid4())
         video_path = os.path.join(self.UPLOAD_FOLDER, (id + ".mp4"))
-        file = request.files['file']
         self.save_video_file(video_path, file)
         # Add pending task to database
         self.dao_detections.insert_one_task(id, "Pending")
@@ -102,11 +101,11 @@ class Detections:
             detections = tracker.track(video_path)
             self.dao_detections.update_one_task(id, detections)
 
+            os.remove(video_path)
         except Exception as e:
             print("EXCEPTION in thread: " + str(e))
 
         finally:
-            os.remove(video_path)
 
             print("Thread Done")
             self.checkQueue()
