@@ -40,8 +40,8 @@ class Authenticator:
 
             _token = self.JWT_creation(_payload)
             return _token
-        except:
-            print("failed to authenticate profile")
+        except Exception as e:
+            print("failed to authenticate profile: " + str(e))
             return ""
 
     def JWT_creation(self, profile):
