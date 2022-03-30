@@ -20,8 +20,10 @@ const actions = {
         )
         const json = await response.json()
         console.log(json)
-        commit("setJwtData", json["jwt"]);
-        commit("setLoginData", true)
+        if (json["jwt"].length > 0) {
+            commit("setLoginData", true)
+            commit("setJwtData", json["jwt"]);
+        }
     },
     logout({ commit }) {
         commit("setJwtData", "")

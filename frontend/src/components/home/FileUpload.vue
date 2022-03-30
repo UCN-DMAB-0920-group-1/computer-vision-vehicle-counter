@@ -116,7 +116,6 @@
       </button>
 
       <p>{{ error }}</p>
-      <p>lOOK HERE DUM DUM {{jwt}}</p>
     </section>
   </div>
 </template>
