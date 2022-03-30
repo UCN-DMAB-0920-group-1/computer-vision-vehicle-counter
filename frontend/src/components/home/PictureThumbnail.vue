@@ -1,9 +1,9 @@
 <template>
   <div class="relative pt-1">
     <div oncontextmenu="return false;">
-      <label class="text-center shadow-md font-bold border-1 text-violet-700 p-1 rounded-lg bg-white"
-        >Seconds: {{ timestampValue }} / {{ parseInt(duration) }}</label
-      >
+      <label class="text-center shadow-md font-bold border-1 text-violet-700 p-1 rounded-lg bg-white">
+        Seconds: {{ timestampValue }} / {{ parseInt(duration) }}
+      </label>
       <input
         type="range"
         name="range"
@@ -148,7 +148,6 @@ export default {
       const video = document.getElementById("video-frame");
       video.currentTime = timestampValue.value;
     }
-
     watch(drawPoints.value, (currentValue) => {
       console.log(currentValue);
       store.commit("FileProcessing/setVideoBbox", currentValue);

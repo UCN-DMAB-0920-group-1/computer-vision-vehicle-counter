@@ -6,15 +6,14 @@
         <div class="uppercase tracking-wide text-md text-indigo-500 font-semibold text-center text-black		">Your video is done </div>
         <p class="block mt-1 text-lg leading-tight font-medium text-black hover:underline text-center	">Video: {{ video.id }} </p>
         <p class="mt-2 text-gray-500 text-center">We found {{ video.detections.car }} cars in total.</p>
+      </div>
+    </div>
   </div>
-</div>
-</div>
 </div>
 </template>
 
 <script>
 import { useStore } from "vuex";
-
 export default {
   props: {
     video: Object,
