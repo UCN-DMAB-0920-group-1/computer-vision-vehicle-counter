@@ -173,7 +173,7 @@ export default {
           file: file.value,
           jwt: JWT.value
         });
-        await store.dispatch("Detections/getVideoData", {id:id})
+        await store.dispatch("Detections/getVideoData", {id:id, jwt:JWT.value})
       } catch (e) {
         error.value = e;
       } finally {

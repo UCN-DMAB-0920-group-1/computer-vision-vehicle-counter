@@ -27,7 +27,6 @@ const mutations = {
 };
 const actions = {
     async uploadVideo({ commit, state }, { file, jwt }) {
-        console.log(jwt)
         const formData = new FormData();
         formData.append("file", file);
 

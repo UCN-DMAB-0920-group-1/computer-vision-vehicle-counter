@@ -7,6 +7,7 @@ const mutations = {
 };
 const actions = {
     async getVideoData({ commit }, { id, jwt }) {
+        console.log(jwt)
         const response = await fetch(
             process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection/" + id, {
                 method: "GET",
