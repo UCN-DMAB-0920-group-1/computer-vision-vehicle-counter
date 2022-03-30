@@ -22,7 +22,6 @@ cors = CORS(app, resources={r"*": {"origins": "*"}})
 UPLOAD_FOLDER = 'api/storage/'  # check if working, this changes often!
 ALLOWED_EXTENSIONS = {'mp4'}
 MAX_THREADS = 4
-CLIENT_ID = '512124053214-vpk9p42i9ls413asejsa9bg7j1b4nq61.apps.googleusercontent.com'
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
@@ -30,7 +29,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 _detections = Detections(thread_list, UPLOAD_FOLDER, Tracking, dao_detections,
                          MAX_THREADS)
 
-_authenticator = Authenticator(CLIENT_ID, app.secret_key,
+_authenticator = Authenticator(environment["CLIENT_ID"], app.secret_key,
                                environment["JWT_algorithm"],
                                environment["CLIENT_SECRET"])
 ############# - ROUTES - #############
@@ -39,19 +38,22 @@ _authenticator = Authenticator(CLIENT_ID, app.secret_key,
 @app.route('/detection', methods=['POST'])
 def upload_video():
     permitted = checkPermission(request)
-    return _detections.upload_video(request) if permitted else "Not permitted to access this resource"
+    return _detections.upload_video(
+        request) if permitted else "Not permitted to access this resource"
 
 
 @app.route('/detection/<string:id>/video')
 def get_video(id):
     permitted = checkPermission(request)
-    return _detections.get_video(id) if permitted else "Not permitted to access this resource"
+    return _detections.get_video(
+        id) if permitted else "Not permitted to access this resource"
 
 
 @app.route('/detection/<string:id>')
 def get_count(id):
     permitted = checkPermission(request)
-    return _detections.get_count(id) if permitted else "Not permitted to access this resource"
+    return _detections.get_count(
+        id) if permitted else "Not permitted to access this resource"
 
 
 @app.route("/auth", methods=["GET"])
@@ -62,12 +64,12 @@ def login():
     print(res)
     return jsonify({"jwt": res})
 
+
 ######### METHODS #########
 
 
 def checkPermission(request):
     res = False
     if "Authorization" in request.headers:
-        res = _authenticator.authenticate_JWT(
-            request.headers["Authorization"])
+        res = _authenticator.authenticate_JWT(request.headers["Authorization"])
     return res
