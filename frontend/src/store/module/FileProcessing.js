@@ -30,7 +30,6 @@ const actions = {
         console.log(jwt)
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("jwt", jwt);
 
         state.advancedOptions["confidence"] /= 100;
         Object.entries(state.advancedOptions).forEach(([key, value]) => {

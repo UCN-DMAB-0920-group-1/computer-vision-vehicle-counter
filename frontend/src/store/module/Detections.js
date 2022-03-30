@@ -10,7 +10,7 @@ const actions = {
         const response = await fetch(
             process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection/" + id, {
                 method: "GET",
-                headers: jwt,
+                headers: { "Authorization": jwt },
             }
         );
 
