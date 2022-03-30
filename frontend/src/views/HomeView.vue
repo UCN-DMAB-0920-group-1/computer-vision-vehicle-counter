@@ -30,7 +30,7 @@ let loggedin = computed(() => store.getters["Authorization/Login"]);
 
 
 const asyncDispatch = async () =>  {
-  await store.dispatch("Authorization/saveGoogleCode", route.query["code"])
+  await store.dispatch("Authorization/GoogleLogin", route.query["code"])
 }
 asyncDispatch()
 </script>

@@ -10,7 +10,7 @@ const mutations = {
     setLoginData: (state, Login) => (state.Login = Login),
 };
 const actions = {
-    async saveGoogleCode({ commit }, code) {
+    async GoogleLogin({ commit }, code) {
         console.log("from store code:", code);
 
         const response = await fetch(
