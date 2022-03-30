@@ -114,7 +114,6 @@
       >
         Upload
       </button>
-
       <p>{{ error }}</p>
     </section>
   </div>
@@ -193,6 +192,7 @@ export default {
       advancedOptions,
       bboxCoordinates,
       videoUrl,
+      JWT,
     };
   },
 };

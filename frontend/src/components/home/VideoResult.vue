@@ -42,6 +42,9 @@ export default {
     const loading = ref(false);
     const error = ref("");
 
+    let JWT = computed(() => store.getters["Authorization/Jwt"]);
+
+
     const videoIds = computed(() => store.getters["FileProcessing/videoIds"]);
 
     async function downloadNewestData() {
@@ -49,6 +52,7 @@ export default {
         loading.value = true;
         store.dispatch("Detections/getVideoData", {
           id: videoIds.value[videoIds.value.length - 1],
+          jwt: JWT,
         });
       } catch (e) {
         error.value = e;

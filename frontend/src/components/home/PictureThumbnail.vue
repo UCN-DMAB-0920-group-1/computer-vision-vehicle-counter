@@ -109,6 +109,8 @@ export default {
     let duration = ref(0);
     let timestampValue = ref(0);
 
+
+
     function onImageLoaded() {
       const video = document.getElementById("video-frame");
       duration.value = video.duration;

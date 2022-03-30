@@ -60,6 +60,7 @@ const actions = {
             process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection", {
                 method: "POST",
                 body: formData,
+                headers: { "Authorization": jwt },
             }
         );
 
