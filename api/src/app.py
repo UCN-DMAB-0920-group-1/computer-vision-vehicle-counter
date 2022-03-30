@@ -56,10 +56,9 @@ def get_video(id):
 
 @app.route('/detection/<string:id>')
 def get_count(id):
-
-
-<< << << < HEAD
-return detections.get_count(id)
+    permitted = checkPermission(request)
+    return _detections.get_count(
+        id) if permitted else "Not permitted to access this resource"
 
 
 @app.route('/pusher/<string:toSend>', methods=['GET'])
@@ -67,12 +66,6 @@ def pusher_test(toSend):
     socket = PusherSocket("my-channel")
     socket.send_notification("my-event", {"message": "123321"})
     return "Send!"
-
-
-== == == =
-permitted = checkPermission(request)
-return _detections.get_count(
-    id) if permitted else "Not permitted to access this resource"
 
 
 @app.route("/auth", methods=["GET"])
@@ -93,6 +86,3 @@ def checkPermission(request):
         # decoes JWT and looks at payload value "valid" return true if succes and false if not
         res = _authenticator.authenticate_JWT(request.headers["Authorization"])
     return res
-
-
->>>>>> > main
