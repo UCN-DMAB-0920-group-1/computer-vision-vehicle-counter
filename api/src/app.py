@@ -71,5 +71,6 @@ def login():
 def checkPermission(request):
     res = False
     if "Authorization" in request.headers:
+        #decoes JWT and looks at payload value "valid" return true if succes and false if not
         res = _authenticator.authenticate_JWT(request.headers["Authorization"])
     return res
