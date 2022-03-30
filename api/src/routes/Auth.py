@@ -55,7 +55,7 @@ class Authenticator:
             _token = jwt.decode(jwt=token,
                                 key=self.SECRET_KEY,
                                 algorithms=[self.ALGORITHM])
-            print(_token)
-            return True
-        except jwt.exceptions.InvalidTokenError:
+            return True if _token["valid"] == "True" else False
+        except Exception as e:
+            print("JWT token was not valid: " + str(e))
             return False

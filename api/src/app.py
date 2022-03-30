@@ -38,17 +38,20 @@ _authenticator = Authenticator(CLIENT_ID, app.secret_key,
 
 @app.route('/detection', methods=['POST'])
 def upload_video():
-    return _detections.upload_video(request)
+    permitted = checkPermission(request)
+    return _detections.upload_video(request) if permitted else "Not permitted to access this resource"
 
 
 @app.route('/detection/<string:id>/video')
 def get_video(id):
-    return _detections.get_video(id)
+    permitted = checkPermission(request)
+    return _detections.get_video(id) if permitted else "Not permitted to access this resource"
 
 
 @app.route('/detection/<string:id>')
 def get_count(id):
-    return _detections.get_count(id)
+    permitted = checkPermission(request)
+    return _detections.get_count(id) if permitted else "Not permitted to access this resource"
 
 
 @app.route("/auth", methods=["GET"])
@@ -59,5 +62,12 @@ def login():
     print(res)
     return jsonify({"jwt": res})
 
+######### METHODS #########
 
-#
+
+def checkPermission(request):
+    res = False
+    if "Authorization" in request.headers:
+        res = _authenticator.authenticate_JWT(
+            request.headers["Authorization"])
+    return res
