@@ -114,7 +114,6 @@
       >
         Upload
       </button>
-
       <p>{{ error }}</p>
     </section>
   </div>
@@ -134,6 +133,8 @@ export default {
     let error = ref("");
     let loading = ref(false);
     let videoUrl = computed(() => store.getters["FileProcessing/videoUrl"]);
+    let JWT = computed(() => store.getters["Authorization/Jwt"]);
+
 
     let advancedOptions = computed(() => store.getters["FileProcessing/advancedOptions"]);
 
@@ -161,16 +162,18 @@ export default {
     async function onUploadFile() {
       if (!file.value) {
         error.value = "Please select a file!";
-
         return;
       }
 
       try {
         loading.value = true;
+
+
         const id = await store.dispatch("FileProcessing/uploadVideo", {
           file: file.value,
+          jwt: JWT.value
         });
-        await store.dispatch("Detections/getVideoData", {id:id})
+        await store.dispatch("Detections/getVideoData", {id:id, jwt:JWT.value})
       } catch (e) {
         error.value = e;
       } finally {
@@ -189,6 +192,7 @@ export default {
       advancedOptions,
       bboxCoordinates,
       videoUrl,
+      JWT,
     };
   },
 };

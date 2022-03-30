@@ -26,7 +26,7 @@ const mutations = {
         (state.bboxCoordinates = coordinates),
 };
 const actions = {
-    async uploadVideo({ commit, state }, { file }) {
+    async uploadVideo({ commit, state }, { file, jwt }) {
         const formData = new FormData();
         formData.append("file", file);
 
@@ -58,6 +58,7 @@ const actions = {
             process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection", {
                 method: "POST",
                 body: formData,
+                headers: { "Authorization": jwt },
             }
         );
 
@@ -65,13 +66,13 @@ const actions = {
         state.videoIds.push(json.id); //Save ids for later use
 
 
-    commit("setVideoIds", state.videoIds);
-    return json.id;
-  },
-  saveVideoUrl({ commit }, url) {
-    console.log("VIDEO URL:", url);
-    commit("setVideoUrl", url);
-  },
+        commit("setVideoIds", state.videoIds);
+        return json.id;
+    },
+    saveVideoUrl({ commit }, url) {
+        console.log("VIDEO URL:", url);
+        commit("setVideoUrl", url);
+    },
 
 };
 const getters = {

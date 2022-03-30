@@ -42,13 +42,17 @@ export default {
     const loading = ref(false);
     const error = ref("");
 
+    let JWT = computed(() => store.getters["Authorization/Jwt"]);
+
+
     const videoIds = computed(() => store.getters["FileProcessing/videoIds"]);
 
     async function downloadNewestData() {
       try {
         loading.value = true;
-        store.dispatch("Detections/getVideoData", {
+        await store.dispatch("Detections/getVideoData", {
           id: videoIds.value[videoIds.value.length - 1],
+          jwt: JWT.value
         });
       } catch (e) {
         error.value = e;
@@ -59,7 +63,7 @@ export default {
 
     return {
       vehicleTypes,
-
+      JWT,
       loading,
       downloadNewestData,
       videoData: computed(() => store.getters["Detections/videoData"]),
