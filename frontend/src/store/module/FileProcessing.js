@@ -1,3 +1,4 @@
+import { getCookie} from "@/util/Cookie";
 const state = {
 
     videoIds: [],
@@ -26,7 +27,7 @@ const mutations = {
         (state.bboxCoordinates = coordinates),
 };
 const actions = {
-    async uploadVideo({ commit, state }, { file, jwt }) {
+    async uploadVideo({ commit, state }, { file}) {
         const formData = new FormData();
         formData.append("file", file);
 
@@ -58,7 +59,7 @@ const actions = {
             process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection", {
                 method: "POST",
                 body: formData,
-                headers: { "Authorization": jwt },
+                headers: { "Authorization": getCookie("jwt")},
             }
         );
 

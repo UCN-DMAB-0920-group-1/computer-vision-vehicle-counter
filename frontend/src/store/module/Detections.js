@@ -1,3 +1,5 @@
+import { getCookie} from "@/util/Cookie";
+
 const state = {
     videoData: [],
 };
@@ -6,12 +8,11 @@ const mutations = {
     setVideoData: (state, videoData) => (state.videoData = videoData),
 };
 const actions = {
-    async getVideoData({ commit }, { id, jwt }) {
-        console.log(jwt)
+    async getVideoData({ commit }, {id}) {
         const response = await fetch(
             process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection/" + id, {
                 method: "GET",
-                headers: { "Authorization": jwt },
+                headers: { "Authorization": getCookie("jwt") },
             }
         );
 
@@ -27,6 +28,8 @@ const actions = {
             process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection", {
                 method: "POST",
                 body: fd,
+                headers: { "Authorization": getCookie("jwt") },
+
             }
         );
 
