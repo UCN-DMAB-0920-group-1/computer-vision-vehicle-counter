@@ -14,7 +14,7 @@ const actions = {
         console.log("from store code:", code);
 
         const response = await fetch(
-            process.env.VUE_APP_PROCESSING_ENDPOINT + "auth?code=" + code, {
+            process.env.VUE_APP_PROCESSING_ENDPOINT + "/auth?code=" + code, {
                 method: "GET",
             }
         )
