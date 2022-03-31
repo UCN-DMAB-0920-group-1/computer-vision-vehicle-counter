@@ -91,7 +91,7 @@
 </template>
 
 <script>
-import { ref, computed, watch } from "vue";
+import { ref, computed } from "vue";
 import { useStore } from "vuex";
 
 export default {
@@ -99,12 +99,10 @@ export default {
     const store = useStore();
 
     let imageSize = ref({});
-    let drawPoints = ref([]);
+    let drawPoints = computed(() => store.getters["FileProcessing/videoBBox"]);
 
     let duration = ref(0);
     let timestampValue = ref(0);
-
-
 
     function onImageLoaded() {
       const video = document.getElementById("video-frame");
@@ -130,7 +128,7 @@ export default {
     }
 
     function onClick(e) {
-      drawPoints.value.push({
+      const newPoint = {
         //X and Y relative to screen size
         x: e.offsetX,
         y: e.offsetY,
@@ -138,22 +136,28 @@ export default {
         // X and Y relative to video size
         scaledX: e.offsetX * imageSize.value.scaleX,
         scaledY: e.offsetY * imageSize.value.scaleY,
-        id: drawPoints.value.length,
-      });
+        id: uuid(),
+      };
+
+      store.commit("FileProcessing/addPointToPolygon", newPoint);
     }
 
     function deletePoint(id) {
-      drawPoints.value = drawPoints.value.filter((point) => point.id != id);
+      store.commit("FileProcessing/removePointfromPolygon", id);
     }
 
     function changeTime() {
       const video = document.getElementById("video-frame");
       video.currentTime = timestampValue.value;
     }
-    watch(drawPoints.value, (currentValue) => {
-      console.log(currentValue);
-      store.commit("FileProcessing/setVideoBbox", currentValue);
-    });
+
+    function uuid() {
+      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+        var rnd = (Math.random() * 16) | 0,
+          v = c === "x" ? rnd : (rnd & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    }
 
     return {
       drawPoints,
