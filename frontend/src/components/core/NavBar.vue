@@ -6,6 +6,7 @@
     >
       Home</router-link
     >
+    <div class="hidden  sm:block">
 
     <router-link
       to="/about"
@@ -13,6 +14,7 @@
     >
       About</router-link
     >
+    </div>
       
     <button
       @click="logout"
@@ -30,8 +32,12 @@
     >
       Login
     </router-link>
+      
     
 </div>
+    <div>
+    <ProfileBox></ProfileBox>
+    </div>
     
   </div>
 </template>
@@ -39,6 +45,7 @@
 <script setup>
 import {useStore} from "vuex"
 import {computed} from "vue"
+import ProfileBox from "@/components/core/ProfileBox.vue"
 const store = useStore()
 let loggedin = computed(() => store.getters["Authorization/loginState"])
 
