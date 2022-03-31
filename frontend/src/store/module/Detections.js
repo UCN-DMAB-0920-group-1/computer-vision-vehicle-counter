@@ -1,49 +1,50 @@
 const state = {
   videoData: [],
+  finishedVideos: [],
 };
 
 const mutations = {
   setVideoData: (state, videoData) => (state.videoData = videoData),
+  addFinishedVideo: (state, data) => state.finishedVideos.push(data),
+  removeFinishedVideoNotification: (state, id) =>
+    (state.finishedVideos = state.finishedVideos.filter((item) => item.id != id)),
 };
 const actions = {
-  async getVideoData({ commit }, { id }) {
-    const response = await fetch(
-      process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection/" + id,
-      {
-        method: "GET",
-      }
-    );
+  async getVideoData({ commit }, { id, jwt }) {
+    const response = await fetch(process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection/" + id, {
+      method: "GET",
+      headers: { "Authorization": jwt },
+    });
 
-    const json = await response.json();
 
-    commit("setVideoData", json);
-  },
-  async downloadVideo({ commit }, file) {
-    const fd = new FormData();
-    fd.append("file", file);
+        const json = await response.json();
 
-    const response = await fetch(
-      process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection",
-      {
-        method: "POST",
-        body: fd,
-      }
-    );
+        commit("setVideoData", json);
+    },
+    async downloadVideo({ commit }, file) {
+        const fd = new FormData();
+        fd.append("file", file);
 
-    const json = await response.json();
-    state.videoIds.push(json.id); //Save ids for later use
+    const response = await fetch(process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection", {
+      method: "POST",
+      body: fd,
+    });
 
-    commit("setVideoIds", state.videoIds);
-  },
+        const json = await response.json();
+        state.videoIds.push(json.id); //Save ids for later use
+
+        commit("setVideoIds", state.videoIds);
+    },
 };
 const getters = {
   videoData: (state) => state.videoData,
+  finishedVideos: (state) => state.finishedVideos,
 };
 
 export default {
-  state,
-  namespaced: true,
-  mutations,
-  actions,
-  getters,
+    state,
+    namespaced: true,
+    mutations,
+    actions,
+    getters,
 };
