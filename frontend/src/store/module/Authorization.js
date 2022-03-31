@@ -1,28 +1,29 @@
-import { isLoggedIn} from "./getCookie";
+import { isLoggedIn, logoutCookie} from "@/util/Cookie";
 
 const state = {
-    Login: false,
-    Jwt: "",
+    login: false,
+    jwt: "",
 };
 
 const mutations = {
-    setLoginData: (state, Login) => (state.Login = Login),
-    setJwtData: (state, jwt) => (state.Jwt = jwt),
+    setLoginData: (state, login) => (state.login = login),
+    setJwtData: (state, jwt) => (state.jwt = jwt),
 };
 const actions = {
     login() {
     },
-    logout({ commit }) {
-        commit("setLoginData", false);
+    logout({dispatch}) {
+        logoutCookie();
+        dispatch("checkLoggedin");
     },
-    checkLoggedin({commit}){
+    checkLoggedin({ commit }) {
         const loggedIn = isLoggedIn();
         commit("setLoginData", loggedIn);
     },
 };
 const getters = {
-    Login: (state) => state.Login,
-    Jwt: (state) => state.Jwt,
+    loginState: (state) => state.login,
+    jwt: (state) => state.jwt,
 };
 
 export default {

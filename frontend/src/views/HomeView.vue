@@ -21,20 +21,20 @@
 import FileUpload from "@/components/home/FileUpload.vue";
 import VideoResult from "@/components/home/VideoResult.vue";
 import LoginText from "@/components/home/LoginText.vue";
-import {getCookie} from "@/store/module/getCookie.js"
-import { useRoute } from 'vue-router'
+import {useRoute} from 'vue-router'
 import {useStore} from "vuex"
 import {computed} from "vue"
 const route = useRoute()
 const store = useStore()
 
-let loggedIn = computed(() => store.getters["Authorization/Login"])
+
+let loggedIn = computed(() => store.getters["Authorization/loginState"])
 
 
 
 const asyncfetch = async () =>  {
   if(!loggedIn.value){
-
+    
     const response = await fetch( process.env.VUE_APP_PROCESSING_ENDPOINT + "/auth?code=" + route.query["code"]
       , { method: "GET", } )
 
@@ -42,15 +42,14 @@ const asyncfetch = async () =>  {
 
       if (json["jwt"].length > 0) {
         document.cookie = "jwt=" + json["jwt"];
-        console.log("i am trying " + document.cookie)
         document.cookie = "loggedIn=" + "true";
     } 
   }
+        store.dispatch("Authorization/checkLoggedin")
 }
 asyncfetch();
 
 
-console.log(getCookie("jwt"))
 </script>
 <style scoped>
 #app{

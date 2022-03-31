@@ -8,8 +8,8 @@ export function isLoggedIn() {
     return getCookie("loggedIn") === "true" ? true : false;
 }
 
-export function logout() {
-    console.log("please change this cookie")
+export function logoutCookie() {
     document.cookie = "jwt=;"
     document.cookie = "loggedIn=; expires=Thu, 01 Jan 1970 00: 00: 00 UTC; path = /;"
 }
+
