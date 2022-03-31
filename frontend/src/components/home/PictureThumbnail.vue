@@ -36,18 +36,18 @@
           <line
             v-for="(point, i) in drawPoints"
             :key="i"
-            :x1="point.x"
-            :y1="point.y"
-            :x2="drawPoints[(i + 1) % drawPoints.length].x"
-            :y2="drawPoints[(i + 1) % drawPoints.length].y"
+            :x1="point.relativeX * imageSize.width"
+            :y1="point.relativeY * imageSize.height"
+            :x2="drawPoints[(i + 1) % drawPoints.length].relativeX * imageSize.width"
+            :y2="drawPoints[(i + 1) % drawPoints.length].relativeY * imageSize.height"
             style="stroke: rgb(255, 0, 0); stroke-width: 2"
           />
           <circle
             v-for="point in drawPoints"
             :key="point.id"
             @click.right="deletePoint(point.id)"
-            :cx="point.x"
-            :cy="point.y"
+            :cx="point.relativeX * imageSize.width"
+            :cy="point.relativeY * imageSize.height"
             r="10"
             stroke="black"
             stroke-width="1"
@@ -91,7 +91,7 @@
 </template>
 
 <script>
-import { ref, computed, watch } from "vue";
+import { ref, computed } from "vue";
 import { useStore } from "vuex";
 
 export default {
@@ -99,12 +99,10 @@ export default {
     const store = useStore();
 
     let imageSize = ref({});
-    let drawPoints = ref([]);
+    let drawPoints = computed(() => store.getters["FileProcessing/videoDrawPoints"]);
 
     let duration = ref(0);
     let timestampValue = ref(0);
-
-
 
     function onImageLoaded() {
       const video = document.getElementById("video-frame");
@@ -126,34 +124,46 @@ export default {
         scaleX: videoWidth / width,
         scaleY: videoHeight / height,
       };
-      console.log(imageSize.value);
     }
 
     function onClick(e) {
-      drawPoints.value.push({
-        //X and Y relative to screen size
-        x: e.offsetX,
-        y: e.offsetY,
+      const newPoint = {
+        relativeX: e.offsetX / imageSize.value.width,
+        relativeY: e.offsetY / imageSize.value.height,
 
         // X and Y relative to video size
         scaledX: e.offsetX * imageSize.value.scaleX,
         scaledY: e.offsetY * imageSize.value.scaleY,
-        id: drawPoints.value.length,
-      });
+        id: uuid(),
+      };
+
+      store.commit("FileProcessing/addPointToPolygon", newPoint);
     }
 
     function deletePoint(id) {
-      drawPoints.value = drawPoints.value.filter((point) => point.id != id);
+      store.commit("FileProcessing/removePointfromPolygon", id);
     }
 
     function changeTime() {
       const video = document.getElementById("video-frame");
       video.currentTime = timestampValue.value;
     }
-    watch(drawPoints.value, (currentValue) => {
-      console.log(currentValue);
-      store.commit("FileProcessing/setVideoBbox", currentValue);
-    });
+
+    function uuid() {
+      return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+        var rnd = (Math.random() * 16) | 0,
+          v = c === "x" ? rnd : (rnd & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    }
+
+    window.addEventListener(
+      "resize",
+      function () {
+        onImageLoaded();
+      },
+      true
+    );
 
     return {
       drawPoints,
