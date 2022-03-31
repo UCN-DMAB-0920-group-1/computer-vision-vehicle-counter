@@ -55,12 +55,7 @@
           />
         </svg>
 
-        <svg
-          v-else
-          :height="imageSize.height"
-          :width="imageSize.width"
-          style="position: absolute; z-index: 3"
-        >
+        <svg v-else :height="imageSize.height" :width="imageSize.width" style="position: absolute; z-index: 3">
           <line
             :x1="bboxCoordinates.startX / imageSize.scaleX"
             :y1="bboxCoordinates.startY / imageSize.scaleY"
@@ -108,8 +103,6 @@ export default {
 
     let duration = ref(0);
     let timestampValue = ref(0);
-
-
 
     function onImageLoaded() {
       const video = document.getElementById("video-frame");
@@ -165,9 +158,7 @@ export default {
       imageSize,
       videoUrl: computed(() => store.getters["FileProcessing/videoUrl"]),
       options: computed(() => store.getters["FileProcessing/advancedOptions"]),
-      bboxCoordinates: computed(
-        () => store.getters["FileProcessing/bboxCoordinates"]
-      ),
+      bboxCoordinates: computed(() => store.getters["FileProcessing/bboxCoordinates"]),
       duration,
       timestampValue,
       changeTime,
