@@ -1,7 +1,7 @@
 const state = {
   videoIds: [],
   videoUrl: "",
-  videoBBox: [],
+  videoDrawPoints: [],
   advancedOptions: {
     enabled: true,
     drawBoundingBox: true,
@@ -19,9 +19,10 @@ const state = {
 const mutations = {
   setVideoIds: (state, videoIds) => (state.videoIds = videoIds),
   setVideoUrl: (state, url) => (state.videoUrl = url),
-  setVideoBbox: (state, videoBBox) => (state.videoBBox = videoBBox),
-  addPointToPolygon: (state, point) => state.videoBBox.push(point),
-  removePointfromPolygon: (state, id) => (state.videoBBox = state.videoBBox.filter((item) => item.id != id)),
+  setvideoDrawPoints: (state, videoDrawPoints) => (state.videoDrawPoints = videoDrawPoints),
+  addPointToPolygon: (state, point) => state.videoDrawPoints.push(point),
+  removePointfromPolygon: (state, id) =>
+    (state.videoDrawPoints = state.videoDrawPoints.filter((item) => item.id != id)),
   saveOptions: (state, options) => (state.advancedOptions = options),
   saveBboxCoordinates: (state, coordinates) => (state.bboxCoordinates = coordinates),
 };
@@ -39,8 +40,8 @@ const actions = {
 
     let bbox = [];
     //Check if draw is true and if there are more than 2 points drawn else make default box
-    if (state.advancedOptions.drawBoundingBox && state.videoBBox.length > 2) {
-      bbox = state.videoBBox.map(function (point) {
+    if (state.advancedOptions.drawBoundingBox && state.videoDrawPoints.length > 2) {
+      bbox = state.videoDrawPoints.map(function (point) {
         return [parseInt(point.scaledX), parseInt(point.scaledY)];
       });
     } else {
@@ -76,7 +77,7 @@ const getters = {
   videoUrl: (state) => state.videoUrl,
   advancedOptions: (state) => state.advancedOptions,
   bboxCoordinates: (state) => state.bboxCoordinates,
-  videoBBox: (state) => state.videoBBox,
+  videoDrawPoints: (state) => state.videoDrawPoints,
 };
 
 export default {

@@ -36,18 +36,18 @@
           <line
             v-for="(point, i) in drawPoints"
             :key="i"
-            :x1="point.x"
-            :y1="point.y"
-            :x2="drawPoints[(i + 1) % drawPoints.length].x"
-            :y2="drawPoints[(i + 1) % drawPoints.length].y"
+            :x1="point.relativeX * imageSize.width"
+            :y1="point.relativeY * imageSize.height"
+            :x2="drawPoints[(i + 1) % drawPoints.length].relativeX * imageSize.width"
+            :y2="drawPoints[(i + 1) % drawPoints.length].relativeY * imageSize.height"
             style="stroke: rgb(255, 0, 0); stroke-width: 2"
           />
           <circle
             v-for="point in drawPoints"
             :key="point.id"
             @click.right="deletePoint(point.id)"
-            :cx="point.x"
-            :cy="point.y"
+            :cx="point.relativeX * imageSize.width"
+            :cy="point.relativeY * imageSize.height"
             r="10"
             stroke="black"
             stroke-width="1"
@@ -99,7 +99,7 @@ export default {
     const store = useStore();
 
     let imageSize = ref({});
-    let drawPoints = computed(() => store.getters["FileProcessing/videoBBox"]);
+    let drawPoints = computed(() => store.getters["FileProcessing/videoDrawPoints"]);
 
     let duration = ref(0);
     let timestampValue = ref(0);
@@ -124,14 +124,12 @@ export default {
         scaleX: videoWidth / width,
         scaleY: videoHeight / height,
       };
-      console.log(imageSize.value);
     }
 
     function onClick(e) {
       const newPoint = {
-        //X and Y relative to screen size
-        x: e.offsetX,
-        y: e.offsetY,
+        relativeX: e.offsetX / imageSize.value.width,
+        relativeY: e.offsetY / imageSize.value.height,
 
         // X and Y relative to video size
         scaledX: e.offsetX * imageSize.value.scaleX,
@@ -158,6 +156,14 @@ export default {
         return v.toString(16);
       });
     }
+
+    window.addEventListener(
+      "resize",
+      function () {
+        onImageLoaded();
+      },
+      true
+    );
 
     return {
       drawPoints,
