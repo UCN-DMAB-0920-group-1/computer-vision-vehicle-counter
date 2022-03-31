@@ -1,11 +1,15 @@
 import { getCookie} from "@/util/Cookie";
 
 const state = {
-    videoData: [],
+  videoData: [],
+  finishedVideos: [],
 };
 
 const mutations = {
-    setVideoData: (state, videoData) => (state.videoData = videoData),
+  setVideoData: (state, videoData) => (state.videoData = videoData),
+  addFinishedVideo: (state, data) => state.finishedVideos.push(data),
+  removeFinishedVideoNotification: (state, id) =>
+    (state.finishedVideos = state.finishedVideos.filter((item) => item.id != id)),
 };
 const actions = {
     async getVideoData({ commit }, {id}) {
@@ -40,7 +44,8 @@ const actions = {
     },
 };
 const getters = {
-    videoData: (state) => state.videoData,
+  videoData: (state) => state.videoData,
+  finishedVideos: (state) => state.finishedVideos,
 };
 
 export default {

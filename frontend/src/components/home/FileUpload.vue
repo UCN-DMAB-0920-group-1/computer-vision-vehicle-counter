@@ -9,7 +9,6 @@
         type="checkbox"
         v-model="advancedOptions.enabled"
       />
-
       <section class="w-full mt-2 bg-violet-400 rounded-xl p-4 shadow-xl" v-if="advancedOptions.enabled">
         <div
           class="px-1 w-max mx-auto shadow-md text-violet-700 mb-3 text-center font-bold border-1 rounded-lg bg-white"
