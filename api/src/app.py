@@ -1,12 +1,8 @@
-import os
-from time import strftime, strptime
-import uuid
-import threading
-from flask import Flask, jsonify, flash, request, redirect, url_for, send_file, send_from_directory, safe_join, abort
+from src.dao.dao_detections import dao_detections
+from src.routes.detections import Detections
+from src.tracking_module.tracking import Tracking
+from flask import Flask, request
 from flask_cors import CORS
-from api.dao.dao_detections import dao_detections
-from api.routes.detections import Detections
-from api.tracking_module.tracking import Tracking
 
 thread_list = []
 app = Flask(__name__)

@@ -1,5 +1,5 @@
 import numpy as np
-from api.tracking_module import util as module
+from src.tracking_module import util as module
 
 
 def test_uneven_center():

@@ -1,11 +1,11 @@
-from time import sleep
-from api.tracking_module.tracking import Tracking
-from api.dao.dao_detections import dao_detections
-from flask import abort, jsonify, send_from_directory
 import json
-import uuid
 import os
 import threading
+import uuid
+
+from src.dao.dao_detections import dao_detections
+from src.tracking_module.tracking import Tracking
+from flask import abort, jsonify, send_from_directory
 
 
 class Detections:
