@@ -1,21 +1,6 @@
 <template>
-  <div class="flex place-content-center text-grad text-4xl mt-40 gap-1">
-    <p class="duration-200" style="animation: bounce 1s infinite; animation-delay: 0s">Y</p>
-    <p class="duration-200" style="animation: bounce 1s infinite; animation-delay: 0.2s">o</p>
-    <p class="duration-200" style="animation: bounce 1s infinite; animation-delay: 0.1s">u</p>
-    <p class="duration-200 w-3" style="animation: bounce 1s infinite; animation-delay: 0.3s"></p>
-    <p class="duration-200" style="animation: bounce 1s infinite; animation-delay: 0.4s">s</p>
-    <p class="duration-200" style="animation: bounce 1s infinite; animation-delay: 0.5s">h</p>
-    <p class="duration-200" style="animation: bounce 1s infinite; animation-delay: 0.6s">o</p>
-    <p class="duration-200" style="animation: bounce 1s infinite; animation-delay: 0.7s">u</p>
-    <p class="duration-200" style="animation: bounce 1s infinite; animation-delay: 0.8s">l</p>
-    <p class="duration-200" style="animation: bounce 1s infinite; animation-delay: 0.9s">d</p>
-    <p class="duration-200 w-3" style="animation: bounce 1s infinite; animation-delay: 1s"></p>
-    <p class="duration-200" style="animation: bounce 1s infinite; animation-delay: 1.1s">l</p>
-    <p class="duration-200" style="animation: bounce 1s infinite; animation-delay: 1.2s">o</p>
-    <p class="duration-200" style="animation: bounce 1s infinite; animation-delay: 1.3s">g</p>
-    <p class="duration-200" style="animation: bounce 1s infinite; animation-delay: 1.4s">i</p>
-    <p class="duration-200" style="animation: bounce 1s infinite; animation-delay: 1.5s">n</p>
+  <div class="flex place-content-center text-grad text-4xl mt-40 gap-1 animate-bounce">
+    <p>You should login</p>
   </div>
 </template>
 
@@ -31,16 +16,16 @@ p {
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  
 }
-@keyframes bounce {
-  0%,
-  100% {
-    transform: translateY(-25%);
-    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
-  }
-  50% {
-    transform: none;
-    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-  }
-}
+ .bounce {
+        animation-name: bounce;
+        animation-timing-function: ease;
+    }
+    @keyframes bounce {
+        0%   { transform: translateY(0); }
+        50%  { transform: translateY(-100px); }
+        100% { transform: translateY(0); }
+    }
+
 </style>
