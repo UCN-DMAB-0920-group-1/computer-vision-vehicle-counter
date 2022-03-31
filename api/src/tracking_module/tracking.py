@@ -172,7 +172,7 @@ class Tracking:
                    np.squeeze(frame))
 
     def track(self, stream_location):
-
+        track(stream_location, self.roi_area)
         # Ready the stream
         stream_url = get_stream(stream_location)
 
@@ -348,3 +348,117 @@ class Label:
                            label_container.y_max - self.box_margin * 3)
 
         return label_container, label_text
+
+
+def track(content_feed, roi: np.ndarray):
+
+    # Ready the stream
+    stream_url = get_stream(content_feed)
+
+    # Open stream
+    video_stream = cv2.VideoCapture(stream_url)
+
+    # Open file writer
+    out = cv2.VideoWriter(
+        filename=content_feed + "_processed.mkv",
+        fourcc=cv2.VideoWriter_fourcc(*'FMP4'),  # FFMPEG codec
+        fps=video_stream.get(cv2.CAP_PROP_FPS),
+        frameSize=(int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
+                   int(video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT))))
+
+    # Get first frame for masking
+    if (video_stream.isOpened()):
+        ref_frame = video_stream.read()[1]
+
+    # returns (x,y,w,h) of the rect surrounding the ROI
+    b_rect = cv2.boundingRect(roi)
+    b_rect[2] -= 1
+    b_rect[3] -= 1
+    mask, roi_offset = create_mask(ref_frame, roi, b_rect)
+
+    # As long as the video stream is open, run the YOLO model on the frame, and show the output
+    while video_stream.isOpened():
+        ret, frame = video_stream.read()
+
+        # Ensures no error occur, even when there is no more frames to check for
+        if (not ret):
+            break
+
+        # Crop frame to ROI area
+        masked_image = mask_image(frame, mask, b_rect)
+
+        # Detect objects inside the cropped frame
+        # yolo_detections = self.model(frame)
+        yolo_detections = self.model(masked_image)
+
+        # Convert to norfair detections
+        # detections = yolo_detections_to_norfair_detections(yolo_detections, track_points=self.track_points)
+        detections = yolo_detections_to_norfair_detections(
+            yolo_detections,
+            track_points=self.track_points,
+            offset=roi_offset)
+
+        # Update tracker
+        tracked_objects = self.tracker.update(detections=detections)
+
+        self.count_objects(tracked_objects)
+
+        if (self.should_draw):
+            self.draw(frame, detections, tracked_objects)
+            # self.draw(cropped_image, detections, tracked_objects)
+
+        # Write to filesystem
+        out.write(frame)
+
+        # Wait for ESC to be pressed (then exit)
+        if (cv2.waitKey(1) == 27):
+            break
+
+    # Safely disposed any used resources
+    video_stream.release()
+    out.release()
+    # cv2.destroyAllWindows()
+
+    return self.detections
+
+
+def create_mask(image: np.ndarray, roi: np.ndarray, bounding_rect: tuple[int, int, int, int]) -> tuple[np.ndarray, tuple[int, int]]:
+    """Creates mask based on image and ROI
+    """
+    # mask defaulting to black for 3-channel and transparent for 4-channel
+    image_shape = (*[*bounding_rect[3:1:-1], 3], )
+    mask = np.zeros(image_shape, dtype=np.uint8)
+    #mask = np.zeros(image.shape, dtype=np.uint8)
+
+    # automatically find lowest offsets (for later repositioning)
+    min_x = min(point[0] for point in roi)
+    min_y = min(point[1] for point in roi)
+    roi_offset = (min_x, min_y)
+    roi_region = ([point[0] - roi_offset[0], point[1] - roi_offset[1]]
+                  for point in roi)
+    roi_region = np.array([*roi_region])
+
+    # fill the ROI so it doesn't get wiped out when the mask is applied
+    channel_count = image.shape[2]  # channel count on image
+
+    # array of white color, sized to channels count
+    ignore_mask_color = (255, ) * channel_count
+
+    # draw desired area on mask
+    cv2.fillConvexPoly(mask, roi_region, ignore_mask_color)
+    # cv2.drawContours(mask, [roi_corners], -1, ignore_mask_color, -1, cv2.LINE_AA)
+
+    return mask, roi_offset
+
+
+def mask_image(image: np.ndarray, mask: np.ndarray, bounding_rect: tuple[int, int, int, int]) -> np.ndarray:
+    """crops the given frame to fit the mask, based on ROI area
+    """
+    # crop frame to masked area
+    cropped_image = image[bounding_rect[1]:bounding_rect[1] + bounding_rect[3],
+                          bounding_rect[0]:bounding_rect[0] + bounding_rect[2]]
+
+    # apply the mask
+    masked_image = cv2.bitwise_and(cropped_image, mask)
+
+    return masked_image
