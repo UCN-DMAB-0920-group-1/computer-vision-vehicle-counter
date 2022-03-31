@@ -15,7 +15,7 @@
     >
       
     <button
-      @click="logout"
+      @click="navLogout"
       to="/logout"
       v-if="loggedin"
       class="shadow-xl block rounded-full bg-violet-700 p-4 px-8 text-white mx-2 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
@@ -37,13 +37,13 @@
 </template>
 
 <script setup>
-import { useStore } from "vuex";
-import {computed} from "vue";
-const store = useStore();
-let loggedin = computed(() => store.getters["Authorization/Login"]);
+import {isLoggedIn, logout} from "@/store/module/getCookie.js"
+import {ref} from "vue";
+let loggedin = ref(isLoggedIn());
 
-function logout(){
-  store.dispatch("Authorization/logout", "");
+
+function navLogout(){
+  logout()
 }
 
 

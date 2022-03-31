@@ -7,6 +7,11 @@
 
 <script setup>
   import NavBar from "./components/NavBar.vue"
+  import {useStore} from "vuex"
+  const store = useStore();
+
+  store.dispatch("Authorization/checkLoggedin")
+
 </script>
 <style>
 #app {

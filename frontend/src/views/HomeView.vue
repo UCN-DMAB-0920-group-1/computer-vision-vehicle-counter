@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      v-if="loggedin"
+      v-if="loggedIn"
       class="grid grid-cols-1 gap-3 sm:grid-cols-1 max-w-7xl mx-auto duration-300"
     >
       <div class="bg-violet-200 rounded-xl shadow-xl ">
@@ -21,18 +21,36 @@
 import FileUpload from "@/components/home/FileUpload.vue";
 import VideoResult from "@/components/home/VideoResult.vue";
 import LoginText from "@/components/home/LoginText.vue";
+import {getCookie} from "@/store/module/getCookie.js"
 import { useRoute } from 'vue-router'
-import { useStore } from "vuex";
-import {computed} from "vue";
+import {useStore} from "vuex"
+import {computed} from "vue"
 const route = useRoute()
 const store = useStore()
-let loggedin = computed(() => store.getters["Authorization/Login"]);
+
+let loggedIn = computed(() => store.getters["Authorization/Login"])
 
 
-const asyncDispatch = async () =>  {
-  await store.dispatch("Authorization/googleLogin", route.query["code"])
+
+const asyncfetch = async () =>  {
+  if(!loggedIn.value){
+
+    const response = await fetch( process.env.VUE_APP_PROCESSING_ENDPOINT + "/auth?code=" + route.query["code"]
+      , { method: "GET", } )
+
+      const json = await response.json(); 
+
+      if (json["jwt"].length > 0) {
+        document.cookie = "jwt=" + json["jwt"];
+        console.log("i am trying " + document.cookie)
+        document.cookie = "loggedIn=" + "true";
+    } 
+  }
 }
-asyncDispatch()
+asyncfetch();
+
+
+console.log(getCookie("jwt"))
 </script>
 <style scoped>
 #app{
