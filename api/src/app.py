@@ -23,7 +23,6 @@ app.secret_key = environment["SECRET_KEY"]
 MAX_THREADS = environment["APP_SETTINGS"]["MAX_THREADS"]
 UPLOAD_FOLDER = environment["APP_SETTINGS"]["UPLOAD_FOLDER"]
 ALLOWED_EXTENSIONS = set(environment["APP_SETTINGS"]["ALLOWED_EXTENSIONS"])
-# {'mp4'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 cors = CORS(app, resources={r"*": {"origins": "*"}})
