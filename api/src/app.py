@@ -18,21 +18,18 @@ from routes.Auth import Authenticator
 with open("api/conf.json", "r") as config:
     environment = json.load(config)
 
-
-thread_list = []
 app = Flask(__name__)
 app.secret_key = environment["SECRET_KEY"]
-cors = CORS(app, resources={r"*": {"origins": "*"}})
-
-UPLOAD_FOLDER = 'api/storage/'  # check if working, this changes often!
-ALLOWED_EXTENSIONS = {'mp4'}
-MAX_THREADS = 4
-
+MAX_THREADS = environment["APP_SETTINGS"]["MAX_THREADS"]
+UPLOAD_FOLDER = environment["APP_SETTINGS"]["UPLOAD_FOLDER"]
+ALLOWED_EXTENSIONS = set(environment["APP_SETTINGS"]["ALLOWED_EXTENSIONS"])
+# {'mp4'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+cors = CORS(app, resources={r"*": {"origins": "*"}})
 # detections routes init
-_detections = Detections(thread_list, UPLOAD_FOLDER, Tracking, dao_detections,
-                         MAX_THREADS)
+_detections = Detections(UPLOAD_FOLDER, Tracking, dao_detections,
+                         MAX_THREADS, ALLOWED_EXTENSIONS)
 
 _authenticator = Authenticator(environment["CLIENT_ID"], app.secret_key,
                                environment["JWT_algorithm"],
@@ -75,7 +72,6 @@ def login():
     res = _authenticator.authenticate_google(code)
     print(res)
     return jsonify({"jwt": res})
-
 
 ######### METHODS #########
 
