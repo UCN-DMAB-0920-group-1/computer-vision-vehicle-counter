@@ -1,12 +1,12 @@
 import { isLoggedIn, logoutCookie} from "@/util/Cookie";
 
 const state = {
-    login: false,
+    loggedIn: false,
     jwt: "",
 };
 
 const mutations = {
-    setLoginData: (state, login) => (state.login = login),
+    setLoginData: (state, login) => (state.loggedIn = login),
     setJwtData: (state, jwt) => (state.jwt = jwt),
 };
 const actions = {
@@ -33,7 +33,7 @@ const actions = {
     },
 };
 const getters = {
-    loginState: (state) => state.login,
+    loginState: (state) => state.loggedIn,
     jwt: (state) => state.jwt,
 };
 
