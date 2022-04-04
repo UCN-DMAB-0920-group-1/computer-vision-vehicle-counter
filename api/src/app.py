@@ -14,26 +14,18 @@ from routes.Auth import Authenticator
 with open("api/conf.json", "r") as config:
     environment = json.load(config)
 
-thread_list = []
 app = Flask(__name__)
 app.secret_key = environment["SECRET_KEY"]
-
-
-cors = CORS(app, resources={r"*": {"origins": "*"}})
-
-UPLOAD_FOLDER = 'api/storage/'  # check if working, this changes often!
-ALLOWED_EXTENSIONS = {'mp4'}
-MAX_THREADS = 4
-
+MAX_THREADS = environment["APP_SETTINGS"]["MAX_THREADS"]
+UPLOAD_FOLDER = environment["APP_SETTINGS"]["UPLOAD_FOLDER"]
+ALLOWED_EXTENSIONS = set(environment["APP_SETTINGS"]["ALLOWED_EXTENSIONS"])
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+cors = CORS(app, resources={r"*": {"origins": "*"}})
 # detections routes init
+_detections = Detections(UPLOAD_FOLDER, Tracking, dao_detections,
+                         MAX_THREADS, ALLOWED_EXTENSIONS)
 
-
-_detections = Detections(
-    thread_list, UPLOAD_FOLDER, Tracking, dao_detections,
-    MAX_THREADS,
-)
 
 _authenticator = Authenticator(
     environment["CLIENT_ID"], app.secret_key,
@@ -93,15 +85,4 @@ def pusher_auth():
     if(res == 401):
         return abort(401, "unauthenticated")
 
-    return res
-
-
-######### METHODS #########
-
-
-def checkPermission(request):
-    res = False
-    if "Authorization" in request.headers:
-        # decoes JWT and looks at payload value "valid" return true if succes and false if not
-        res = _authenticator.authenticate_JWT(request.headers["Authorization"])
     return res
