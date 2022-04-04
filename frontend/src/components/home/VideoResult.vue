@@ -29,7 +29,6 @@
 </template>
 
 <script>
-import Pusher from "pusher-js";
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import AlertBox from "../core/AlertBox.vue";
@@ -43,19 +42,24 @@ export default {
     const error = ref("");
 
     const videoIds = computed(() => store.getters["FileProcessing/videoIds"]);
+    const pusher = computed(() => store.getters["Authorization/pusherSession"]);
 
-    Pusher.logToConsole = false;
-    const pusher = new Pusher(process.env.VUE_APP_PUSHER_KEY, { cluster: "eu" });
-    var channel = pusher.subscribe("video-channel");
-    channel.bind("video-event", function (data) {
-      console.log(data);
-      if (data.status == "Finished") {
-        store.commit("Detections/addFinishedVideo", data);
-        store.dispatch("Detections/getVideoData", {
-          id: data.id,
-        });
-      }
-    });
+    if (pusher.value != null) {
+      //TODO: Inject pusher from Authorization module
+      //TODO: Get UUID from User (jwt)
+      const uuid = "1234";
+
+      var channel = pusher.value.subscribe(`private-video-channel-${uuid}`);
+      channel.bind(`video-event`, function (data) {
+        if (data.status == "Finished") {
+          store.commit("Detections/addFinishedVideo", data);
+          store.dispatch("Detections/getVideoData", {
+            id: data.id,
+          });
+        }
+      });
+    }
+
     async function downloadNewestData() {
       try {
         loading.value = true;

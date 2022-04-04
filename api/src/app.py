@@ -9,7 +9,6 @@ from flask_cors import CORS
 from dao.dao_detections import dao_detections
 from routes.Detections import Detections
 from tracking_module.tracking import Tracking
-from pusher_socket import PusherSocket
 
 
 from routes.Auth import Authenticator
@@ -22,6 +21,8 @@ with open("api/conf.json", "r") as config:
 thread_list = []
 app = Flask(__name__)
 app.secret_key = environment["SECRET_KEY"]
+
+
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 
 UPLOAD_FOLDER = 'api/storage/'  # check if working, this changes often!
@@ -31,12 +32,17 @@ MAX_THREADS = 4
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # detections routes init
-_detections = Detections(thread_list, UPLOAD_FOLDER, Tracking, dao_detections,
-                         MAX_THREADS)
+_detections = Detections(
+    thread_list, UPLOAD_FOLDER, Tracking, dao_detections,
+    MAX_THREADS
+)
 
-_authenticator = Authenticator(environment["CLIENT_ID"], app.secret_key,
-                               environment["JWT_algorithm"],
-                               environment["CLIENT_SECRET"])
+_authenticator = Authenticator(
+    environment["CLIENT_ID"], app.secret_key,
+    environment["JWT_algorithm"],
+    environment["CLIENT_SECRET"]
+)
+
 ############# - ROUTES - #############
 
 
@@ -61,13 +67,6 @@ def get_count(id):
         id) if permitted else "Not permitted to access this resource"
 
 
-@app.route('/pusher/<string:toSend>', methods=['GET'])
-def pusher_test(toSend):
-    socket = PusherSocket("my-channel")
-    socket.send_notification("my-event", {"message": "123321"})
-    return "Send!"
-
-
 @app.route("/auth", methods=["GET"])
 def login():
     code = request.args.get('code')
@@ -75,6 +74,15 @@ def login():
     res = _authenticator.authenticate_google(code)
     print(res)
     return jsonify({"jwt": res})
+
+
+@app.route('/auth/pusher', methods=['POST'])
+def pusher_auth():
+    data = request.json
+    return _authenticator.authenticate_pusher(
+        data["channel_name"],
+        data["socket_id"],
+    )
 
 
 ######### METHODS #########

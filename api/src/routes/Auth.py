@@ -2,6 +2,7 @@ import jwt
 from google.oauth2 import id_token
 from google.auth.transport import requests as googleRequests
 import requests
+from pusher_socket import PusherSocket
 
 
 class Authenticator:
@@ -60,3 +61,10 @@ class Authenticator:
         except Exception as e:
             print("JWT token was not valid: " + str(e))
             return False
+
+    def authenticate_pusher(self, channel, socket_id):
+        pusher = PusherSocket(channel)
+        return pusher.pusher_client.authenticate(
+            channel=channel,
+            socket_id=socket_id,
+        )

@@ -12,6 +12,7 @@ import { useStore } from "vuex";
 const store = useStore();
 
 store.dispatch("Authorization/checkLoggedin");
+store.dispatch("Authorization/authenticatePusher");
 </script>
 <style>
 #app {
