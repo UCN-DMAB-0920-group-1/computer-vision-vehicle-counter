@@ -2,22 +2,16 @@
   <div class="">
     <NavBar></NavBar>
     <router-view></router-view>
-        
-    <AlertBox v-for="video in finishedVideos" :key="video.id" :video="video"></AlertBox>
   </div>
 </template>
 
-<script>
-
+<script setup>
 import NavBar from "./components/core/NavBar.vue";
-import AlertBox from "./components/core/AlertBox.vue";
-export default {
-  components: { NavBar, AlertBox },
-  setup() {
+import { useStore } from "vuex";
 
+const store = useStore();
 
-  },
-};
+store.dispatch("Authorization/checkLoggedin");
 </script>
 <style>
 #app {

@@ -19,22 +19,20 @@ class Tracking:
     """class for tracking objects via a videofeed
     """
 
-    def __init__(
-        self,
-        should_draw: bool = True,
-        save_file: bool = True,
-        device: str = "cuda",  # Device (CPU or GPU)
-        model_path: str = "yolov5m",  # YOLO version
-        custom_model: bool = False,
-        # How confidence should YOLO be, before labeling
-        confidence_threshold: float = 0.6,
-        track_points: str = "bbox",  # Can be centroid or bbox
-        label_offset:
-        int = 50,  # Offset from center point to classification label
-        max_distance_between_points: int = 30,
-        # TOP LEFT, BOTTOM LEFT, BOTTOM RIGHT, TOP RIGHT,
-        roi_area: np.ndarray[int, int] = [[0, 250], [520, 90], [640, 90],
-                                          [640, 719], [0, 719]]):
+    def __init__(self,
+                 should_draw: bool = True,
+                 should_save: bool = True,
+                 device: str = "cuda",  # Device (CPU or GPU)
+                 model_path: str = "yolov5m",  # YOLO version
+                 custom_model: bool = False,
+                 # How confidence should YOLO be, before labeling
+                 confidence_threshold: float = 0.6,
+                 track_points: str = "bbox",  # Can be centroid or bbox
+                 label_offset:
+                 int = 50,  # Offset from center point to classification label
+                 max_distance_between_points: int = 30,
+                 # TOP LEFT, BOTTOM LEFT, BOTTOM RIGHT, TOP RIGHT
+                 roi_area: np.ndarray[int, int] = None):
 
         # Load yolo model
         if (custom_model):
@@ -46,17 +44,17 @@ class Tracking:
             # self.model = torch.load('yolov5m.pt', map_location=torch.device(
             #     f"{'cuda' if torch.cuda.is_available() else 'cpu'}"))
         else:
-            self.model = torch.hub.load(  # downloads model to root folder, fix somehow
-                repo_or_dir="ultralytics/yolov5",
-                model=model_path,
-                force_reload=False,
-                skip_validation=True)
+            # downloads model to root folder, fix somehow
+            self.model = torch.hub.load(repo_or_dir="ultralytics/yolov5",
+                                        model=model_path,
+                                        force_reload=False,
+                                        skip_validation=True)
 
         self.model.conf = confidence_threshold
         self.model.iou = 0.45
 
         self.inside_roi = []  # Int array
-        self.detections = {"car": 0}
+        self.detections = {}
 
         self.tracker = Tracker(
             distance_function=euclidean_distance,
@@ -65,9 +63,10 @@ class Tracking:
 
         self.track_points = track_points
         self.label_offset = label_offset
-        self.roi_area = np.array(roi_area, dtype=np.int32)
+        self.roi_area = (np.array(roi_area, dtype=np.int32)
+                         if roi_area != None else None)
         self.should_draw = should_draw
-        self.save_file = save_file
+        self.should_save = should_save
 
     def draw_label(self,
                    frame,
@@ -144,7 +143,8 @@ class Tracking:
 
         # Draw vehicle counter
 
-        total_vehicles = reduce(lambda a, b: a + b, self.detections.values())
+        total_vehicles = reduce(
+            lambda a, b: a + b, self.detections.values()) if len(self.detections) > 0 else 0
 
         cv2.putText(
             img=frame,
@@ -168,7 +168,10 @@ class Tracking:
             lineType=cv2.LINE_AA,
         )
 
-    def track(self, stream_location):
+    def track(self, stream_location: str):
+        if(len(self.roi_area) <= 2):
+            raise Exception("roi needs more than 2 points")
+
         # Ready the stream
         stream_url = get_stream(stream_location)
 
@@ -178,17 +181,24 @@ class Tracking:
         # Get frame count for stream
         stream_frame_count = video_stream.get(cv2.CAP_PROP_FRAME_COUNT)
 
+        video_dimension = (int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
+                           int(video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+
         # Open file writer
         out = cv2.VideoWriter(
             filename=stream_location + "_processed.mkv",
             fourcc=cv2.VideoWriter_fourcc(*'FMP4'),  # FFMPEG codec
             fps=video_stream.get(cv2.CAP_PROP_FPS),
-            frameSize=(int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                       int(video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT))))
+            frameSize=video_dimension)
 
         # Get first frame for masking
         if (video_stream.isOpened()):
             ref_frame = video_stream.read()[1]
+
+        if(self.roi_area is None):
+            self.roi_area = np.array(
+                (0, 0, video_dimension[0], video_dimension[1]))
+
         mask, roi_offset = self.mask_create(ref_frame)
 
         bar = Bar.IncrementalBar('Analyzing', max=stream_frame_count - 1,
@@ -205,32 +215,35 @@ class Tracking:
             # Crop frame to ROI area
             cropped_image = self.crop_frame(frame, mask)
 
-            # Detect objects inside the cropped frame
-            # yolo_detections = self.model(frame)
-            yolo_detections = self.model(cropped_image)
+            try:
+                # Detect objects inside the cropped frame
+                # yolo_detections = self.model(frame)
+                yolo_detections = self.model(cropped_image)
+            except Exception as e:
+                print(str(e))
+                break
 
             # Convert to norfair detections
             # detections = yolo_detections_to_norfair_detections(yolo_detections, track_points=self.track_points)
-            detections = yolo_detections_to_norfair_detections(
-                yolo_detections,
-                track_points=self.track_points,
-                offset=roi_offset)
+            detections = yolo_detections_to_norfair_detections(yolo_detections,
+                                                               track_points=self.track_points,
+                                                               offset=roi_offset)
 
             # Update tracker
             tracked_objects = self.tracker.update(detections=detections)
 
             self.count_objects(tracked_objects)
 
-            self.draw(frame, detections, tracked_objects)
+
+# Write to filesystem
+            if(self.should_save):
+                out.write(frame)
+                self.draw(frame, detections, tracked_objects)
 
             if (self.should_draw):
                 # Draw the model classifications on a gui
                 cv2.imshow("REALTIME! " + threading.currentThread().getName(),
                            np.squeeze(frame))
-
-            # Write to filesystem
-            if(self.save_file):
-                out.write(frame)
 
             bar.next()
 
@@ -257,7 +270,8 @@ class Tracking:
             if not obj.live_points.any():
                 continue
 
-            track_position = center_pos(obj.estimate[obj.live_points])
+            # center_pos(obj.estimate[obj.live_points])
+            track_position = center_pos(obj.last_detection.points)
             # Is this object inside ROI?
             is_inside_roi = cv2.pointPolygonTest(
                 np.array(self.roi_area, np.int32), track_position, False)
@@ -273,7 +287,7 @@ class Tracking:
             else:
                 if obj.id in self.inside_roi:
                     self.inside_roi.remove(obj.id)
-            # print(self.detections)
+           # print(self.detections)
 
     def mask_create(self, image: np.ndarray):
         """Creates mask based on image and ROI

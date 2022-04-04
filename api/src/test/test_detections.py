@@ -40,7 +40,7 @@ def test_get_video():
         [], upload_folder, None, None, 1)
 
     # Act
-    with patch('api.routes.detections.send_from_directory', new=mock_module_flask):
+    with patch('src.routes.detections.send_from_directory', new=mock_module_flask):
         with app.app_context():
             response = detection.get_video('test')
 
@@ -61,7 +61,7 @@ def test_detection_save_file():
     mock_file.filename = 'test.mp4'
 
     # Act
-    with patch('api.routes.detections.os', new=mock_module_os):
+    with patch('src.routes.detections.os', new=mock_module_os):
         with app.app_context():
             response = detection.save_video_file(
                 upload_folder + mock_file.filename, mock_file)
@@ -86,7 +86,7 @@ def test_detection_save_file_existing_path():
     mock_module_os.mkdir.side_effect = FileExistsError()
 
     # Act
-    with patch('api.routes.detections.os', new=mock_module_os):
+    with patch('src.routes.detections.os', new=mock_module_os):
         with app.app_context():
             response = detection.save_video_file(
                 upload_folder + mock_file.filename, mock_file)

@@ -108,7 +108,7 @@
       </button>
       <button
         v-else
-        class="shadow-xl block w-full rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
+        class="shadow-xl block mx-auto px-5 rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
         @click="onUploadFile"
       >
         Upload
@@ -132,7 +132,6 @@ export default {
     let error = ref("");
     let loading = ref(false);
     let videoUrl = computed(() => store.getters["FileProcessing/videoUrl"]);
-    let JWT = computed(() => store.getters["Authorization/Jwt"]);
 
 
     let advancedOptions = computed(() => store.getters["FileProcessing/advancedOptions"]);
@@ -170,9 +169,8 @@ export default {
 
         const id = await store.dispatch("FileProcessing/uploadVideo", {
           file: file.value,
-          jwt: JWT.value
         });
-        await store.dispatch("Detections/getVideoData", {id:id, jwt:JWT.value})
+        await store.dispatch("Detections/getVideoData", {id:id})
       } catch (e) {
         error.value = e;
       } finally {
@@ -191,7 +189,6 @@ export default {
       advancedOptions,
       bboxCoordinates,
       videoUrl,
-      JWT,
     };
   },
 };

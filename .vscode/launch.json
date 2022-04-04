@@ -17,7 +17,7 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "api/arc/app.py",
+                "FLASK_APP": "api/src/app.py",
                 "FLASK_ENV": "development",
                 "FLASK_DEBUG": "1"
             },
@@ -33,7 +33,16 @@
             "name": "Python: ML tracker",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/api/src/main.py",
+            "program": "${workspaceFolder}/api/src/ml_tracker.py",
+            "console": "integratedTerminal",
+            "args": [],
+            "justMyCode": false
+        },
+        {
+            "name": "Python: Analysis",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/api/src/analysis.py",
             "console": "integratedTerminal",
             "args": [],
             "justMyCode": true

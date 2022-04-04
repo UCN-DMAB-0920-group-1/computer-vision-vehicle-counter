@@ -7,7 +7,7 @@ from src.dao.dao_detections import dao_detections
 from src.tracking_module.tracking import Tracking
 from flask import abort, jsonify, send_from_directory
 
-from pusher_socket import PusherSocket
+from src.pusher_socket import PusherSocket
 
 
 class Detections:

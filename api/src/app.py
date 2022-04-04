@@ -1,10 +1,10 @@
 import json
 
+from src.dao.dao_detections import dao_detections
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from pusher_socket import PusherSocket
-from routes.Auth import Authenticator
-from src.dao.dao_detections import dao_detections
+from src.pusher_socket import PusherSocket
+from src.routes.Auth import Authenticator
 from src.routes.detections import Detections
 from src.tracking_module.tracking import Tracking
 
