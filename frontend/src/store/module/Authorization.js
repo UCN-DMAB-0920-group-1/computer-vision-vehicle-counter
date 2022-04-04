@@ -10,7 +10,18 @@ const mutations = {
     setJwtData: (state, jwt) => (state.jwt = jwt),
 };
 const actions = {
-    login() {
+    async login({ dispatch},{routeCode}) {
+        const response = await fetch( process.env.VUE_APP_PROCESSING_ENDPOINT + "/auth?code=" + routeCode
+      , { method: "GET", } )
+
+      const json = await response.json(); 
+
+      if (json["jwt"].length > 0) {
+        document.cookie = "jwt=" + json["jwt"];
+        document.cookie = "loggedIn=" + "true";
+        }
+    
+        dispatch("checkLoggedin")
     },
     logout({dispatch}) {
         logoutCookie();
