@@ -1,6 +1,8 @@
 import json
+from os import abort
+import uuid
 from tracking_module.util import get_payload_from_jwt
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, abort, request
 from flask_cors import CORS
 from dao.dao_detections import dao_detections
 from routes.Detections import Detections
@@ -24,9 +26,13 @@ cors = CORS(app, resources={r"*": {"origins": "*"}})
 _detections = Detections(UPLOAD_FOLDER, Tracking, dao_detections, MAX_THREADS,
                          ALLOWED_EXTENSIONS)
 
-_authenticator = Authenticator(environment["CLIENT_ID"], app.secret_key,
-                               environment["JWT_algorithm"],
-                               environment["CLIENT_SECRET"])
+
+_authenticator = Authenticator(
+    environment["CLIENT_ID"], app.secret_key,
+    environment["JWT_algorithm"],
+    environment["CLIENT_SECRET"]
+)
+
 ############# - ROUTES - #############
 
 
@@ -63,13 +69,6 @@ def get_user_videos():
     pass
 
 
-@app.route('/pusher/<string:toSend>', methods=['GET'])
-def pusher_test(toSend):
-    socket = PusherSocket("my-channel")
-    socket.send_notification("my-event", {"message": "123321"})
-    return "Send!"
-
-
 @app.route("/auth", methods=["GET"])
 def login():
     code = request.args.get('code')
@@ -77,3 +76,13 @@ def login():
     res = _authenticator.authenticate_google(code)
     print(res)
     return jsonify({"jwt": res})
+
+
+@app.route('/auth/pusher', methods=['POST'])
+def pusher_auth():
+    res = _authenticator.authenticate_pusher(request)
+
+    if(res == 401):
+        return abort(401, "unauthenticated")
+
+    return res

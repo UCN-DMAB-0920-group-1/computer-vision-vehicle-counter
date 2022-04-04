@@ -45,7 +45,7 @@ class Detections:
         # Add pending task to database
         self.dao_detections.insert_one_task(id, "Pending", UUID)
 
-        socket = PusherSocket("video-channel")
+        socket = PusherSocket("private-video-channel-" + UUID)
         socket.send_notification("video-event", {
             "status": "Pending",
             "id": id
@@ -54,7 +54,7 @@ class Detections:
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
 
-            task = Task(id, video_path, options, bbox)
+            task = Task(id, video_path, options, bbox, UUID)
 
             self.task_queue.append(task)
             return abort(
@@ -62,7 +62,7 @@ class Detections:
                 'Task added to queue, check result again latorz. you are number:'
                 + str(len(self.task_queue)))
         try:
-            self.startVideoTracker(id, video_path, options, bbox)
+            self.startVideoTracker(id, video_path, options, bbox, UUID)
         except Exception as e:
             print("Exception in uploading video: " + str(e))
             return abort(
@@ -85,16 +85,16 @@ class Detections:
 
     ############# - METHODS - #############
 
-    def startVideoTracker(self, id, video_path, options: map, bbox):
+    def startVideoTracker(self, id, video_path, options: map, bbox, UUID):
         thread = threading.Thread(target=self.threadVideoTracker,
-                                  args=(id, video_path, options, bbox),
+                                  args=(id, video_path, options, bbox, UUID),
                                   daemon=True)
         self.thread_list.append(thread)
         thread.start()
         print("Thread Started: " + thread.getName())
         return "Thread started"
 
-    def threadVideoTracker(self, id, video_path, options: map, bbox):
+    def threadVideoTracker(self, id, video_path, options: map, bbox, UUID):
         if options['enabled'] == 'false':
             bbox = [[0, 0], [1920, 0], [1920, 1080], [0, 1080]]
             confidence = 0.6
@@ -115,7 +115,7 @@ class Detections:
             self.dao_detections.update_one_task(id, detections)
 
             print("OUTPUTTED TO CONSOLE!")
-            socket = PusherSocket("video-channel")
+            socket = PusherSocket("private-video-channel-" + UUID)
             socket.send_notification("video-event", {
                 "status": "Finished",
                 "id": id,
@@ -185,12 +185,13 @@ class Detections:
 
     def checkQueue(self):
         print("Checking task list...")
-        if self.checkThreadCount() < self.MAX_THREADS and len(
+
+        if self.checkThreadCount() < self.MAX_THREADS + 1 and len(
                 self.task_queue) > 0:
             print("Starting new task")
             task = self.task_queue.pop(0)
             self.startVideoTracker(task.id, task.video_path, task.options,
-                                   task.bbox)
+                                   task.bbox, task.UUID)
         return len(self.task_queue)
 
 
@@ -198,9 +199,9 @@ class Detections:
 
 
 class Task:
-
-    def __init__(self, id: str, video_path: str, options: map, bbox):
+    def __init__(self, id: str, video_path: str, options: map, bbox, UUID: str):
         self.id = id
         self.options = options
         self.video_path = video_path
         self.bbox = bbox
+        self.UUID = UUID
