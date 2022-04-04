@@ -14,10 +14,9 @@
         <div class="bg-violet-200 rounded-xl p-3">
           <div class="bg-violet-300 rounded-lg p-3 shadow-md">
             <h1 class="font-bold text-lg">Video result ({{ videoIds.length }})</h1>
-            <p class="text-left" v-for="entity in Object.entries(videoData)" :key="entity[0]">
-              <span class="font-semibold">{{ entity[0] }}:</span>: {{ entity[1] }}
-            </p>
+            <DetectionResults :video="videoData"></DetectionResults>
           </div>
+
           <!-- <p>Total vehicles: {{ totalCars }}</p> -->
 
           <button
@@ -33,13 +32,14 @@
 </template>
 
 <script>
+import DetectionResults from "@/components/core/detectionResults.vue";
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import AlertBox from "../core/AlertBox.vue";
 import { getPayloadValue } from "@/util/Cookie";
 
 export default {
-  components: { AlertBox },
+  components: { AlertBox, DetectionResults },
   setup() {
     const store = useStore();
     const vehicleTypes = ref([]);

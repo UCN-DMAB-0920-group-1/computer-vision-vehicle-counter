@@ -23,8 +23,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 # detections routes init
-_detections = Detections(UPLOAD_FOLDER, Tracking, dao_detections,
-                         MAX_THREADS, ALLOWED_EXTENSIONS)
+_detections = Detections(UPLOAD_FOLDER, Tracking, dao_detections, MAX_THREADS,
+                         ALLOWED_EXTENSIONS)
 
 
 _authenticator = Authenticator(
