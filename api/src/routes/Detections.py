@@ -23,7 +23,7 @@ class Detections:
         self.Tracking = Tracking
         self.dao_detections = dao_detections
 
-    def upload_video(self, request):
+    def upload_video(self, request, UUID):
         self.validate_video_post(request)
         file = request.files['file']
 
@@ -43,11 +43,13 @@ class Detections:
         file = request.files['file']
         self.save_video_file(video_path, file)
         # Add pending task to database
-        self.dao_detections.insert_one_task(id, "Pending")
+        self.dao_detections.insert_one_task(id, "Pending", UUID)
 
         socket = PusherSocket("video-channel")
-        socket.send_notification(
-            "video-event", {"status": "Pending", "id": id})
+        socket.send_notification("video-event", {
+            "status": "Pending",
+            "id": id
+        })
 
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
@@ -75,6 +77,10 @@ class Detections:
 
     def get_count(self, id):
         res = self.dao_detections.find_one(id)
+        return jsonify(res)
+
+    def get_user_videos(self, UUID):
+        res = self.dao_detections.find(key="UUID", value=UUID)
         return jsonify(res)
 
     ############# - METHODS - #############
@@ -110,9 +116,11 @@ class Detections:
 
             print("OUTPUTTED TO CONSOLE!")
             socket = PusherSocket("video-channel")
-            socket.send_notification(
-                "video-event", {"status": "Finished", "id": id, "detections": detections
-                                })
+            socket.send_notification("video-event", {
+                "status": "Finished",
+                "id": id,
+                "detections": detections
+            })
 
         except Exception as e:
             print("EXCEPTION in thread: " + str(e))
