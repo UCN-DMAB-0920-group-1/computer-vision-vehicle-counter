@@ -3,7 +3,7 @@ from src.tracking_module.tracking import Tracking
 import cv2
 
 
-def test_tracking():
+def test_masking():
     # Assign
     image_path = 'api/res/highway_1.jpg'
     tracker = Tracking(roi_area=[[0, 0], [1920, 0], [1920, 1080], [0, 1080]])
@@ -18,7 +18,7 @@ def test_tracking():
     assert len(offset) == 2
 
 
-def test_track_small_roi():
+def test_track_small_mask():
     image_path = 'api/res/highway_1.jpg'
     tracker = Tracking(roi_area=[[0, 0], [1, 0], [1, 1], [0, 1]])
     mock_module_opencv = MagicMock()
