@@ -1,4 +1,5 @@
-from tracking_module import tracking, streams
+import streams
+import tracking
 
 if __name__ == '__main__':
     tracker = tracking.Tracking(should_draw=True,
