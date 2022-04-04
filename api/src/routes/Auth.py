@@ -60,3 +60,10 @@ class Authenticator:
         except Exception as e:
             print("JWT token was not valid: " + str(e))
             return False
+
+    def checkPermission(self, request):
+        res = False
+        if "Authorization" in request.headers:
+            # decoes JWT and looks at payload value "valid" return true if succes and false if not
+            res = self.authenticate_JWT(request.headers["Authorization"])
+        return res

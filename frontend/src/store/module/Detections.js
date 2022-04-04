@@ -1,11 +1,13 @@
-import { getCookie} from "@/util/Cookie";
+import { getCookie, getPayloadValue} from "@/util/Cookie";
 
 const state = {
-  videoData: [],
-  finishedVideos: [],
+    videoData: [],
+    finishedVideos: [],
+    userVideos:[],
 };
 
 const mutations = {
+  setUserVideos:(state, userVideos) => (state.userVideos = userVideos),
   setVideoData: (state, videoData) => (state.videoData = videoData),
   addFinishedVideo: (state, data) => state.finishedVideos.push(data),
   removeFinishedVideoNotification: (state, id) =>
@@ -25,13 +27,13 @@ const actions = {
         commit("setVideoData", json);
     },
     async downloadVideo({ commit }, file) {
-        const fd = new FormData();
-        fd.append("file", file);
+        const formData = new FormData();
+        formData.append("file", file);
 
         const response = await fetch(
             process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection", {
                 method: "POST",
-                body: fd,
+                body: formData,
                 headers: { "Authorization": getCookie("jwt") },
 
             }
@@ -42,10 +44,24 @@ const actions = {
 
         commit("setVideoIds", state.videoIds);
     },
+    async downloadUserDetections({ commit }) {
+        const UUID = getPayloadValue("UUID")
+        const response = await fetch(
+            process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection/user?UUID=" + UUID, {
+                method: "GET",
+                headers: { "Authorization": getCookie("jwt") },
+
+            }
+        );
+        const json = await response.json();
+        console.log(json);
+        commit("setUserVideos", json);
+    },
 };
 const getters = {
   videoData: (state) => state.videoData,
   finishedVideos: (state) => state.finishedVideos,
+  userVideos: (state) => state.userVideos
 };
 
 export default {

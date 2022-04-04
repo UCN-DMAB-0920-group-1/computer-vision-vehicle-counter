@@ -1,3 +1,6 @@
+import jwt_decode from "jwt-decode";
+
+
 export function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
@@ -13,3 +16,10 @@ export function logoutCookie() {
     document.cookie = "loggedIn=; expires=Thu, 01 Jan 1970 00: 00: 00 UTC; path = /;"
 }
 
+export function getPayloadValue(key) {
+    let token = getCookie("jwt");
+    if (token.length > 0) {
+        let json = jwt_decode(getCookie("jwt"));
+        return json[key];
+    } else return "no token found";
+}

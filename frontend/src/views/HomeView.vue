@@ -34,18 +34,10 @@ let loggedIn = computed(() => store.getters["Authorization/loginState"])
 
 const asyncfetch = async () =>  {
   if(!loggedIn.value){
+   const routeCode = route.query["code"]
+   store.dispatch("Authorization/login",{routeCode}) 
     
-    const response = await fetch( process.env.VUE_APP_PROCESSING_ENDPOINT + "/auth?code=" + route.query["code"]
-      , { method: "GET", } )
-
-      const json = await response.json(); 
-
-      if (json["jwt"].length > 0) {
-        document.cookie = "jwt=" + json["jwt"];
-        document.cookie = "loggedIn=" + "true";
-    } 
   }
-        store.dispatch("Authorization/checkLoggedin")
 }
 asyncfetch();
 
