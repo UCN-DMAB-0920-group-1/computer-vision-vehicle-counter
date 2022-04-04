@@ -7,6 +7,8 @@ import uuid
 import os
 import threading
 
+from pusher_socket import PusherSocket
+
 
 class Detections:
 
@@ -42,6 +44,10 @@ class Detections:
         self.save_video_file(video_path, file)
         # Add pending task to database
         self.dao_detections.insert_one_task(id, "Pending")
+
+        socket = PusherSocket("video-channel")
+        socket.send_notification(
+            "video-event", {"status": "Pending", "id": id})
 
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
@@ -102,6 +108,12 @@ class Detections:
             detections = tracker.track(video_path)
             self.dao_detections.update_one_task(id, detections)
 
+            print("OUTPUTTED TO CONSOLE!")
+            socket = PusherSocket("video-channel")
+            socket.send_notification(
+                "video-event", {"status": "Finished", "id": id, "detections": detections
+                                })
+
         except Exception as e:
             print("EXCEPTION in thread: " + str(e))
 
@@ -139,7 +151,7 @@ class Detections:
         if not file and not self.allowed_file(file.filename):
             return abort(403, 'File is not allowed to be uploaded')
 
-        if request.content_length > 30000000:
+        if request.content_length > 1000000000:
             return abort(403, 'File is too large - try a smaller video')
 
     def create_options(self, request):

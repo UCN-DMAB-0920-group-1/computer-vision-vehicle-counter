@@ -1,54 +1,67 @@
 <template>
   <div>
-    <section v-if="loading">
-      <div class="flex justify-center items-center">
-        <div
-          class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full"
-          role="status"
-        >
-          <span class="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    </section>
-    <section>
-      <div class="bg-violet-200 rounded-xl p-3">
-        <h1 class="font-bold text-lg">Video result ({{ videoIds.length }})</h1>
-        <p v-for="entity in Object.entries(videoData)" :key="entity[0]">
-          {{ entity[0] }}: {{ entity[1] }}
-        </p>
-        <!-- <p>Total vehicles: {{ totalCars }}</p> -->
+    <AlertBox v-for="video in finishedVideos" :key="video.id" :video="video"></AlertBox>
 
-        <button
-          class="shadow-xl block w-full rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
-          @click="downloadNewestData"
-        >
-          Download newest data
-        </button>
-      </div>
-    </section>
+    <div>
+      <section v-if="loading">
+        <div class="flex justify-center items-center">
+          <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="bg-violet-200 rounded-xl p-3">
+          <h1 class="font-bold text-lg">Video result ({{ videoIds.length }})</h1>
+          <p v-for="entity in Object.entries(videoData)" :key="entity[0]">{{ entity[0] }}: {{ entity[1] }}</p>
+          <!-- <p>Total vehicles: {{ totalCars }}</p> -->
+
+          <button
+            class="mx-auto px-3 shadow-xl block rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
+            @click="downloadNewestData"
+          >
+            Download newest data
+          </button>
+        </div>
+      </section>
+    </div>
   </div>
-  
 </template>
 
 <script>
+import Pusher from "pusher-js";
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
+import AlertBox from "../core/AlertBox.vue";
 
 export default {
+  components: { AlertBox },
   setup() {
     const store = useStore();
-
     const vehicleTypes = ref([]);
     const loading = ref(false);
     const error = ref("");
-
+    let JWT = computed(() => store.getters["Authorization/Jwt"]);
     const videoIds = computed(() => store.getters["FileProcessing/videoIds"]);
 
+    Pusher.logToConsole = false;
+    const pusher = new Pusher(process.env.VUE_APP_PUSHER_KEY, { cluster: "eu" });
+    var channel = pusher.subscribe("video-channel");
+    channel.bind("video-event", function (data) {
+      console.log(data);
+      if (data.status == "Finished") {
+        store.commit("Detections/addFinishedVideo", data);
+        store.dispatch("Detections/getVideoData", {
+          id: data.id,
+        });
+      }
+    });
     async function downloadNewestData() {
       try {
         loading.value = true;
-        store.dispatch("Detections/getVideoData", {
+        await store.dispatch("Detections/getVideoData", {
           id: videoIds.value[videoIds.value.length - 1],
+          jwt: JWT.value,
         });
       } catch (e) {
         error.value = e;
@@ -56,18 +69,15 @@ export default {
         loading.value = false;
       }
     }
-
     return {
+      finishedVideos: computed(() => store.getters["Detections/finishedVideos"]),
       vehicleTypes,
-
+      JWT,
       loading,
       downloadNewestData,
       videoData: computed(() => store.getters["Detections/videoData"]),
       totalCars: computed(() => {
-        return vehicleTypes.value.reduce(
-          (total, item) => item.amount + total,
-          0
-        );
+        return vehicleTypes.value.reduce((total, item) => item.amount + total, 0);
       }),
       videoIds,
     };
