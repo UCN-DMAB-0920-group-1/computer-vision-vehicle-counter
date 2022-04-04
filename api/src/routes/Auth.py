@@ -35,7 +35,8 @@ class Authenticator:
                 "exp": _profile["exp"],
                 "name": _profile["name"],
                 "picture": _profile["picture"],
-                "valid": "True"
+                "valid": "True",
+                "UUID": _profile["sub"]
             }
 
             _token = self.JWT_creation(_payload)

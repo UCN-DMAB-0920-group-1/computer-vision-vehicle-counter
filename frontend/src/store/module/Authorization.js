@@ -1,39 +1,29 @@
+import { isLoggedIn, logoutCookie} from "@/util/Cookie";
+
 const state = {
-    Login: false,
-    Jwt: "",
-    GoogleToken: ""
+    login: false,
+    jwt: "",
 };
 
 const mutations = {
-    setJwtData: (state, Jwt) => (state.Jwt = Jwt),
-    setGoogleTokenData: (state, GoogleToken) => (state.GoogleToken = GoogleToken),
-    setLoginData: (state, Login) => (state.Login = Login),
+    setLoginData: (state, login) => (state.login = login),
+    setJwtData: (state, jwt) => (state.jwt = jwt),
 };
 const actions = {
-    async googleLogin({ commit }, code) {
-        console.log("from store code:", code);
-
-        const response = await fetch(
-            process.env.VUE_APP_PROCESSING_ENDPOINT + "/auth?code=" + code, {
-                method: "GET",
-            }
-        )
-        const json = await response.json()
-        console.log(json)
-        if (json["jwt"].length > 0) {
-            commit("setLoginData", true)
-            commit("setJwtData", json["jwt"]);
-        }
+    login() {
     },
-    logout({ commit }) {
-        commit("setJwtData", "")
-        commit("setLoginData", false)
+    logout({dispatch}) {
+        logoutCookie();
+        dispatch("checkLoggedin");
+    },
+    checkLoggedin({ commit }) {
+        const loggedIn = isLoggedIn();
+        commit("setLoginData", loggedIn);
     },
 };
 const getters = {
-    Login: (state) => state.Login,
-    Jwt: (state) => state.Jwt,
-    Google: (state) => state.GoogleToken,
+    loginState: (state) => state.login,
+    jwt: (state) => state.jwt,
 };
 
 export default {
