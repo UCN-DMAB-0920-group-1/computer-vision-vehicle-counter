@@ -187,12 +187,13 @@ class Detections:
 
     def checkQueue(self):
         print("Checking task list...")
-        if self.checkThreadCount() < self.MAX_THREADS and len(
+
+        if self.checkThreadCount() < self.MAX_THREADS + 1 and len(
                 self.task_queue) > 0:
             print("Starting new task")
             task = self.task_queue.pop(0)
             self.startVideoTracker(task.id, task.video_path, task.options,
-                                   task.bbox, task.uuid)
+                                   task.bbox, task.UUID)
         return len(self.task_queue)
 
 
@@ -200,9 +201,9 @@ class Detections:
 
 
 class Task:
-
-    def __init__(self, id: str, video_path: str, options: map, bbox):
+    def __init__(self, id: str, video_path: str, options: map, bbox, UUID: string):
         self.id = id
         self.options = options
         self.video_path = video_path
         self.bbox = bbox
+        self.UUID = UUID
