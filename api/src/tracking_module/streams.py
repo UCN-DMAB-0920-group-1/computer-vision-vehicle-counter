@@ -4,5 +4,7 @@ streams = {"highway": "https://www.youtube.com/watch?v=5_XSYlAfJZM",
            "file": "api/res/highway.mp4",
            "file-1-sec": "api/res/highway-1-sec.mp4",
            "file-5-sec": "api/res/highway-5-sec.mp4",
+           "file-1-min": "api/res/highway-1-min.mp4",
+           "tokyo": "api/res/tokyo.mp4",
            "japan-city-night-rain": "https://www.youtube.com/watch?v=RQA5RcIZlAM",
            "dr": "https://drlive01hls.akamaized.net/hls/live/2014185/drlive01/master2000.m3u8", }

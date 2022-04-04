@@ -25,16 +25,16 @@ class dao_detections(IDao):
         video = id + '.mp4'
         date = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 
-        if("car" not in detections):
+        if ("car" not in detections):
             detections["car"] = 0
 
-        if("person" not in detections):
+        if ("person" not in detections):
             detections["person"] = 0
 
-        if("truck" not in detections):
+        if ("truck" not in detections):
             detections["truck"] = 0
 
-        total = reduce(lambda a, b: a+b, detections.values())
+        total = reduce(lambda a, b: a + b, detections.values())
 
         res = collection.insert_one({
             "_id": id,
@@ -65,8 +65,10 @@ class dao_detections(IDao):
 
     def update_one_task(id: str, detection_result):
         video = id + '.mp4'
-        cars_detected = detection_result['car'] if 'car' in detection_result else 0
-        trucks_detected = detection_result['truck'] if 'truck' in detection_result else 0
+        cars_detected = detection_result[
+            'car'] if 'car' in detection_result else 0
+        trucks_detected = detection_result[
+            'truck'] if 'truck' in detection_result else 0
         try:
 
             res = collection.update_one({"_id": id}, {

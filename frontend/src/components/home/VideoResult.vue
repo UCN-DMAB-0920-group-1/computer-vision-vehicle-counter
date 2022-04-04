@@ -17,7 +17,7 @@
           <!-- <p>Total vehicles: {{ totalCars }}</p> -->
 
           <button
-            class="shadow-xl block w-full rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
+            class="mx-auto px-3 shadow-xl block rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
             @click="downloadNewestData"
           >
             Download newest data
@@ -41,7 +41,7 @@ export default {
     const vehicleTypes = ref([]);
     const loading = ref(false);
     const error = ref("");
-    let JWT = computed(() => store.getters["Authorization/Jwt"]);
+
     const videoIds = computed(() => store.getters["FileProcessing/videoIds"]);
 
     Pusher.logToConsole = false;
@@ -61,7 +61,6 @@ export default {
         loading.value = true;
         await store.dispatch("Detections/getVideoData", {
           id: videoIds.value[videoIds.value.length - 1],
-          jwt: JWT.value,
         });
       } catch (e) {
         error.value = e;
@@ -72,7 +71,6 @@ export default {
     return {
       finishedVideos: computed(() => store.getters["Detections/finishedVideos"]),
       vehicleTypes,
-      JWT,
       loading,
       downloadNewestData,
       videoData: computed(() => store.getters["Detections/videoData"]),
