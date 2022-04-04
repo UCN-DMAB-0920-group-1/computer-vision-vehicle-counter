@@ -1,3 +1,4 @@
+import string
 from time import sleep
 from tracking_module.tracking import Tracking
 from dao.dao_detections import dao_detections
@@ -6,6 +7,7 @@ import json
 import uuid
 import os
 import threading
+from tracking_module.util import get_payload_from_jwt
 
 from pusher_socket import PusherSocket
 
@@ -23,7 +25,7 @@ class Detections:
         self.Tracking = Tracking
         self.dao_detections = dao_detections
 
-    def upload_video(self, request):
+    def upload_video(self, request, UUID):
         self.validate_video_post(request)
         file = request.files['file']
 
@@ -43,16 +45,18 @@ class Detections:
         file = request.files['file']
         self.save_video_file(video_path, file)
         # Add pending task to database
-        self.dao_detections.insert_one_task(id, "Pending")
+        self.dao_detections.insert_one_task(id, "Pending", UUID)
 
-        socket = PusherSocket("video-channel")
-        socket.send_notification(
-            "video-event", {"status": "Pending", "id": id})
+        socket = PusherSocket("private-video-channel-" + UUID)
+        socket.send_notification("video-event", {
+            "status": "Pending",
+            "id": id
+        })
 
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
 
-            task = Task(id, video_path, options, bbox)
+            task = Task(id, video_path, options, bbox, UUID)
 
             self.task_queue.append(task)
             return abort(
@@ -60,7 +64,7 @@ class Detections:
                 'Task added to queue, check result again latorz. you are number:'
                 + str(len(self.task_queue)))
         try:
-            self.startVideoTracker(id, video_path, options, bbox)
+            self.startVideoTracker(id, video_path, options, bbox, UUID)
         except Exception as e:
             print("Exception in uploading video: " + str(e))
             return abort(
@@ -77,18 +81,22 @@ class Detections:
         res = self.dao_detections.find_one(id)
         return jsonify(res)
 
+    def get_user_videos(self, UUID):
+        res = self.dao_detections.find(key="UUID", value=UUID)
+        return jsonify(res)
+
     ############# - METHODS - #############
 
-    def startVideoTracker(self, id, video_path, options: map, bbox):
+    def startVideoTracker(self, id, video_path, options: map, bbox, UUID):
         thread = threading.Thread(target=self.threadVideoTracker,
-                                  args=(id, video_path, options, bbox),
+                                  args=(id, video_path, options, bbox, UUID),
                                   daemon=True)
         self.thread_list.append(thread)
         thread.start()
         print("Thread Started: " + thread.getName())
         return "Thread started"
 
-    def threadVideoTracker(self, id, video_path, options: map, bbox):
+    def threadVideoTracker(self, id, video_path, options: map, bbox, UUID):
         if options['enabled'] == 'false':
             bbox = [[0, 0], [1920, 0], [1920, 1080], [0, 1080]]
             confidence = 0.6
@@ -109,10 +117,12 @@ class Detections:
             self.dao_detections.update_one_task(id, detections)
 
             print("OUTPUTTED TO CONSOLE!")
-            socket = PusherSocket("video-channel")
-            socket.send_notification(
-                "video-event", {"status": "Finished", "id": id, "detections": detections
-                                })
+            socket = PusherSocket("private-video-channel-" + UUID)
+            socket.send_notification("video-event", {
+                "status": "Finished",
+                "id": id,
+                "detections": detections
+            })
 
         except Exception as e:
             print("EXCEPTION in thread: " + str(e))
@@ -182,7 +192,7 @@ class Detections:
             print("Starting new task")
             task = self.task_queue.pop(0)
             self.startVideoTracker(task.id, task.video_path, task.options,
-                                   task.bbox)
+                                   task.bbox, task.uuid)
         return len(self.task_queue)
 
 

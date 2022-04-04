@@ -4,21 +4,28 @@ import Pusher from "pusher-js";
 const state = {
   loggedIn: false,
   jwt: "",
-  pusherSession: null,
+  pusher: null,
 };
 
 const mutations = {
   setLoginData: (state, login) => (state.loggedIn = login),
   setJwtData: (state, jwt) => (state.jwt = jwt),
-  setPusherSession: (state, pusher) => (state.pusherSession = pusher),
+  setPusherSession: (state, pusher) => (state.pusher = pusher),
 };
 const actions = {
-  login({ dispatch, state }, { route }) {
-    console.log(route);
+  async login({ dispatch }, { routeCode }) {
+    const response = await fetch(process.env.VUE_APP_PROCESSING_ENDPOINT + "/auth?code=" + routeCode, {
+      method: "GET",
+    });
 
-    if (state.loggedIn) {
-      dispatch("authenticatePusher");
+    const json = await response.json();
+
+    if (json["jwt"].length > 0) {
+      document.cookie = "jwt=" + json["jwt"];
+      document.cookie = "loggedIn=" + "true";
     }
+
+    dispatch("checkLoggedin");
   },
   logout({ dispatch }) {
     logoutCookie();
@@ -46,7 +53,10 @@ const actions = {
           const jwt = getCookie("jwt");
           fetch(authUrl, {
             method: "POST",
-            headers: new Headers({ "Content-Type": "application/json", Authorization: `Bearer: ${jwt}` }),
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: jwt,
+            },
             body: body,
           })
             .then((res) => {
@@ -57,7 +67,6 @@ const actions = {
               return res.json();
             })
             .then((data) => {
-              console.log("AYO IT WORKED!", data);
               callback(null, data);
             })
             .catch((err) => {
@@ -81,7 +90,7 @@ const actions = {
 const getters = {
   loginState: (state) => state.loggedIn,
   jwt: (state) => state.jwt,
-  pusherSession: (state) => state.pusherSession,
+  pusherSession: (state) => state.pusher,
 };
 
 export default {

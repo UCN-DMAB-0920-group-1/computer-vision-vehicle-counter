@@ -12,8 +12,12 @@
       </section>
       <section>
         <div class="bg-violet-200 rounded-xl p-3">
-          <h1 class="font-bold text-lg">Video result ({{ videoIds.length }})</h1>
-          <p v-for="entity in Object.entries(videoData)" :key="entity[0]">{{ entity[0] }}: {{ entity[1] }}</p>
+          <div class="bg-violet-300 rounded-lg p-3 shadow-md">
+            <h1 class="font-bold text-lg">Video result ({{ videoIds.length }})</h1>
+            <p class="text-left" v-for="entity in Object.entries(videoData)" :key="entity[0]">
+              <span class="font-semibold">{{ entity[0] }}:</span>: {{ entity[1] }}
+            </p>
+          </div>
           <!-- <p>Total vehicles: {{ totalCars }}</p> -->
 
           <button
@@ -32,6 +36,7 @@
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
 import AlertBox from "../core/AlertBox.vue";
+import { getPayloadValue } from "@/util/Cookie";
 
 export default {
   components: { AlertBox },
@@ -45,9 +50,7 @@ export default {
     const pusher = computed(() => store.getters["Authorization/pusherSession"]);
 
     if (pusher.value != null) {
-      //TODO: Inject pusher from Authorization module
-      //TODO: Get UUID from User (jwt)
-      const uuid = "1234";
+      const uuid = getPayloadValue("UUID");
 
       var channel = pusher.value.subscribe(`private-video-channel-${uuid}`);
       channel.bind(`video-event`, function (data) {

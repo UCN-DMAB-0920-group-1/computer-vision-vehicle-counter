@@ -11,7 +11,7 @@
     <div class="hidden  sm:block">
 
     <router-link
-      to="/about"
+      to="/User"
       class="shadow-xl block rounded-full bg-violet-700 px-8 text-white p-4 mx-2 ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
     >
       About</router-link

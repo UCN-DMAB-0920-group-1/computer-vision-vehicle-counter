@@ -9,13 +9,9 @@
 
 <script setup>
 import {ref} from "vue"
-import {getCookie} from "../../util/Cookie"
-import jwt_decode from "jwt-decode";
-
-let token = getCookie("jwt");
-let json = jwt_decode(token);
-let pictureSrc = ref(json["picture"]);
-let name = ref(json["name"]);
+import {getPayloadValue} from "../../util/Cookie"
+let pictureSrc = ref(getPayloadValue("picture"));
+let name = ref(getPayloadValue("name"));
 </script>
 
 <style lang="scss" scoped>
