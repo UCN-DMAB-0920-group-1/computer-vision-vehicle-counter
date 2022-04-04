@@ -1,4 +1,3 @@
-from time import sleep
 from tracking_module.tracking import Tracking
 from dao.dao_detections import dao_detections
 from flask import abort, jsonify, send_from_directory
@@ -12,14 +11,15 @@ from pusher_socket import PusherSocket
 
 class Detections:
 
-    def __init__(self, thread_list: list, UPLOAD_FOLDER: str,
+    def __init__(self, UPLOAD_FOLDER: str,
                  Tracking: Tracking, dao_detections: dao_detections,
-                 MAX_THREADS: int):
+                 MAX_THREADS: int, ALLOWED_EXTENSIONS: set):
 
-        self.thread_list = thread_list
-        self.MAX_THREADS = MAX_THREADS
+        self.thread_list = []
         self.task_queue = []
+        self.MAX_THREADS = MAX_THREADS
         self.UPLOAD_FOLDER = UPLOAD_FOLDER
+        self.ALLOWED_EXTENSIONS = ALLOWED_EXTENSIONS
         self.Tracking = Tracking
         self.dao_detections = dao_detections
 
