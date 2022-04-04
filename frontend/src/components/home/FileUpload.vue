@@ -108,7 +108,7 @@
       </button>
       <button
         v-else
-        class="shadow-xl block w-full rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
+        class="shadow-xl block mx-auto px-5 rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
         @click="onUploadFile"
       >
         Upload

@@ -17,7 +17,7 @@
           <!-- <p>Total vehicles: {{ totalCars }}</p> -->
 
           <button
-            class="shadow-xl block w-full rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
+            class="mx-auto px-3 shadow-xl block rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
             @click="downloadNewestData"
           >
             Download newest data

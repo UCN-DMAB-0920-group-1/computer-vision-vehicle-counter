@@ -18,14 +18,4 @@ p {
   -webkit-text-fill-color: transparent;
   
 }
- .bounce {
-        animation-name: bounce;
-        animation-timing-function: ease;
-    }
-    @keyframes bounce {
-        0%   { transform: translateY(0); }
-        50%  { transform: translateY(-100px); }
-        100% { transform: translateY(0); }
-    }
-
 </style>
