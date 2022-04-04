@@ -53,12 +53,10 @@ class Authenticator:
                               algorithm=self.ALGORITHM)
         return user_jwt
 
-    def authenticate_JWT(self, token):
+    def authenticate_JWT(self, request):
         try:
-            _token = jwt.decode(jwt=token,
-                                key=self.SECRET_KEY,
-                                algorithms=[self.ALGORITHM])
-            return True if _token["valid"] == "True" else False
+            valid = get_payload_from_jwt(request, "valid", self.SECRET_KEY)
+            return True if valid == "True" else False
         except Exception as e:
             print("JWT token was not valid: " + str(e))
             return False
@@ -91,5 +89,5 @@ class Authenticator:
         res = False
         if "Authorization" in request.headers:
             # decoes JWT and looks at payload value "valid" return true if succes and false if not
-            res = self.authenticate_JWT(request.headers["Authorization"])
+            res = self.authenticate_JWT(request)
         return res
