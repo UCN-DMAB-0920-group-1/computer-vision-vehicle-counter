@@ -17,7 +17,7 @@
             "request": "launch",
             "module": "flask",
             "env": {
-                "FLASK_APP": "api/arc/app.py",
+                "FLASK_APP": "api/src/app.py",
                 "FLASK_ENV": "development",
                 "FLASK_DEBUG": "1"
             },
