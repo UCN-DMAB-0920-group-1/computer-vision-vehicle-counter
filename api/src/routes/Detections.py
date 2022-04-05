@@ -11,9 +11,9 @@ from pusher_socket import PusherSocket
 
 class Detections:
 
-    def __init__(self, UPLOAD_FOLDER: str,
-                 Tracking: Tracking, dao_detections: dao_detections,
-                 MAX_THREADS: int, ALLOWED_EXTENSIONS: set):
+    def __init__(self, UPLOAD_FOLDER: str, Tracking: Tracking,
+                 dao_detections: dao_detections, MAX_THREADS: int,
+                 ALLOWED_EXTENSIONS: set):
 
         self.thread_list = []
         self.task_queue = []
@@ -72,8 +72,10 @@ class Detections:
     def get_video(self, id):
         path = id + ".mp4"
         path += "_processed.mkv"
-        return send_from_directory(self.UPLOAD_FOLDER,
-                                   path)  # mp4 is hardcoded
+        res = send_from_directory(
+            self.UPLOAD_FOLDER,
+            path)  # this does not work properly, we should fix
+        return res  # mp4 is hardcoded
 
     def get_count(self, id):
         res = self.dao_detections.find_one(id)

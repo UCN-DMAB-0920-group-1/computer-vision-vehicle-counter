@@ -42,8 +42,8 @@ def upload_video():
 @app.route('/detection/<string:id>/video')
 def get_video(id):
     permitted = _authenticator.checkPermission(request)
-    return _detections.get_video(
-        id) if permitted else "Not permitted to access this resource"
+    res = _detections.get_video(id)
+    return res if permitted else "Not permitted to access this resource"
 
 
 @app.route('/detection/<string:id>')
