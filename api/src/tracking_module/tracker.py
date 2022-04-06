@@ -1,4 +1,3 @@
-from contextlib import redirect_stdout
 import threading
 from collections import namedtuple
 from functools import reduce
@@ -9,31 +8,26 @@ import norfair
 import numpy as np
 import progress.bar as Bar
 import torch
-from norfair import Tracker
+from norfair import Tracker as NorfairTracker
 
-from tracking_module.norfair_helpers import euclidean_distance, yolo_detections_to_norfair_detections
-#from norfair_helpers import euclidean_distance, yolo_detections_to_norfair_detections
-from tracking_module.util import center_pos, get_stream
+from .norfair_helpers import euclidean_distance, yolo_detections_to_norfair_detections
+from .util import center_pos, get_stream
 
 
-class Tracking:
+class Tracker:
     """class for tracking objects via a videofeed
     """
 
     def __init__(self,
                  should_draw: bool = True,
                  should_save: bool = True,
-                 device: str = "cuda",  # Device (CPU or GPU)
                  model_path: str = "yolov5m",  # YOLO version
                  custom_model: bool = False,
                  # How confidence should YOLO be, before labeling
                  confidence_threshold: float = 0.6,
-                 track_points: str = "bbox",  # Can be centroid or bbox
-                 label_offset:
-                 int = 50,  # Offset from center point to classification label
-                 max_distance_between_points: int = 30,
-                 # TOP LEFT, BOTTOM LEFT, BOTTOM RIGHT, TOP RIGHT
-                 roi_area: np.ndarray[int, int] = None):
+                 track_shape: str = "bbox",  # Can be centroid or bbox
+                 label_offset: int = 50,  # Offset from center point to classification label
+                 max_distance_between_points: int = 30):
 
         # Load yolo model
         if (custom_model):
@@ -57,150 +51,69 @@ class Tracking:
         self.inside_roi = []  # Int array
         self.detections = {}
 
-        self.tracker = Tracker(
+        self.norfair_tracker = NorfairTracker(
             distance_function=euclidean_distance,
             distance_threshold=max_distance_between_points,
         )
 
-        self.track_points = track_points
+        self.track_shape = track_shape
         self.label_offset = label_offset
-        self.roi_area = (np.array(roi_area, dtype=np.int32)
-                         if roi_area != None else None)
         self.should_draw = should_draw
         self.should_save = should_save
 
-    def draw_label(self, frame, label):
+    def track(self, content_feed: str, roi: Iterable[list[int]] = None):
+        """Tracks objects in a given file within a specified regoin of interest (roi)
 
-        label_container, label_text = label.get_label_location()
+        Args:
+            content_feed (str): path/url to video
+            roi (np.ndarray[int, int], optional): region of interest, as a list og points. Defaults to None.
 
-        cv2.rectangle(
-            img=frame,
-            pt1=(label_container.x_min, label_container.y_min),
-            pt2=(label_container.x_max, label_container.y_max),
-            color=label.box_color,
-            thickness=cv2.FILLED
-        )
+        Raises:
+            Exception: _description_
 
-        cv2.putText(
-            img=frame,
-            text=label.text,
-            org=label_text,
-            fontFace=label.font_face,
-            fontScale=label.font_scale,
-            color=label.font_color,
-            thickness=label.font_thickness,
-            lineType=cv2.LINE_AA,
-        )
-
-    def detection_to_tracked_linker(self, norfair_detetion, tracked_objects):
-        for object in tracked_objects:
-            if (object.last_detection == norfair_detetion):
-                return object
-
-    def draw(self, frame, norfair_detections, tracked_objects):
-        # Draw detected label
-        frame_scale = frame.shape[0] / 100
-        id_size = frame_scale / 10
-        id_thickness = int(frame_scale / 3)
-
-        # Draw detections, ids and center point/ bounding box
-        if self.track_points == 'centroid':
-            norfair.draw_points(frame,
-                                norfair_detections,
-                                thickness=3,
-                                draw_labels=True,
-                                label_size=id_size)
-        elif self.track_points == 'bbox':
-            norfair.draw_boxes(frame,
-                               norfair_detections,
-                               line_width=3,
-                               draw_labels=False,
-                               label_size=id_size)
-
-        for detection in norfair_detections:
-            tracked_object = self.detection_to_tracked_linker(
-                detection, tracked_objects)
-
-            if (tracked_object != None):
-                object_id = str(tracked_object.id)
-            else:
-                object_id = "-1"
-
-            text = "id: {id} type: {label} ({conf})".format(
-                id=object_id,
-                label=detection.label,
-                conf=str(round(detection.scores[0], 2)))
-
-            label = Label(text, detection.points[0])
-
-            self.draw_label(frame,
-                            label)
-
-        # Draw ROI
-        cv2.polylines(frame, [np.array(self.roi_area, np.int32)], True,
-                      (15, 220, 10), 6)
-
-        # Draw vehicle counter
-
-        total_vehicles = reduce(
-            lambda a, b: a + b, self.detections.values()) if len(self.detections) > 0 else 0
-
-        cv2.putText(
-            img=frame,
-            text="total: " + str(total_vehicles),
-            org=(25, 100),
-            fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-            fontScale=id_size,
-            color=[255, 255, 255],  # Dynamic?
-            thickness=id_thickness,
-            lineType=cv2.LINE_AA,
-        )
-
-        cv2.putText(
-            img=frame,
-            text="now: " + str(len(self.inside_roi)),
-            org=(25, 150),
-            fontFace=cv2.FONT_HERSHEY_SIMPLEX,
-            fontScale=id_size,
-            color=[255, 255, 255],  # Dynamic?
-            thickness=id_thickness,
-            lineType=cv2.LINE_AA,
-        )
-
-    def track(self, stream_location: str):
-        if(len(self.roi_area) <= 2):
-            raise Exception("roi needs more than 2 points")
+        Returns:
+            _type_: _description_
+        """        # setup variables
+        roi = np.array(roi, np.int16)
+        detection_map = {}
+        inside_roi = []
 
         # Ready the stream
-        stream_url = get_stream(stream_location)
+        stream_url = get_stream(content_feed)
 
         # Open stream
         video_stream = cv2.VideoCapture(stream_url)
 
-        # Get frame count for stream
-        stream_frame_count = video_stream.get(cv2.CAP_PROP_FRAME_COUNT)
-
         video_dimension = (int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
                            int(video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT)))
 
+        if(roi is None):
+            roi = np.array(
+                [[0, 0], [video_dimension[0], 0], [video_dimension[0], video_dimension[1]], [0, video_dimension[1]]])
+        if(len(roi) <= 2):
+            raise Exception("roi needs more than 2 points")
+
+        # Get frame count for stream
+        stream_frame_count = video_stream.get(cv2.CAP_PROP_FRAME_COUNT)
+
         # Open file writer
         out = cv2.VideoWriter(
-            filename=stream_location + "_processed.mkv",
+            filename=content_feed + "_processed.mkv",
             fourcc=cv2.VideoWriter_fourcc(*'FMP4'),  # FFMPEG codec
             fps=video_stream.get(cv2.CAP_PROP_FPS),
-            frameSize=video_dimension)
+            frameSize=(int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
+                       int(video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT))))
 
         # Get first frame for masking
         if (video_stream.isOpened()):
             ref_frame = video_stream.read()[1]
 
-        if(self.roi_area is None):
-            self.roi_area = np.array(
-                (0, 0, video_dimension[0], video_dimension[1]))
+        # returns (x,y,w,h) of the rect surrounding the ROI
+        b_rect = cv2.boundingRect(roi)
+        b_rect = [*b_rect[:2], *(x - 1 for x in b_rect[2:])]
+        mask, roi_offset = create_mask(ref_frame, roi, b_rect)
 
-        mask, roi_offset = self.mask_create(ref_frame)
-
-        bar = Bar.IncrementalBar('Analyzing', max=stream_frame_count - 1,
+        bar = Bar.IncrementalBar('Analyzing', max=stream_frame_count - 1, redirect_stdout=True,
                                  suffix='%(percent).1f%% ETA: %(eta_td)s')
 
         # As long as the video stream is open, run the YOLO model on the frame, and show the output
@@ -212,12 +125,12 @@ class Tracking:
                 break
 
             # Crop frame to ROI area
-            cropped_image = self.crop_frame(frame, mask)
+            masked_image = mask_image(frame, mask, b_rect)
 
             try:
                 # Detect objects inside the cropped frame
                 # yolo_detections = self.model(frame)
-                yolo_detections = self.model(cropped_image)
+                yolo_detections = self.model(masked_image)
             except Exception as e:
                 print(str(e))
                 break
@@ -225,16 +138,18 @@ class Tracking:
             # Convert to norfair detections
             # detections = yolo_detections_to_norfair_detections(yolo_detections, track_points=self.track_points)
             detections = yolo_detections_to_norfair_detections(yolo_detections,
-                                                               track_points=self.track_points,
+                                                               track_points=self.track_shape,
                                                                offset=roi_offset)
 
             # Update tracker
-            tracked_objects = self.tracker.update(detections=detections)
+            tracked_objects = self.norfair_tracker.update(
+                detections=detections)
 
-            self.count_objects(tracked_objects)
+            count_objects(tracked_objects, roi, detection_map, inside_roi)
 
             if(self.should_draw or self.should_save):
-                self.draw(frame, detections, tracked_objects)
+                draw(frame, roi, detections, tracked_objects,
+                     self.track_shape, detection_map, inside_roi)
 
             # Write to filesystem
             if(self.should_save):
@@ -257,75 +172,8 @@ class Tracking:
         # cv2.destroyAllWindows()
 
         bar.finish()
-        print("cars found: {car_count}".format(
-            car_count=self.detections["car"]))
 
-        return self.detections
-
-    def count_objects(self, tracked_objects):
-        """counts objects inside tracked inside the ROI
-        """
-        # Find ROI vehicles
-        for obj in tracked_objects:
-            if not obj.live_points.any():
-                continue
-
-            # center_pos(obj.estimate[obj.live_points])
-            track_position = center_pos(obj.last_detection.points)
-            # Is this object inside ROI?
-            is_inside_roi = cv2.pointPolygonTest(
-                np.array(self.roi_area, np.int32), track_position, False)
-
-            if (is_inside_roi >= 0):
-                if not obj.id in self.inside_roi:
-                    self.inside_roi.append(obj.id)
-
-                    if (obj.label in self.detections):
-                        self.detections[obj.label] += 1
-                    else:
-                        self.detections[obj.label] = 1
-            else:
-                if obj.id in self.inside_roi:
-                    self.inside_roi.remove(obj.id)
-           # print(self.detections)
-
-    def mask_create(self, image: np.ndarray):
-        """Creates mask based on image and ROI
-        """
-        # mask defaulting to black for 3-channel and transparent for 4-channel
-        # (of course replace corners with yours)
-        mask = np.zeros(image.shape, dtype=np.uint8)
-
-        # automatically find lowest offsets
-        min_x = min(p[0] for p in self.roi_area)
-        min_y = min(p[1] for p in self.roi_area)
-        roi_offset = (min_x, min_y)
-
-        # fill the ROI so it doesn't get wiped out when the mask is applied
-        channel_count = image.shape[2]  # channel count on image
-
-        # array of white color, sized to channels count
-        ignore_mask_color = (255, ) * channel_count
-
-        # draw desired area on mask
-        cv2.fillConvexPoly(mask, self.roi_area, ignore_mask_color)
-        # cv2.drawContours(mask, [roi_corners], -1, ignore_mask_color, -1, cv2.LINE_AA)
-
-        return mask, roi_offset
-
-    def crop_frame(self, frame: np.ndarray, mask: np.ndarray) -> np.ndarray:
-        """crops the given frame to fit the mask, based on ROI area
-        """
-        # apply the mask
-        masked_image = cv2.bitwise_and(frame, mask)
-
-        # crop frame to masked area
-        # returns (x,y,w,h) of the rect
-        b_rect = cv2.boundingRect(self.roi_area)
-        cropped_image = masked_image[b_rect[1]:b_rect[1] + b_rect[3],
-                                     b_rect[0]:b_rect[0] + b_rect[2]]
-
-        return cropped_image
+        return detection_map
 
 
 class Label:
@@ -376,111 +224,7 @@ class Label:
         return label_container, label_text
 
 
-def track(content_feed, model, norfair_tracker, roi: np.ndarray, track_shape: str, should_draw: bool, should_save: bool):
-    if(len(roi) <= 2):
-        raise Exception("roi needs more than 2 points")
-
-    detection_map = {}
-    inside_roi = []
-
-    # Ready the stream
-    stream_url = get_stream(content_feed)
-
-    # Open stream
-    video_stream = cv2.VideoCapture(stream_url)
-
-    # Get frame count for stream
-    stream_frame_count = video_stream.get(cv2.CAP_PROP_FRAME_COUNT)
-
-    video_dimension = (int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                       int(video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-
-    # Open file writer
-    out = cv2.VideoWriter(
-        filename=content_feed + "_processed.mkv",
-        fourcc=cv2.VideoWriter_fourcc(*'FMP4'),  # FFMPEG codec
-        fps=video_stream.get(cv2.CAP_PROP_FPS),
-        frameSize=(int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                   int(video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT))))
-
-    # Get first frame for masking
-    if (video_stream.isOpened()):
-        ref_frame = video_stream.read()[1]
-
-    if(roi is None):
-        roi = np.array(
-            (0, 0, video_dimension[0], video_dimension[1]))
-
-    # returns (x,y,w,h) of the rect surrounding the ROI
-    b_rect = cv2.boundingRect(roi)
-    b_rect = [*b_rect[:2], *(x - 1 for x in b_rect[2:])]
-    mask, roi_offset = create_mask(ref_frame, roi, b_rect)
-
-    bar = Bar.IncrementalBar('Analyzing', max=stream_frame_count - 1, redirect_stdout=True,
-                             suffix='%(percent).1f%% ETA: %(eta_td)s')
-
-    # As long as the video stream is open, run the YOLO model on the frame, and show the output
-    while video_stream.isOpened():
-        ret, frame = video_stream.read()
-
-        # Ensures no error occur, even when there is no more frames to check for
-        if (not ret):
-            break
-
-        # Crop frame to ROI area
-        masked_image = mask_image(frame, mask, b_rect)
-
-        try:
-            # Detect objects inside the cropped frame
-            # yolo_detections = self.model(frame)
-            yolo_detections = model(masked_image)
-        except Exception as e:
-            print(str(e))
-            break
-
-        # Convert to norfair detections
-        # detections = yolo_detections_to_norfair_detections(yolo_detections, track_points=self.track_points)
-        detections = yolo_detections_to_norfair_detections(yolo_detections,
-                                                           track_points=track_shape,
-                                                           offset=roi_offset)
-
-        # Update tracker
-        tracked_objects = norfair_tracker.update(detections=detections)
-
-        count_objects(tracked_objects, roi, detection_map, inside_roi)
-
-        if(should_draw or should_save):
-            draw(frame, roi, detections, tracked_objects,
-                 track_shape, detection_map, inside_roi)
-
-        # Write to filesystem
-        if(should_save):
-            out.write(frame)
-
-        if (should_draw):
-            # Draw the model classifications on a gui
-            cv2.imshow("REALTIME! " + threading.currentThread().getName(),
-                       np.squeeze(frame))
-
-        bar.next()
-
-        # Wait for ESC to be pressed (then exit)
-        if (cv2.waitKey(1) == 27):
-            break
-
-    # Safely disposed any used resources
-    video_stream.release()
-    out.release()
-    # cv2.destroyAllWindows()
-
-    bar.finish()
-    print("cars found: {car_count}".format(
-        car_count=detection_map["car"]))
-
-    return detection_map
-
-
-def create_mask(image: np.ndarray, roi: np.ndarray, bounding_rect: tuple[int, int, int, int]) -> tuple[np.ndarray, tuple[int, int]]:
+def create_mask(image: np.ndarray, roi: np.ndarray, bounding_rect: list[int, int, int, int]) -> tuple[np.ndarray, tuple[int, int]]:
     """Creates mask based on image and ROI
     """
     # mask defaulting to black for 3-channel and transparent for 4-channel
@@ -541,9 +285,6 @@ def count_objects(tracked_objects, roi, detections, inside_roi):
         }
         for obj in tracked_objects if obj.live_points.any()
     )
-
-    for obj in [*center_positions]:
-        print(obj)
 
     # Find ROI vehicles
     for obj in tracked_objects:

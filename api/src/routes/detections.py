@@ -4,7 +4,7 @@ import threading
 import uuid
 
 from src.dao.dao_detections import dao_detections
-from src.tracking_module.tracking import Tracking
+from tracker import Tracker
 from flask import abort, jsonify, send_from_directory
 
 from src.pusher_socket import PusherSocket
@@ -13,7 +13,7 @@ from src.pusher_socket import PusherSocket
 class Detections:
 
     def __init__(self, thread_list: list, UPLOAD_FOLDER: str,
-                 Tracking: Tracking, dao_detections: dao_detections,
+                 Tracking: Tracker, dao_detections: dao_detections,
                  MAX_THREADS: int):
 
         self.thread_list = thread_list

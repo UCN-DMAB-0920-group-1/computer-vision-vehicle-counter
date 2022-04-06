@@ -6,7 +6,7 @@ from flask_cors import CORS
 from src.pusher_socket import PusherSocket
 from src.routes.Auth import Authenticator
 from src.routes.detections import Detections
-from src.tracking_module.tracking import Tracking
+from tracker import Tracker
 
 # Load config
 with open("api/conf.json", "r") as config:
@@ -25,7 +25,7 @@ MAX_THREADS = 4
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # detections routes init
-_detections = Detections(thread_list, UPLOAD_FOLDER, Tracking, dao_detections,
+_detections = Detections(thread_list, UPLOAD_FOLDER, Tracker, dao_detections,
                          MAX_THREADS)
 
 _authenticator = Authenticator(environment["CLIENT_ID"], app.secret_key,
