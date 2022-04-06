@@ -14,7 +14,3 @@ class StorageFilehandler(IFileHandler):
 
     def delete(self, path):
         os.remove(path)
-
-
-if __name__ == '__main__':
-    StorageFilehandler()

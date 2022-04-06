@@ -10,7 +10,3 @@ class ConsoleFilehandler(IFileHandler):
 
     def delete(self, path):
         print("going to delete file at " + path)
-
-
-if __name__ == '__main__':
-    ConsoleFilehandler()
