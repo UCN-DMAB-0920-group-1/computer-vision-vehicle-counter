@@ -2,17 +2,21 @@ from tracking_module.tracking import Tracking
 from dao.dao_detections import dao_detections
 from flask import abort, jsonify, send_from_directory
 import json
-import uuid
 import os
 import threading
+import uuid
 
-from pusher_socket import PusherSocket
+from src.dao.dao_detections import dao_detections
+from tracker import Tracker
+from flask import abort, jsonify, send_from_directory
+
+from src.pusher_socket import PusherSocket
 
 
 class Detections:
 
     def __init__(self, UPLOAD_FOLDER: str,
-                 Tracking: Tracking, dao_detections: dao_detections,
+                 tracker: Tracker, dao_detections: dao_detections,
                  MAX_THREADS: int, ALLOWED_EXTENSIONS: set):
 
         self.thread_list = []
@@ -20,7 +24,7 @@ class Detections:
         self.MAX_THREADS = MAX_THREADS
         self.UPLOAD_FOLDER = UPLOAD_FOLDER
         self.ALLOWED_EXTENSIONS = ALLOWED_EXTENSIONS
-        self.Tracking = Tracking
+        self.tracker = tracker
         self.dao_detections = dao_detections
 
     def upload_video(self, request, UUID):
@@ -40,7 +44,6 @@ class Detections:
 
         id = str(uuid.uuid4())
         video_path = os.path.join(self.UPLOAD_FOLDER, (id + ".mp4"))
-        file = request.files['file']
         self.save_video_file(video_path, file)
         # Add pending task to database
         self.dao_detections.insert_one_task(id, "Pending", UUID)
@@ -105,7 +108,7 @@ class Detections:
             max_distance_between_points = float(
                 options['max_distance_between_points'])
         try:
-            tracker = self.Tracking(
+            tracker = self.tracker(
                 should_draw=True,
                 roi_area=bbox,
                 confidence_threshold=confidence,
@@ -113,6 +116,8 @@ class Detections:
 
             detections = tracker.track(video_path)
             self.dao_detections.update_one_task(id, detections)
+
+            os.remove(video_path)
 
             print("OUTPUTTED TO CONSOLE!")
             socket = PusherSocket("private-video-channel-" + UUID)
@@ -126,7 +131,6 @@ class Detections:
             print("EXCEPTION in thread: " + str(e))
 
         finally:
-            os.remove(video_path)
 
             print("Thread Done")
             self.checkQueue()

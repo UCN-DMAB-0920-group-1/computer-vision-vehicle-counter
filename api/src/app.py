@@ -1,14 +1,13 @@
 import json
-from os import abort
-import uuid
-from tracking_module.util import get_payload_from_jwt
-from flask import Flask, jsonify, abort, request
+
+from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
-from dao.dao_detections import dao_detections
-from routes.Detections import Detections
-from tracking_module.tracking import Tracking
-from pusher_socket import PusherSocket
-from routes.Auth import Authenticator
+from src.dao.dao_detections import dao_detections
+from src.pusher_socket import PusherSocket
+from src.routes.Auth import Authenticator
+from src.routes.detections import Detections
+from tracker import Tracker
+from tracking_module.util import get_payload_from_jwt
 
 # Load config
 with open("api/conf.json", "r") as config:
@@ -23,7 +22,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 # detections routes init
-_detections = Detections(UPLOAD_FOLDER, Tracking, dao_detections, MAX_THREADS,
+_detections = Detections(UPLOAD_FOLDER, Tracker, dao_detections, MAX_THREADS,
                          ALLOWED_EXTENSIONS)
 
 
