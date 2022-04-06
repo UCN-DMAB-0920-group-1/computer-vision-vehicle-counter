@@ -20,7 +20,7 @@ class Configuration(dict):
         else:
             conf_map = Configuration.__instance.env
             for new_key in keys:
-                if(new_key is None or new_key is ""):
+                if(new_key is None or new_key == ""):
                     raise Exception(
                         "${new_key} is empty! thats illegal! full key: ${key}")
 

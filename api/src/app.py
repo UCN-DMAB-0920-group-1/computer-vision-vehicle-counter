@@ -13,7 +13,8 @@ from src.implementations.storage_filehandler import StorageFilehandler
 
 # Load config
 app = Flask(__name__)
-app.secret_key = Configuration.get("SECRET_KEY")
+
+SECRET_KEY = Configuration.get("SECRET_KEY")
 MAX_THREADS = Configuration.get("APP_SETTINGS.MAX_THREADS")
 TEMP_STORAGE_FOLDER = Configuration.get("APP_SETTINGS.STORAGE_FOLDER")
 UPLOAD_FOLDER = Configuration.get("APP_SETTINGS.UPLOAD_FOLDER")
@@ -36,9 +37,10 @@ _detections = Detections(
 )
 
 _authenticator = Authenticator(
-    environment["CLIENT_ID"], app.secret_key,
-    environment["JWT_algorithm"],
-    environment["CLIENT_SECRET"]
+    Configuration.get("CLIENT_ID"),
+    SECRET_KEY,
+    Configuration.get("JWT_algorithm"),
+    Configuration.get("CLIENT_SECRET")
 )
 
 ############# - ROUTES - #############
@@ -47,7 +49,7 @@ _authenticator = Authenticator(
 @ app.route('/detection', methods=['POST'])
 def upload_video():
     permitted = _authenticator.checkPermission(request)
-    UUID = get_payload_from_jwt(request, "UUID", app.secret_key)
+    UUID = get_payload_from_jwt(request, "UUID", SECRET_KEY)
     return _detections.upload_video(
         request,
         UUID) if permitted else "Not permitted to access this resource"
