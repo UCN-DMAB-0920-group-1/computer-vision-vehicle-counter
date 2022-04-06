@@ -2,6 +2,8 @@ import jwt
 from google.oauth2 import id_token
 from google.auth.transport import requests as googleRequests
 import requests
+from pusher_socket import PusherSocket
+from tracking_module.util import get_payload_from_jwt
 
 
 class Authenticator:
@@ -51,12 +53,41 @@ class Authenticator:
                               algorithm=self.ALGORITHM)
         return user_jwt
 
-    def authenticate_JWT(self, token):
+    def authenticate_JWT(self, request):
         try:
-            _token = jwt.decode(jwt=token,
-                                key=self.SECRET_KEY,
-                                algorithms=[self.ALGORITHM])
-            return True if _token["valid"] == "True" else False
+            valid = get_payload_from_jwt(request, "valid", self.SECRET_KEY)
+            return True if valid == "True" else False
         except Exception as e:
             print("JWT token was not valid: " + str(e))
             return False
+
+    def authenticate_pusher(self, request):
+        # Make sure the token is valid
+
+        if self.checkPermission(request) is False:
+            return 401
+
+        data = request.json
+        channel = data["channel_name"]
+        socket_id = data["socket_id"]
+
+        uuid = get_payload_from_jwt(
+            request, "UUID", self.SECRET_KEY)
+
+        # If the user tries to authenticate to a channel, and their uuid doesnt match, return 401
+        channel_split = channel.split("-")
+        if channel_split[len(channel_split)-1] == uuid is False:
+            return 401
+
+        pusher = PusherSocket(channel)
+        return pusher.pusher_client.authenticate(
+            channel=channel,
+            socket_id=socket_id,
+        )
+
+    def checkPermission(self, request):
+        res = False
+        if "Authorization" in request.headers:
+            # decoes JWT and looks at payload value "valid" return true if succes and false if not
+            res = self.authenticate_JWT(request)
+        return res

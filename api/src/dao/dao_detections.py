@@ -17,6 +17,10 @@ class dao_detections(IDao):
     db = client['AI_result_database']
     collection = db['Vehicle_tracking_result']
 
+    def find(key, value):
+        res = list(collection.find({key: value}))
+        return res
+
     def find_one(id: int):
         res = collection.find_one({"_id": id})
         return res
@@ -49,13 +53,14 @@ class dao_detections(IDao):
         })
         return res
 
-    def insert_one_task(id: str, status):
+    def insert_one_task(id: str, status, UUID):
         date = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         try:
             res = collection.insert_one({
                 "_id": id,
                 "status": status,
-                "date": date
+                "date": date,
+                "UUID": UUID
             })
         except Exception as e:
             errorTxt = "Could not insert new task "
