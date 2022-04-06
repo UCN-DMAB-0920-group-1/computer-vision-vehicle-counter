@@ -4,7 +4,7 @@ import uuid
 from tracking_module.util import get_payload_from_jwt
 from flask import Flask, jsonify, abort, request
 from flask_cors import CORS
-from dao.dao_detections import dao_detections
+from dao.dao_detections import DaoDetections
 from routes.Detections import Detections
 from tracking_module.tracking import Tracking
 from pusher_socket import PusherSocket
@@ -23,7 +23,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 # detections routes init
-_detections = Detections(UPLOAD_FOLDER, Tracking, dao_detections, MAX_THREADS,
+_detections = Detections(UPLOAD_FOLDER, Tracking, DaoDetections, MAX_THREADS,
                          ALLOWED_EXTENSIONS)
 
 

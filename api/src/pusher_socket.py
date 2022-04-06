@@ -10,9 +10,9 @@ class PusherSocket:
             data = json.load(config)
 
         self.pusher_client = pusher.Pusher(
-            app_id=data["pusher_app_id"],
-            key=data["pusher_key"],
-            secret=data["pusher_secret"],
+            app_id=data["PUSHER_APP_ID"],
+            key=data["PUSHER_KEY"],
+            secret=data["PUSHER_SECRET"],
             cluster='eu',
             ssl=True
         )

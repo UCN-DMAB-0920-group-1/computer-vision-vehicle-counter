@@ -2,5 +2,10 @@
     "cSpell.words": [
         "pafy",
         "pand"
-    ]
+    ],
+    "python.testing.pytestArgs": [
+        "api"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }
