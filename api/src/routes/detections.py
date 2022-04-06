@@ -1,13 +1,12 @@
-from tracking_module.tracking import Tracking
-from dao.dao_detections import DaoDetections
+from src.tracking_module.tracker import Tracker
+from src.dao.dao_detections import DaoDetections
 from flask import abort, jsonify, send_from_directory
 import json
 import os
 import threading
 import uuid
 
-from src.dao.dao_detections import dao_detections
-from tracker import Tracker
+from src.dao.dao_detections import DaoDetections
 from flask import abort, jsonify, send_from_directory
 
 from src.models.task import Task
@@ -18,14 +17,15 @@ from src.filehandler_module import IFileHandler
 
 class Detections:
 
-    def __init__(self,
-                 UPLOAD_FOLDER: str,
-                 STORAGE_FOLDER: str,
-                 tracker: Tracker,
-                 dao_detections: DaoDetections,
-                 MAX_THREADS: int,
-                 ALLOWED_EXTENSIONS: set[str],
-                 filehandler: IFileHandler):
+    def __init__(
+            self,
+            UPLOAD_FOLDER: str,
+            STORAGE_FOLDER: str,
+            tracker: Tracker,
+            dao_detections: DaoDetections,
+            MAX_THREADS: int,
+            ALLOWED_EXTENSIONS: set[str],
+            filehandler: IFileHandler):
 
         self.filehandler = filehandler
         self.thread_list: list[threading.Thread] = []
@@ -140,8 +140,6 @@ class Detections:
             self.filehandler.upload(uploadPath, bytes)
             self.dao_detections.update_one_task(id, detections)
 
-            os.remove(video_path)
-
             print("OUTPUTTED TO CONSOLE!")
             socket = PusherSocket("private-video-channel-" + UUID)
             socket.send_notification("video-event", {
@@ -151,10 +149,13 @@ class Detections:
             })
 
         except Exception as e:
-            print("EXCEPTION in thread: " + str(e))
+            print("EXCEPTION thrown in thread from threadVideoTracker:")
+            print(e)
 
         finally:
+            # Delete temp files
             self.filehandler.delete(video_path)
+            self.filehandler.delete(video_path + "_processed.mkv")
 
             print("Thread Done")
             self.checkQueue()
@@ -204,7 +205,7 @@ class Detections:
 
     def save_video_file(self, video_path, file):
         try:
-            os.mkdir(self.UPLOAD_FOLDER)
+            os.mkdir(self.STORAGE_FOLDER)
         except FileExistsError as e:
             print("path already exists")
 

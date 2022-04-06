@@ -1,13 +1,14 @@
 import json
+from pymongo import MongoClient
 
 from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
 from src.dao.dao_detections import DaoDetections
-from src.pusher_socket import PusherSocket
 from src.routes.Auth import Authenticator
 from src.routes.detections import Detections
 from src.tracking_module.tracker import Tracker
-from tracking_module.util import get_payload_from_jwt
+from src.tracking_module.util import get_payload_from_jwt
+from src.implementations.storage_filehandler import StorageFilehandler
 
 # Load config
 with open("api/conf.json", "r") as config:
@@ -16,16 +17,26 @@ with open("api/conf.json", "r") as config:
 app = Flask(__name__)
 app.secret_key = environment["SECRET_KEY"]
 MAX_THREADS = environment["APP_SETTINGS"]["MAX_THREADS"]
+TEMP_STORAGE_FOLDER = environment["APP_SETTINGS"]["STORAGE_FOLDER"]
 UPLOAD_FOLDER = environment["APP_SETTINGS"]["UPLOAD_FOLDER"]
 ALLOWED_EXTENSIONS = set(environment["APP_SETTINGS"]["ALLOWED_EXTENSIONS"])
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 # detections routes init
+filehandler: StorageFilehandler = StorageFilehandler()
 
-_detections = Detections(UPLOAD_FOLDER, Tracker,
-                         DaoDetections, MAX_THREADS, ALLOWED_EXTENSIONS),
+mongo_client = MongoClient(environment["mongodb"])
 
+_detections = Detections(
+    UPLOAD_FOLDER=UPLOAD_FOLDER,
+    STORAGE_FOLDER=TEMP_STORAGE_FOLDER,
+    tracker=Tracker,
+    dao_detections=DaoDetections(mongoClient=mongo_client),
+    MAX_THREADS=MAX_THREADS,
+    ALLOWED_EXTENSIONS=ALLOWED_EXTENSIONS,
+    filehandler=filehandler
+)
 
 _authenticator = Authenticator(
     environment["CLIENT_ID"], app.secret_key,

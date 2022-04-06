@@ -74,7 +74,7 @@ class Tracker:
         Returns:
             _type_: _description_
         """        # setup variables
-        roi = np.array(roi, np.int16)
+        roi = np.array(roi)
         detection_map = {}
         inside_roi = []
 
@@ -84,10 +84,9 @@ class Tracker:
         # Open stream
         video_stream = cv2.VideoCapture(stream_url)
 
-        video_dimension = (int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                           int(video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-
         if(roi is None):
+            video_dimension = (int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
+                               int(video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT)))
             roi = np.array(
                 [[0, 0], [video_dimension[0], 0], [video_dimension[0], video_dimension[1]], [0, video_dimension[1]]])
         if(len(roi) <= 2):

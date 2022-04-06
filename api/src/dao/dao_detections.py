@@ -14,11 +14,10 @@ class DaoDetections(IDao):
 
     def __init__(
         self,
-        mongoClient: MongoClient = None,
-
+        mongoClient: MongoClient,
     ):
         db = mongoClient['AI_result_database']
-        self.self.collection = db['Vehicle_tracking_result']
+        self.collection = db['Vehicle_tracking_result']
 
     def find(self, key, value):
         res = list(self.collection.find({key: value}))
@@ -56,7 +55,7 @@ class DaoDetections(IDao):
         })
         return res
 
-    def insert_one_task(self, id: str, status, UUID):
+    def insert_one_task(self, id: str, status: str, UUID: str):
         date = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
         try:
             res = self.collection.insert_one({

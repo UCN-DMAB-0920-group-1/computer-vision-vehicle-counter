@@ -1,5 +1,5 @@
 from distutils.errors import DistutilsModuleError
-from tracking_module import Tracker, streams
+from src.tracking_module import Tracker, streams
 from functools import reduce
 from pymongo import MongoClient
 import json
@@ -28,13 +28,13 @@ collection.drop()
 
 for distance in range(start_distance, end_distance, increment_interval):
     tracker = Tracker(should_draw=True,
-                       track_shape='bbox',
-                       # custom_model=True, model_path="./api/models/yolov5m-custom-97.pt",
-                       #roi_area=[[0, 250], [520, 90], [640, 90],[640, 719], [0, 719]]
-                       max_distance_between_points=distance,
-                       roi_area=[[474, 124], [638, 116], [
-                           596, 697], [5, 708], [0, 332]]
-                       )
+                      track_shape='bbox',
+                      # custom_model=True, model_path="./api/models/yolov5m-custom-97.pt",
+                      #roi_area=[[0, 250], [520, 90], [640, 90],[640, 719], [0, 719]]
+                      max_distance_between_points=distance,
+                      roi_area=[[474, 124], [638, 116], [
+                          596, 697], [5, 708], [0, 332]]
+                      )
 
     print("Now running with: " + str(distance) + " as distance parameter")
     detections = tracker.track(streams["file-1-min"])

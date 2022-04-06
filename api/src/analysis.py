@@ -1,7 +1,7 @@
 from distutils.errors import DistutilsModuleError
 
 from matplotlib.pyplot import draw
-from tracking_module import Tracker, streams
+from src.tracking_module import Tracker, streams
 from functools import reduce
 from pymongo import MongoClient
 import json
