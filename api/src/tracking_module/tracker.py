@@ -1,7 +1,7 @@
 import threading
 from collections import namedtuple
 from functools import reduce
-from typing import Iterable
+from typing import Iterable, Mapping
 
 import cv2
 import norfair
@@ -61,7 +61,7 @@ class Tracker:
         self.should_draw = should_draw
         self.should_save = should_save
 
-    def track(self, content_feed: str, roi: Iterable[list[int]] = None):
+    def track(self, content_feed: str, roi: Iterable[list[int]] = None) -> Mapping[str, int]:
         """Tracks objects in a given file within a specified regoin of interest (roi)
 
         Args:

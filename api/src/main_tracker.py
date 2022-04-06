@@ -1,15 +1,12 @@
-from tracking_module import streams, tracking
+from . import tracker
+from tracking_module import streams
 import time
 
 if __name__ == '__main__':
-    tracker = tracking.Tracking(should_draw=True,
-                                should_save=False,
-                                track_points='bbox',
-                                # custom_model=True, model_path="./api/models/yolov5m-custom-97.pt",
-                                roi_area=[[0, 250], [520, 90], [
-                                    640, 90], [640, 719], [0, 719]]
-                                #roi_area=[[0, 0], [1920, 0],[1920, 1080], [0, 1080]]
-                                )
+    tracker = tracker.Tracker(should_draw=True,
+                               should_save=False,
+                               # custom_model=True, model_path="./api/models/yolov5m-custom-97.pt"
+                               )
 
     # start_time = time.time()
     # for i in range(1):
@@ -19,8 +16,8 @@ if __name__ == '__main__':
 
     start_time = time.time()
     for i in range(1):
-        detections = tracking.track(streams.streams["file-5-sec"], tracker.model, tracker.tracker,
-                                    tracker.roi_area, tracker.track_points, tracker.should_draw, tracker.should_draw)
+        detections = tracker.track(streams.streams["file-5-sec"],
+                                   roi=[[0, 250], [520, 90], [640, 90], [640, 719], [0, 719]])
     print("from module functions")
     print("--- %s seconds ---" % (time.time() - start_time))
 

@@ -16,7 +16,7 @@ from src.pusher_socket import PusherSocket
 class Detections:
 
     def __init__(self, UPLOAD_FOLDER: str,
-                 Tracker: Tracker, dao_detections: dao_detections,
+                 tracker: Tracker, dao_detections: dao_detections,
                  MAX_THREADS: int, ALLOWED_EXTENSIONS: set):
 
         self.thread_list = []
@@ -24,7 +24,7 @@ class Detections:
         self.MAX_THREADS = MAX_THREADS
         self.UPLOAD_FOLDER = UPLOAD_FOLDER
         self.ALLOWED_EXTENSIONS = ALLOWED_EXTENSIONS
-        self.tracker = Tracker
+        self.tracker = tracker
         self.dao_detections = dao_detections
 
     def upload_video(self, request, UUID):
