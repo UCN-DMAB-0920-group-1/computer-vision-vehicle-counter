@@ -6,8 +6,7 @@ from src.configuration import Configuration
 
 class StorageFilehandler(IFileHandler):
     def upload(self, path, bytes):
-        os.mkdir(Configuration.getInstance(
-        ).env["APP_SETTINGS"]["UPLOAD_FOLDER"])
+        os.mkdir(Configuration.get("APP_SETTINGS.UPLOAD_FOLDER"))
 
         with open(path, "wb") as binary_file:
             # Write bytes to file

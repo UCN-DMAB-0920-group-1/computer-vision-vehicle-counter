@@ -2,12 +2,6 @@ from src.interfaces.IDao import IDao
 from pymongo import MongoClient
 from datetime import datetime
 from functools import reduce
-import json
-
-
-# Load config
-with open("api/conf.json", "r") as config:
-    data = json.load(config)
 
 
 class DaoDetections(IDao):
