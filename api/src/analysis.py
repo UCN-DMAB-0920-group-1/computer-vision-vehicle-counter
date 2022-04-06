@@ -1,7 +1,7 @@
 from distutils.errors import DistutilsModuleError
 
 from matplotlib.pyplot import draw
-from tracking_module import Tracking, streams
+from tracking_module import Tracker, streams
 from functools import reduce
 from pymongo import MongoClient
 import json
@@ -24,8 +24,8 @@ class Analysis:
         bestDeviation = 9999
         bestValue = -1
         for value in range(start_value, end_value, increment_interval):
-            tracker = Tracking(
-                track_points='bbox',
+            tracker = Tracker(
+                track_shape='bbox',
                 max_distance_between_points=value,
                 # confidence_threshold=(value/100),
                 roi_area=roi,

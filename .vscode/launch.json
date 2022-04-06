@@ -29,13 +29,13 @@
             "jinja": true
         },
         {
-            "name": "Python: ML tracker",
+            "name": "Python: standalone ML tracker",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/api/src/ml_tracker.py",
+            "program": "${workspaceFolder}/api/src/main_tracker.py",
             "console": "integratedTerminal",
             "args": [],
-            "justMyCode": false
+            "justMyCode": true
         },
         {
             "name": "Python: Analysis",
@@ -44,7 +44,16 @@
             "program": "${workspaceFolder}/api/src/analysis.py",
             "console": "integratedTerminal",
             "args": [],
-            "justMyCode": false
-        }
+            "justMyCode": true
+        },
+        {
+          "name": "Python: ML tracker",
+          "type": "python",
+          "request": "launch",
+          "program": "${workspaceFolder}/api/src/ml_tracker.py",
+          "console": "integratedTerminal",
+          "args": [],
+          "justMyCode": true
+        },
     ]
 }

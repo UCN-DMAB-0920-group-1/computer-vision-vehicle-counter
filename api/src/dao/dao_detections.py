@@ -1,5 +1,4 @@
-
-from interfaces.IDao import IDao
+from src.interfaces.IDao import IDao
 from pymongo import MongoClient
 from datetime import datetime
 from functools import reduce

@@ -1,14 +1,13 @@
 import json
-from os import abort
-import uuid
-from tracking_module.util import get_payload_from_jwt
-from flask import Flask, jsonify, abort, request
+
+from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
-from dao.dao_detections import DaoDetections
-from routes.Detections import Detections
-from tracking_module.tracking import Tracking
-from pusher_socket import PusherSocket
-from routes.Auth import Authenticator
+from src.dao.dao_detections import DaoDetections
+from src.pusher_socket import PusherSocket
+from src.routes.Auth import Authenticator
+from src.routes.detections import Detections
+from src.tracking_module.tracker import Tracker
+from tracking_module.util import get_payload_from_jwt
 
 # Load config
 with open("api/conf.json", "r") as config:
@@ -23,8 +22,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 # detections routes init
-_detections = Detections(UPLOAD_FOLDER, Tracking, DaoDetections, MAX_THREADS,
-                         ALLOWED_EXTENSIONS)
+
+_detections = Detections(UPLOAD_FOLDER, Tracker,
+                         DaoDetections, MAX_THREADS, ALLOWED_EXTENSIONS),
 
 
 _authenticator = Authenticator(
@@ -36,7 +36,7 @@ _authenticator = Authenticator(
 ############# - ROUTES - #############
 
 
-@app.route('/detection', methods=['POST'])
+@ app.route('/detection', methods=['POST'])
 def upload_video():
     permitted = _authenticator.checkPermission(request)
     UUID = get_payload_from_jwt(request, "UUID", app.secret_key)
@@ -45,21 +45,21 @@ def upload_video():
         UUID) if permitted else "Not permitted to access this resource"
 
 
-@app.route('/detection/<string:id>/video')
+@ app.route('/detection/<string:id>/video')
 def get_video(id):
     permitted = _authenticator.checkPermission(request)
     return _detections.get_video(
         id) if permitted else "Not permitted to access this resource"
 
 
-@app.route('/detection/<string:id>')
+@ app.route('/detection/<string:id>')
 def get_count(id):
     permitted = _authenticator.checkPermission(request)
     return _detections.get_count(
         id) if permitted else "Not permitted to access this resource"
 
 
-@app.route('/detection/user')
+@ app.route('/detection/user')
 def get_user_videos():
     UUID = request.args.get("UUID")
     print(UUID)
@@ -69,7 +69,7 @@ def get_user_videos():
     pass
 
 
-@app.route("/auth", methods=["GET"])
+@ app.route("/auth", methods=["GET"])
 def login():
     code = request.args.get('code')
     # returns empty string if failed to authenticate
@@ -78,7 +78,7 @@ def login():
     return jsonify({"jwt": res})
 
 
-@app.route('/auth/pusher', methods=['POST'])
+@ app.route('/auth/pusher', methods=['POST'])
 def pusher_auth():
     res = _authenticator.authenticate_pusher(request)
 

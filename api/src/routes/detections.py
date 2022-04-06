@@ -2,13 +2,17 @@ from tracking_module.tracking import Tracking
 from dao.dao_detections import DaoDetections
 from flask import abort, jsonify, send_from_directory
 import json
-import uuid
 import os
 import threading
+import uuid
+
+from src.dao.dao_detections import dao_detections
+from tracker import Tracker
+from flask import abort, jsonify, send_from_directory
 
 from src.models.task import Task
 
-from pusher_socket import PusherSocket
+from src.pusher_socket import PusherSocket
 from src.filehandler_module import IFileHandler
 
 
@@ -17,11 +21,11 @@ class Detections:
     def __init__(self,
                  UPLOAD_FOLDER: str,
                  STORAGE_FOLDER: str,
-                 tracking: Tracking,
+                 tracker: Tracker,
                  dao_detections: DaoDetections,
                  MAX_THREADS: int,
-                 ALLOWED_EXTENSIONS: set,
-                 filehandler: IFileHandler = None):
+                 ALLOWED_EXTENSIONS: set[str],
+                 filehandler: IFileHandler):
 
         self.filehandler = filehandler
         self.thread_list: list[threading.Thread] = []
@@ -29,8 +33,8 @@ class Detections:
         self.MAX_THREADS = MAX_THREADS
         self.UPLOAD_FOLDER = UPLOAD_FOLDER
         self.STORAGE_FOLDER = STORAGE_FOLDER
-        self.ALLOWED_EXTENSIONS = ALLOWED_EXTENSIONS
-        self.tracking: Tracking = tracking
+        self.ALLOWED_EXTENSIONS: set[str] = ALLOWED_EXTENSIONS
+        self.tracker: Tracker = tracker
         self.dao_detections: DaoDetections = dao_detections
 
     def upload_video(self, request, UUID):
@@ -52,6 +56,7 @@ class Detections:
         temp_video_path = os.path.join(self.STORAGE_FOLDER, (id + ".mp4"))
         file = request.files['file']
         self.save_video_file(temp_video_path, file)
+
         # Add pending task to database
         self.dao_detections.insert_one_task(id, "Pending", UUID)
 
@@ -117,13 +122,12 @@ class Detections:
             max_distance_between_points = float(
                 options['max_distance_between_points'])
         try:
-            tracker = self.tracking(
+            tracker = self.tracker(
                 should_draw=True,
-                roi_area=bbox,
                 confidence_threshold=confidence,
                 max_distance_between_points=max_distance_between_points)
 
-            detections = tracker.track(video_path)
+            detections = tracker.track(video_path, roi=bbox)
 
             path = video_path + "_processed.mkv"
 
@@ -135,6 +139,8 @@ class Detections:
             uploadPath = self.UPLOAD_FOLDER + "/" + id + ".mkv"
             self.filehandler.upload(uploadPath, bytes)
             self.dao_detections.update_one_task(id, detections)
+
+            os.remove(video_path)
 
             print("OUTPUTTED TO CONSOLE!")
             socket = PusherSocket("private-video-channel-" + UUID)
