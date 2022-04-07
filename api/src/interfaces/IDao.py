@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class IDao:
+class IDao(ABC):
     @abstractmethod
     def find_one(id: int):  # should read a single object
         pass
