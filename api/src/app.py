@@ -33,7 +33,7 @@ _detections = Detections(
     dao_detections=DaoDetections(mongoClient=mongo_client),
     MAX_THREADS=MAX_THREADS,
     ALLOWED_EXTENSIONS=ALLOWED_EXTENSIONS,
-    filehandler=filehandler
+    filehandler=_filehandler
 )
 
 _authenticator = Authenticator(

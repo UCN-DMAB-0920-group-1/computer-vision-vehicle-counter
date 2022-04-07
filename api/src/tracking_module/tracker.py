@@ -74,7 +74,6 @@ class Tracker:
         Returns:
             _type_: _description_
         """        # setup variables
-        roi = np.array(roi)
         detection_map = {}
         inside_roi = []
 
@@ -91,6 +90,7 @@ class Tracker:
                 [[0, 0], [video_dimension[0], 0], [video_dimension[0], video_dimension[1]], [0, video_dimension[1]]])
         if(len(roi) <= 2):
             raise Exception("roi needs more than 2 points")
+        roi = np.array(roi)
 
         # Get frame count for stream
         stream_frame_count = video_stream.get(cv2.CAP_PROP_FRAME_COUNT)
