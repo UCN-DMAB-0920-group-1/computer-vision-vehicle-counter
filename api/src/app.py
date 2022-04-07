@@ -22,7 +22,7 @@ ALLOWED_EXTENSIONS = set(Configuration.get("APP_SETTINGS.ALLOWED_EXTENSIONS"))
 
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 # detections routes init
-filehandler: StorageFilehandler = StorageFilehandler()
+_filehandler: StorageFilehandler = StorageFilehandler()
 
 mongo_client = MongoClient(Configuration.get("mongodb"))
 
@@ -48,7 +48,7 @@ _authenticator = Authenticator(
 
 @ app.route('/detection', methods=['POST'])
 def upload_video():
-    permitted = _authenticator.checkPermission(request)
+    permitted = _authenticator.check_permission(request)
     UUID = get_payload_from_jwt(request, "UUID", SECRET_KEY)
     return _detections.upload_video(
         request,
@@ -57,14 +57,14 @@ def upload_video():
 
 @ app.route('/detection/<string:id>/video')
 def get_video(id):
-    permitted = _authenticator.checkPermission(request)
+    permitted = _authenticator.check_permission(request)
     return _detections.get_video(
         id) if permitted else "Not permitted to access this resource"
 
 
 @ app.route('/detection/<string:id>')
 def get_count(id):
-    permitted = _authenticator.checkPermission(request)
+    permitted = _authenticator.check_permission(request)
     return _detections.get_count(
         id) if permitted else "Not permitted to access this resource"
 
@@ -73,7 +73,7 @@ def get_count(id):
 def get_user_videos():
     UUID = request.args.get("UUID")
     print(UUID)
-    permitted = _authenticator.checkPermission(request)
+    permitted = _authenticator.check_permission(request)
     return _detections.get_user_videos(
         UUID) if permitted else "Not permitted to access this resource"
     pass
