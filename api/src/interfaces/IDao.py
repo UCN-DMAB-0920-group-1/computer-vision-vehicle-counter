@@ -1,18 +1,25 @@
-class IDao:
+from abc import ABC, abstractmethod
 
-    def find_one(id: int):  #should read a single object
+
+class IDao(ABC):
+    @abstractmethod
+    def find_one(id: str):  # should read a single object
         pass
 
-    def insert_one(id: int, object):  #should insert one object with id as key
+    @abstractmethod
+    def insert_one(id: str, object):  # should insert one object with id as key
         pass
 
-    def delete_one(id: int):  #should delete one object with id
+    @abstractmethod
+    def delete_one(id: str):  # should delete one object with id
         pass
 
-    def update_one(id: int, object):  #should update object with id
+    @abstractmethod
+    def update_one(id: str, object):  # should update object with id
         pass
 
+    @abstractmethod
     def insert_many(
         object: dict
-    ):  #should insert all objects with key as id and value as object
+    ):  # should insert all objects with key as id and value as object
         pass

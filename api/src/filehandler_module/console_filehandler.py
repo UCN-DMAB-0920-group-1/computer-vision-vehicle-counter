@@ -1,4 +1,4 @@
-from infrastructure.i_filehandler import IFileHandler
+from .infrastructure.i_filehandler import IFileHandler
 
 
 class ConsoleFilehandler(IFileHandler):

@@ -2,8 +2,8 @@ import jwt
 from google.oauth2 import id_token
 from google.auth.transport import requests as googleRequests
 import requests
-from pusher_socket import PusherSocket
-from tracking_module.util import get_payload_from_jwt
+from src.pusher_socket import PusherSocket
+from src.tracking_module.util import get_payload_from_jwt
 
 
 class Authenticator:
@@ -64,7 +64,7 @@ class Authenticator:
     def authenticate_pusher(self, request):
         # Make sure the token is valid
 
-        if self.checkPermission(request) is False:
+        if self.check_permission(request) is False:
             return 401
 
         data = request.json
@@ -85,7 +85,7 @@ class Authenticator:
             socket_id=socket_id,
         )
 
-    def checkPermission(self, request):
+    def check_permission(self, request):
         res = False
         if "Authorization" in request.headers:
             # decoes JWT and looks at payload value "valid" return true if succes and false if not

@@ -1,7 +1,8 @@
 from distutils.errors import DistutilsModuleError
 
 from matplotlib.pyplot import draw
-from tracking_module import Tracker, streams
+from api.src.configuration import Configuration
+from src.tracking_module import Tracker, streams
 from functools import reduce
 from pymongo import MongoClient
 import json
@@ -58,11 +59,8 @@ class Analysis:
             db_collection.insert_one(data_to_send)
 
 
-with open("api/conf.json", "r") as config:
-    data = json.load(config)
-
 global collection
-client = MongoClient(data["mongodb"])
+client = MongoClient(Configuration.get("mongodb"))
 db = client['AI_result_database']
 collection = db['cloudyday_distance_statistics_test']
 collection.drop()

@@ -1,31 +1,41 @@
-from tracking_module.tracking import Tracking
-from dao.dao_detections import dao_detections
+from src.tracking_module.tracker import Tracker
+from src.dao.dao_detections import DaoDetections
 from flask import abort, jsonify, send_from_directory
 import json
 import os
 import threading
 import uuid
 
-from src.dao.dao_detections import dao_detections
-from tracker import Tracker
+from src.dao.dao_detections import DaoDetections
 from flask import abort, jsonify, send_from_directory
 
+from src.models.task import Task
+
 from src.pusher_socket import PusherSocket
+from src.filehandler_module import IFileHandler
 
 
 class Detections:
 
-    def __init__(self, UPLOAD_FOLDER: str,
-                 tracker: Tracker, dao_detections: dao_detections,
-                 MAX_THREADS: int, ALLOWED_EXTENSIONS: set):
+    def __init__(
+            self,
+            UPLOAD_FOLDER: str,
+            STORAGE_FOLDER: str,
+            tracker: Tracker,
+            dao_detections: DaoDetections,
+            MAX_THREADS: int,
+            ALLOWED_EXTENSIONS: set[str],
+            filehandler: IFileHandler):
 
-        self.thread_list = []
-        self.task_queue = []
+        self.filehandler = filehandler
+        self.thread_list: list[threading.Thread] = []
+        self.task_queue: list[Task] = []
         self.MAX_THREADS = MAX_THREADS
         self.UPLOAD_FOLDER = UPLOAD_FOLDER
-        self.ALLOWED_EXTENSIONS = ALLOWED_EXTENSIONS
-        self.tracker = tracker
-        self.dao_detections = dao_detections
+        self.STORAGE_FOLDER = STORAGE_FOLDER
+        self.ALLOWED_EXTENSIONS: set[str] = ALLOWED_EXTENSIONS
+        self.tracker: Tracker = tracker
+        self.dao_detections: DaoDetections = dao_detections
 
     def upload_video(self, request, UUID):
         self.validate_video_post(request)
@@ -43,12 +53,15 @@ class Detections:
         bbox = json.loads(request.form["bbox"])
 
         id = str(uuid.uuid4())
-        video_path = os.path.join(self.UPLOAD_FOLDER, (id + ".mp4"))
-        self.save_video_file(video_path, file)
+        temp_video_path = os.path.join(self.STORAGE_FOLDER, (id + ".mp4"))
+        file = request.files['file']
+        self.save_video_file(temp_video_path, file)
+
         # Add pending task to database
         self.dao_detections.insert_one_task(id, "Pending", UUID)
 
         socket = PusherSocket("private-video-channel-" + UUID)
+
         socket.send_notification("video-event", {
             "status": "Pending",
             "id": id
@@ -57,7 +70,7 @@ class Detections:
         threadCount = self.checkThreadCount()
         if threadCount >= self.MAX_THREADS:
 
-            task = Task(id, video_path, options, bbox, UUID)
+            task = Task(id, temp_video_path, options, bbox, UUID)
 
             self.task_queue.append(task)
             return abort(
@@ -65,18 +78,18 @@ class Detections:
                 'Task added to queue, check result again latorz. you are number:'
                 + str(len(self.task_queue)))
         try:
-            self.startVideoTracker(id, video_path, options, bbox, UUID)
+            self.startVideoTracker(id, temp_video_path, options, bbox, UUID)
         except Exception as e:
-            print("Exception in uploading video: " + str(e))
+            print("Exception while starting detection and tracker" + str(e))
             return abort(
                 500, 'Internal error while starting video task, try again')
         return jsonify({'id': id})
 
     def get_video(self, id):
-        path = id + ".mp4"
-        path += "_processed.mkv"
-        return send_from_directory(self.UPLOAD_FOLDER,
-                                   path)  # mp4 is hardcoded
+        filename = id + ".mp4"
+        filename += "_processed.mkv"
+
+        return self.filehandler.download(self.UPLOAD_FOLDER, filename)
 
     def get_count(self, id):
         res = self.dao_detections.find_one(id)
@@ -88,9 +101,10 @@ class Detections:
 
     ############# - METHODS - #############
 
-    def startVideoTracker(self, id, video_path, options: map, bbox, UUID):
+    def startVideoTracker(self, id, temp_video_path, options: map, bbox, UUID):
         thread = threading.Thread(target=self.threadVideoTracker,
-                                  args=(id, video_path, options, bbox, UUID),
+                                  args=(id, temp_video_path,
+                                        options, bbox, UUID),
                                   daemon=True)
         self.thread_list.append(thread)
         thread.start()
@@ -110,14 +124,21 @@ class Detections:
         try:
             tracker = self.tracker(
                 should_draw=True,
-                roi_area=bbox,
                 confidence_threshold=confidence,
                 max_distance_between_points=max_distance_between_points)
 
-            detections = tracker.track(video_path)
-            self.dao_detections.update_one_task(id, detections)
+            detections = tracker.track(video_path, roi=bbox)
 
-            os.remove(video_path)
+            path = video_path + "_processed.mkv"
+
+            # opening for [r]eading as [b]inary
+            in_file = open(path, "rb")
+            bytes = in_file.read()
+            in_file.close()
+
+            uploadPath = self.UPLOAD_FOLDER + "/" + id + ".mkv"
+            self.filehandler.upload(uploadPath, bytes)
+            self.dao_detections.update_one(id, detections)
 
             print("OUTPUTTED TO CONSOLE!")
             socket = PusherSocket("private-video-channel-" + UUID)
@@ -128,9 +149,13 @@ class Detections:
             })
 
         except Exception as e:
-            print("EXCEPTION in thread: " + str(e))
+            print("EXCEPTION thrown in thread from threadVideoTracker:")
+            print(e)
 
         finally:
+            # Delete temp files
+            self.filehandler.delete(video_path)
+            self.filehandler.delete(video_path + "_processed.mkv")
 
             print("Thread Done")
             self.checkQueue()
@@ -180,7 +205,7 @@ class Detections:
 
     def save_video_file(self, video_path, file):
         try:
-            os.mkdir(self.UPLOAD_FOLDER)
+            os.mkdir(self.STORAGE_FOLDER)
         except FileExistsError as e:
             print("path already exists")
 
@@ -197,15 +222,3 @@ class Detections:
             self.startVideoTracker(task.id, task.video_path, task.options,
                                    task.bbox, task.UUID)
         return len(self.task_queue)
-
-
-###### CLASSES #####
-
-
-class Task:
-    def __init__(self, id: str, video_path: str, options: map, bbox, UUID: str):
-        self.id = id
-        self.options = options
-        self.video_path = video_path
-        self.bbox = bbox
-        self.UUID = UUID

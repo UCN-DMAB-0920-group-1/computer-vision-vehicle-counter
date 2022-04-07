@@ -1,18 +1,17 @@
 import pusher
 import json
 
+from src.configuration import Configuration
+
 
 class PusherSocket:
     def __init__(self, channel):
         self.channel = channel
 
-        with open("api/conf.json", "r") as config:
-            data = json.load(config)
-
         self.pusher_client = pusher.Pusher(
-            app_id=data["pusher_app_id"],
-            key=data["pusher_key"],
-            secret=data["pusher_secret"],
+            app_id=Configuration.get("PUSHER_APP_ID"),
+            key=Configuration.get("PUSHER_KEY"),
+            secret=Configuration.get("PUSHER_SECRET"),
             cluster='eu',
             ssl=True
         )
