@@ -9,8 +9,13 @@ def test_detection_upload():
     mock_request = MagicMock()
     mock_file = MagicMock()
 
-    detection = Detections(
-        [], 'api/storage/', MagicMock(), MagicMock(), 1)
+    detection = Detections(STORAGE_FOLDER='api/storage/',
+                           UPLOAD_FOLDER='api/storage',
+                           tracker=MagicMock(),
+                           dao_detections=MagicMock(),
+                           MAX_THREADS=1,
+                           ALLOWED_EXTENSIONS=['.mp4'],
+                           filehandler=MagicMock())
 
     mock_request.form = {'bbox': '[[0, 0], [10, 0], [10, 10], [0, 10]]',
                          'enabled': True,
@@ -23,7 +28,7 @@ def test_detection_upload():
 
     # Act
     with app.app_context():
-        response = detection.upload_video(mock_request)
+        response = detection.upload_video(mock_request, 'test')
 
     # Assert
     assert response.status_code == 200
@@ -36,8 +41,13 @@ def test_get_video():
     mock_module_flask.send_from_directory = MagicMock()
     upload_folder = 'api/storage/'
 
-    detection = Detections(
-        [], upload_folder, None, None, 1)
+    detection = Detections(STORAGE_FOLDER='api/storage/',
+                           UPLOAD_FOLDER='api/storage',
+                           tracker=MagicMock(),
+                           dao_detections=MagicMock(),
+                           MAX_THREADS=1,
+                           ALLOWED_EXTENSIONS=['.mp4'],
+                           filehandler=MagicMock())
 
     # Act
     with patch('src.routes.detections.send_from_directory', new=mock_module_flask):
@@ -55,8 +65,13 @@ def test_detection_save_file():
     mock_module_os = MagicMock()
     upload_folder = 'api/storage/'
 
-    detection = Detections(
-        [], upload_folder, None, None, 1)
+    detection = Detections(STORAGE_FOLDER='api/storage/',
+                           UPLOAD_FOLDER='api/storage',
+                           tracker=MagicMock(),
+                           dao_detections=MagicMock(),
+                           MAX_THREADS=1,
+                           ALLOWED_EXTENSIONS=['.mp4'],
+                           filehandler=MagicMock())
 
     mock_file.filename = 'test.mp4'
 
@@ -79,8 +94,13 @@ def test_detection_save_file_existing_path():
     mock_module_os = MagicMock()
     upload_folder = 'api/storage/'
 
-    detection = Detections(
-        [], upload_folder, None, None, 1)
+    detection = Detections(STORAGE_FOLDER='api/storage/',
+                           UPLOAD_FOLDER='api/storage',
+                           tracker=MagicMock(),
+                           dao_detections=MagicMock(),
+                           MAX_THREADS=1,
+                           ALLOWED_EXTENSIONS=['.mp4'],
+                           filehandler=MagicMock())
 
     mock_file.filename = 'test.mp4'
     mock_module_os.mkdir.side_effect = FileExistsError()

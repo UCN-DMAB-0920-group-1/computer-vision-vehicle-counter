@@ -9,6 +9,7 @@ __pycache__/
 # Distribution / packaging
 .Python
 api/storage/
+api/temp/
 build/
 develop-eggs/
 API/storage/

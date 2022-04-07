@@ -3,10 +3,10 @@ import numpy as np
 from matplotlib import collections, pyplot as plt
 from pymongo import MongoClient
 
-with open("api/conf.json", "r") as config:
-    data = json.load(config)
+from api.src.configuration import Configuration
 
-client = MongoClient(data["mongodb"])
+
+client = MongoClient(Configuration.get("mongodb"))
 db = client['AI_result_database']
 
 

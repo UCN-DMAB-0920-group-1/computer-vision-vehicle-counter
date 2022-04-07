@@ -1,12 +1,12 @@
 from . import tracker
-from tracking_module import streams
+from src.tracking_module import streams
 import time
 
 if __name__ == '__main__':
     tracker = tracker.Tracker(should_draw=True,
-                               should_save=False,
-                               # custom_model=True, model_path="./api/models/yolov5m-custom-97.pt"
-                               )
+                              should_save=False,
+                              # custom_model=True, model_path="./api/models/yolov5m-custom-97.pt"
+                              )
 
     # start_time = time.time()
     # for i in range(1):
