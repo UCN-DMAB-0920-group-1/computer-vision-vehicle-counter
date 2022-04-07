@@ -1,4 +1,4 @@
-import { isLoggedIn, logoutCookie, getCookie } from "@/util/Cookie";
+import { isLoggedIn, logoutCookie, getCookie, getPayloadValue } from "@/util/Cookie";
 import Pusher from "pusher-js";
 
 const state = {
@@ -31,9 +31,14 @@ const actions = {
     logoutCookie();
     dispatch("checkLoggedin");
   },
-  checkLoggedin({ commit }) {
+  checkLoggedin({ commit, dispatch }) {
     const loggedIn = isLoggedIn();
-    commit("setLoginData", loggedIn);
+    //checks if jwt is expired, logs you out if so
+    if (getPayloadValue("exp") <= (Date.now() / 1000)) {
+      dispatch("logout")
+    } else {
+      commit("setLoginData", loggedIn);
+    }
   },
   authenticatePusher({ commit }) {
     Pusher.logToConsole = false;
