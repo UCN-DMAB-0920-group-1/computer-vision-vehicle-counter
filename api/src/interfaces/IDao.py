@@ -3,19 +3,19 @@ from abc import ABC, abstractmethod
 
 class IDao(ABC):
     @abstractmethod
-    def find_one(id: int):  # should read a single object
+    def find_one(id: str):  # should read a single object
         pass
 
     @abstractmethod
-    def insert_one(id: int, object):  # should insert one object with id as key
+    def insert_one(id: str, object):  # should insert one object with id as key
         pass
 
     @abstractmethod
-    def delete_one(id: int):  # should delete one object with id
+    def delete_one(id: str):  # should delete one object with id
         pass
 
     @abstractmethod
-    def update_one(id: int, object):  # should update object with id
+    def update_one(id: str, object):  # should update object with id
         pass
 
     @abstractmethod

@@ -64,7 +64,7 @@ class DaoDetections(IDao):
             return errorTxt
         return res
 
-    def update_one_task(self, id: str, detection_result):
+    def update_one(self, id: str, detection_result):
         video = id + '.mp4'
         cars_detected = detection_result[
             'car'] if 'car' in detection_result else 0
@@ -87,3 +87,11 @@ class DaoDetections(IDao):
             print(errorTxt + str(e))
             res = errorTxt
         return res
+
+    def delete_one(id: int):  # should delete one object with id
+        pass
+
+    def insert_many(
+        object: dict
+    ):  # should insert all objects with key as id and value as object
+        pass

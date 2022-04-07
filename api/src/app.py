@@ -3,7 +3,7 @@ from pymongo import MongoClient
 
 from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
-from api.src.configuration import Configuration
+from src.configuration import Configuration
 from src.dao.dao_detections import DaoDetections
 from src.routes.Auth import Authenticator
 from src.routes.detections import Detections

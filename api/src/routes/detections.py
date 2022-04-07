@@ -138,7 +138,7 @@ class Detections:
 
             uploadPath = self.UPLOAD_FOLDER + "/" + id + ".mkv"
             self.filehandler.upload(uploadPath, bytes)
-            self.dao_detections.update_one_task(id, detections)
+            self.dao_detections.update_one(id, detections)
 
             print("OUTPUTTED TO CONSOLE!")
             socket = PusherSocket("private-video-channel-" + UUID)

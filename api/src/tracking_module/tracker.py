@@ -10,8 +10,8 @@ import progress.bar as Bar
 import torch
 from norfair import Tracker as NorfairTracker
 
-from .norfair_helpers import euclidean_distance, yolo_detections_to_norfair_detections
-from .util import center_pos, get_stream
+from norfair_helpers import euclidean_distance, yolo_detections_to_norfair_detections
+from util import center_pos, get_stream
 
 
 class Tracker:
