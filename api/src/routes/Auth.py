@@ -64,7 +64,7 @@ class Authenticator:
     def authenticate_pusher(self, request):
         # Make sure the token is valid
 
-        if self.checkPermission(request) is False:
+        if self.check_permission(request) is False:
             return 401
 
         data = request.json
@@ -85,7 +85,7 @@ class Authenticator:
             socket_id=socket_id,
         )
 
-    def checkPermission(self, request):
+    def check_permission(self, request):
         res = False
         if "Authorization" in request.headers:
             # decoes JWT and looks at payload value "valid" return true if succes and false if not
