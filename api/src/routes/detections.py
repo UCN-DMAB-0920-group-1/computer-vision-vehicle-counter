@@ -17,15 +17,10 @@ from src.filehandler_module import IFileHandler
 
 class Detections:
 
-    def __init__(
-            self,
-            UPLOAD_FOLDER: str,
-            STORAGE_FOLDER: str,
-            tracker: Tracker,
-            dao_detections: DaoDetections,
-            MAX_THREADS: int,
-            ALLOWED_EXTENSIONS: set[str],
-            filehandler: IFileHandler):
+    def __init__(self, UPLOAD_FOLDER: str, STORAGE_FOLDER: str,
+                 tracker: Tracker, dao_detections: DaoDetections,
+                 MAX_THREADS: int, ALLOWED_EXTENSIONS: set[str],
+                 filehandler: IFileHandler):
 
         self.filehandler = filehandler
         self.thread_list: list[threading.Thread] = []
@@ -103,8 +98,8 @@ class Detections:
 
     def startVideoTracker(self, id, temp_video_path, options: map, bbox, UUID):
         thread = threading.Thread(target=self.threadVideoTracker,
-                                  args=(id, temp_video_path,
-                                        options, bbox, UUID),
+                                  args=(id, temp_video_path, options, bbox,
+                                        UUID),
                                   daemon=True)
         self.thread_list.append(thread)
         thread.start()

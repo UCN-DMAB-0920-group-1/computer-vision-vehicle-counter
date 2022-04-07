@@ -33,20 +33,16 @@ _detections = Detections(
     dao_detections=DaoDetections(mongoClient=mongo_client),
     MAX_THREADS=MAX_THREADS,
     ALLOWED_EXTENSIONS=ALLOWED_EXTENSIONS,
-    filehandler=_filehandler
-)
+    filehandler=_filehandler)
 
-_authenticator = Authenticator(
-    Configuration.get("CLIENT_ID"),
-    SECRET_KEY,
-    Configuration.get("JWT_algorithm"),
-    Configuration.get("CLIENT_SECRET")
-)
+_authenticator = Authenticator(Configuration.get("CLIENT_ID"), SECRET_KEY,
+                               Configuration.get("JWT_algorithm"),
+                               Configuration.get("CLIENT_SECRET"))
 
 ############# - ROUTES - #############
 
 
-@ app.route('/detection', methods=['POST'])
+@app.route('/detection', methods=['POST'])
 def upload_video():
     permitted = _authenticator.check_permission(request)
     UUID = get_payload_from_jwt(request, "UUID", SECRET_KEY)
@@ -55,21 +51,21 @@ def upload_video():
         UUID) if permitted else "Not permitted to access this resource"
 
 
-@ app.route('/detection/<string:id>/video')
+@app.route('/detection/<string:id>/video')
 def get_video(id):
     permitted = _authenticator.check_permission(request)
     return _detections.get_video(
         id) if permitted else "Not permitted to access this resource"
 
 
-@ app.route('/detection/<string:id>')
+@app.route('/detection/<string:id>')
 def get_count(id):
     permitted = _authenticator.check_permission(request)
     return _detections.get_count(
         id) if permitted else "Not permitted to access this resource"
 
 
-@ app.route('/detection/user')
+@app.route('/detection/user')
 def get_user_videos():
     UUID = request.args.get("UUID")
     print(UUID)
@@ -79,7 +75,7 @@ def get_user_videos():
     pass
 
 
-@ app.route("/auth", methods=["GET"])
+@app.route("/auth", methods=["GET"])
 def login():
     code = request.args.get('code')
     # returns empty string if failed to authenticate
@@ -88,11 +84,11 @@ def login():
     return jsonify({"jwt": res})
 
 
-@ app.route('/auth/pusher', methods=['POST'])
+@app.route('/auth/pusher', methods=['POST'])
 def pusher_auth():
     res = _authenticator.authenticate_pusher(request)
 
-    if(res == 401):
+    if (res == 401):
         return abort(401, "unauthenticated")
 
     return res
