@@ -108,11 +108,12 @@ class Detections:
 
     def threadVideoTracker(self, id, video_path, options: map, bbox, UUID):
         if options['enabled'] == 'false':
-            bbox = [[0, 0], [1920, 0], [1920, 1080], [0, 1080]]
+            bbox = None
             confidence = 0.6
         else:
             if len(bbox) == 0:
-                bbox = [[0, 0], [1920, 0], [1920, 1080], [0, 1080]]
+                # Create a proper fix for this (np array to np aray bug @bukz, @midi)
+                bbox = None
             confidence = float(options['confidence'])
             max_distance_between_points = float(
                 options['max_distance_between_points'])
