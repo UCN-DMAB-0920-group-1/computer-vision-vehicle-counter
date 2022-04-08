@@ -5,6 +5,7 @@
     </p>
 
     <button
+    v-if="props.video.status === 'Done'"
       @click="downloadVideo"
       :class="props.video.status"
       class="mx-auto px-3 shadow-xl block rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-500 hover:bg-white font-semibold"
