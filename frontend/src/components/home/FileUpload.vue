@@ -117,7 +117,7 @@
   </div>
       <div class="fixed bottom-6 z-10 flex flex-col justify-end flex-wrap h-full pt-6 gap-3">
         <div v-for="item in error" :key="item">
-          <AlertPopup :text="item" :type="'Warning'"></AlertPopup>
+          <AlertPopup :text="item" :type="'Error'"></AlertPopup>
         </div>
       </div>
 </template>
