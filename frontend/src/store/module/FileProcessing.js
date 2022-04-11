@@ -1,4 +1,4 @@
-import { getCookie} from "@/util/Cookie";
+import { getCookie } from "@/util/Cookie";
 
 const state = {
   videoIds: [],
@@ -12,9 +12,9 @@ const state = {
   },
   bboxCoordinates: {
     startX: 0,
-    endX: 1920,
+    endX: 100,
     startY: 0,
-    endY: 1080,
+    endY: 100,
   },
 };
 
@@ -47,12 +47,7 @@ const actions = {
         return [parseInt(point.scaledX), parseInt(point.scaledY)];
       });
     } else {
-      bbox = [
-        [state.bboxCoordinates.startX, state.bboxCoordinates.startY],
-        [state.bboxCoordinates.endX, state.bboxCoordinates.startY],
-        [state.bboxCoordinates.endX, state.bboxCoordinates.endY],
-        [state.bboxCoordinates.startX, state.bboxCoordinates.endY],
-      ];
+      bbox = {};
     }
 
     formData.append("bbox", JSON.stringify(bbox));
@@ -60,8 +55,7 @@ const actions = {
     const response = await fetch(process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection", {
       method: "POST",
       body: formData,
-      headers: { "Authorization": getCookie("jwt") },
-
+      headers: { Authorization: getCookie("jwt") },
     });
 
     const json = await response.json();
