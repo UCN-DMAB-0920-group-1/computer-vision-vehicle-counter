@@ -113,7 +113,11 @@
       >
         Upload
       </button>
-      <p>{{ error }}</p>
+      <div class="absolute bottom-2 z-10 flex flex-col justify-end h-full">
+        <div v-for="item in error" :key="item">
+          <AlertError :error="item"></AlertError>
+        </div>
+      </div>
     </section>
   </div>
 </template>
@@ -122,14 +126,15 @@
 import { ref, watch, computed } from "vue";
 import { useStore } from "vuex";
 import PictureThumbnail from "./PictureThumbnail.vue";
+import AlertError from "../core/AlertError.vue";
 
 export default {
-  components: { PictureThumbnail },
+  components: { PictureThumbnail, AlertError },
   setup() {
     const store = useStore();
 
     let file = ref("");
-    let error = ref("");
+    let error = ref([]);
     let loading = ref(false);
     let videoUrl = computed(() => store.getters["FileProcessing/videoUrl"]);
 
@@ -159,7 +164,7 @@ export default {
 
     async function onUploadFile() {
       if (!file.value) {
-        error.value = "Please select a file!";
+        error.value.push("Please select a file!");
         return;
       }
 
@@ -172,7 +177,7 @@ export default {
         });
         await store.dispatch("Detections/getVideoData", {id:id})
       } catch (e) {
-        error.value = e;
+        error.value.push(e);
       } finally {
         setTimeout(() => {
           loading.value = false;

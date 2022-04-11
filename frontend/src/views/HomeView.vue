@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="loggedIn" class="grid grid-cols-1 gap-3 sm:grid-cols-1 max-w-7xl mx-auto duration-300">
+    <div v-if="loggedIn" class="grid grid-cols-1 gap-3 sm:grid-cols-1 max-w-7xl mx-auto">
       <div class="bg-violet-200 rounded-xl shadow-xl">
         <FileUpload></FileUpload>
       </div>
