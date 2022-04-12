@@ -1,11 +1,12 @@
 import json
 from logging import exception
-
-from flask import Config
+import os
 
 
 class Configuration(dict):
     __instance = None
+
+    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
     @staticmethod
     def get(key: str):

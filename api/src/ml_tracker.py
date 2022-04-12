@@ -1,5 +1,5 @@
 from distutils.errors import DistutilsModuleError
-from api.src.configuration import Configuration
+from api.configuration import Configuration
 from src.tracking_module import Tracker, streams
 from functools import reduce
 from pymongo import MongoClient

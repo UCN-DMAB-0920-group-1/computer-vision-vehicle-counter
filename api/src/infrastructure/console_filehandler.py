@@ -1,4 +1,4 @@
-from .infrastructure.i_filehandler import IFileHandler
+from api.src.domain.i_filehandler import IFileHandler
 
 
 class ConsoleFilehandler(IFileHandler):
