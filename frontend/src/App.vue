@@ -12,7 +12,7 @@
 import NavBar from "./components/core/NavBar.vue";
 import { useStore } from "vuex";
 import {computed} from "vue";
-import AlertPopup from "./components/core/AlertPopup.vue"
+import AlertPopup from "@/components/core/AlertPopup.vue"
 const store = useStore();
 
 let alerts = computed(() => store.getters["AlertsList/list"]);
