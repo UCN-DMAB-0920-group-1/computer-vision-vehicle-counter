@@ -1,7 +1,7 @@
 import pusher
 import json
 
-from src.configuration import Configuration
+from api.configuration import Configuration
 
 
 class PusherSocket:

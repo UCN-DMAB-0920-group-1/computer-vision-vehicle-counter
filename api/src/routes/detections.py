@@ -1,18 +1,16 @@
+from api.configuration import Configuration
 from src.tracking_module.tracker import Tracker
 from src.dao.dao_detections import DaoDetections
-from flask import abort, jsonify, send_from_directory
+from flask import abort, jsonify
 import json
 import os
 import threading
 import uuid
 
-from src.dao.dao_detections import DaoDetections
-from flask import abort, jsonify, send_from_directory
-
 from src.models.task import Task
 
 from src.pusher_socket import PusherSocket
-from src.filehandler_module import IFileHandler
+from src.domain.i_filehandler import IFileHandler
 
 
 class Detections:
@@ -80,11 +78,11 @@ class Detections:
                 500, 'Internal error while starting video task, try again')
         return jsonify({'id': id})
 
-    def get_video(self, id):
+    def get_video(self, id, uuid):
         filename = id + ".mp4"
         filename += "_processed.mkv"
 
-        return self.filehandler.download(self.UPLOAD_FOLDER, filename)
+        return self.filehandler.download(uuid, filename)
 
     def get_count(self, id):
         res = self.dao_detections.find_one(id)
@@ -132,8 +130,7 @@ class Detections:
             bytes = in_file.read()
             in_file.close()
 
-            uploadPath = self.UPLOAD_FOLDER + "/" + id + ".mkv"
-            self.filehandler.upload(uploadPath, bytes)
+            self.filehandler.upload(UUID + "/" + id + ".mkv", bytes)
             self.dao_detections.update_one(id, detections)
 
             print("OUTPUTTED TO CONSOLE!")
@@ -150,8 +147,10 @@ class Detections:
 
         finally:
             # Delete temp files
-            self.filehandler.delete(video_path)
-            self.filehandler.delete(video_path + "_processed.mkv")
+            if os.path.exists(video_path):
+                os.remove(video_path)
+            if os.path.exists(video_path + "_processed.mkv"):
+                os.remove(video_path + "_processed.mkv")
 
             print("Thread Done")
             self.checkQueue()

@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import collections, pyplot as plt
 from pymongo import MongoClient
 
-from api.src.configuration import Configuration
+from api.configuration import Configuration
 
 
 client = MongoClient(Configuration.get("mongodb"))
