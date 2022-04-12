@@ -37,12 +37,10 @@ def test_detection_upload():
 
 def test_get_video():
     # Arrange
-    mock_module_flask = MagicMock()
-    mock_module_flask.send_from_directory = MagicMock()
     upload_folder = 'api/storage/'
 
-    detection = Detections(STORAGE_FOLDER='api/storage/',
-                           UPLOAD_FOLDER='api/storage',
+    detection = Detections(STORAGE_FOLDER=upload_folder,
+                           UPLOAD_FOLDER=upload_folder,
                            tracker=MagicMock(),
                            dao_detections=MagicMock(),
                            MAX_THREADS=1,
@@ -50,9 +48,8 @@ def test_get_video():
                            filehandler=MagicMock())
 
     # Act
-    with patch('src.routes.detections.send_from_directory', new=mock_module_flask):
-        with app.app_context():
-            response = detection.get_video('test')
+    with app.app_context():
+        response = detection.get_video('test', "1234")
 
     # Assert
     assert response != None

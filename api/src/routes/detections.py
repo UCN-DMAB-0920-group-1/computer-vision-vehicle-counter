@@ -1,4 +1,3 @@
-from api.configuration import Configuration
 from src.tracking_module.tracker import Tracker
 from src.dao.dao_detections import DaoDetections
 from flask import abort, jsonify
@@ -149,8 +148,8 @@ class Detections:
             # Delete temp files
             if os.path.exists(video_path):
                 os.remove(video_path)
-            if os.path.exists(video_path + "_processed.mkv"):
-                os.remove(video_path + "_processed.mkv")
+            if os.path.exists(path):
+                os.remove(path)
 
             print("Thread Done")
             self.checkQueue()

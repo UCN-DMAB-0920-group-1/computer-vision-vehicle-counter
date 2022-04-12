@@ -1,7 +1,7 @@
 import os
 from flask import send_from_directory
-from api.src.domain.i_filehandler import IFileHandler
-from api.configuration import Configuration
+from src.domain.i_filehandler import IFileHandler
+from configuration import Configuration
 
 
 class StorageFilehandler(IFileHandler):
