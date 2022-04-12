@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'api-vehicle-detection'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F7B99A96E9564AB0B790C95B1655D5B1 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_F6074B6683A34F1B9A17096BA27935E5 }}
