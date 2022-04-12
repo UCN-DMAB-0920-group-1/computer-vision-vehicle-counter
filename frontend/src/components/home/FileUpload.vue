@@ -113,23 +113,28 @@
       >
         Upload
       </button>
-      <p>{{ error }}</p>
     </section>
   </div>
+      <div class="fixed bottom-6 z-10 flex flex-col justify-end flex-wrap h-full pt-6 gap-3">
+        <div v-for="item in error" :key="item">
+          <AlertPopup :text="item" :type="'Error'"></AlertPopup>
+        </div>
+      </div>
 </template>
 
 <script>
 import { ref, watch, computed } from "vue";
 import { useStore } from "vuex";
 import PictureThumbnail from "./PictureThumbnail.vue";
+import AlertPopup from "../core/AlertPopup.vue";
 
 export default {
-  components: { PictureThumbnail },
+  components: { PictureThumbnail, AlertPopup },
   setup() {
     const store = useStore();
 
     let file = ref("");
-    let error = ref("");
+    let error = ref([]);
     let loading = ref(false);
     let videoUrl = computed(() => store.getters["FileProcessing/videoUrl"]);
 
@@ -150,29 +155,26 @@ export default {
       var files = e.target.files || e.dataTransfer.files;
       if (!files.length) return;
 
-      error.value = "";
       file.value = files[0];
-
       const fileURL = URL.createObjectURL(file.value);
       store.dispatch("FileProcessing/saveVideoUrl", fileURL);
     }
 
     async function onUploadFile() {
       if (!file.value) {
-        error.value = "Please select a file!";
+        error.value.push("Please select a file!");
         return;
       }
-
+      
       try {
         loading.value = true;
-
 
         const id = await store.dispatch("FileProcessing/uploadVideo", {
           file: file.value,
         });
         await store.dispatch("Detections/getVideoData", {id:id})
       } catch (e) {
-        error.value = e;
+        error.value.push(e);
       } finally {
         setTimeout(() => {
           loading.value = false;
