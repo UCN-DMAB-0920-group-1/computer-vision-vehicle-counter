@@ -2,7 +2,7 @@ import os
 from flask import send_from_directory
 
 from azure.storage.blob import BlobServiceClient, ContainerClient, BlobClient
-from src.domain.i_filehandler import IFileHandler
+from src.application.i_filehandler import IFileHandler
 from configuration import Configuration
 
 

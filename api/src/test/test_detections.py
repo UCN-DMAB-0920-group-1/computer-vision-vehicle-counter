@@ -1,6 +1,6 @@
 from unittest.mock import MagicMock, patch
 
-from src.routes.detections import Detections
+from src.infrastructure.routes.detections import Detections
 from src.app import app
 
 

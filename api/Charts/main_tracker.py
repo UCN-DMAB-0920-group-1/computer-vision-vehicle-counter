@@ -1,4 +1,4 @@
-from . import tracker
+from ..src import tracker
 from src.tracking_module import streams
 import time
 
