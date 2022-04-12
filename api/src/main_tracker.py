@@ -1,5 +1,6 @@
 from . import tracker
 from src.tracking_module import streams
+from src.log.logger import Logger
 import time
 
 if __name__ == '__main__':
@@ -11,14 +12,14 @@ if __name__ == '__main__':
     # start_time = time.time()
     # for i in range(1):
     #     detections = tracker.track(streams.streams["file-5-sec"])
-    # print("from object methods")
-    # print("--- %s seconds ---" % (time.time() - start_time))
+    # logger.logEntry("from object methods")
+    # logger.logEntry("--- %s seconds ---" % (time.time() - start_time))
 
     start_time = time.time()
     for i in range(1):
         detections = tracker.track(streams.streams["file-5-sec"],
                                    roi=[[0, 250], [520, 90], [640, 90], [640, 719], [0, 719]])
-    print("from module functions")
-    print("--- %s seconds ---" % (time.time() - start_time))
+    Logger.logEntry("from module functions")
+    Logger.logEntry("--- %s seconds ---" % (time.time() - start_time))
 
-    print(detections)
+    Logger.logEntry(detections)

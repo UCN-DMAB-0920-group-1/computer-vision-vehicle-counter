@@ -2,6 +2,7 @@ import threading
 from collections import namedtuple
 from functools import reduce
 from typing import Iterable, Mapping
+from src.log.logger import Logger
 
 import cv2
 import norfair
@@ -134,7 +135,7 @@ class Tracker:
                 # yolo_detections = self.model(frame)
                 yolo_detections = self.model(masked_image)
             except Exception as e:
-                print(str(e))
+                Logger.logEntry(str(e))
                 break
 
             # Convert to norfair detections
@@ -309,7 +310,6 @@ def count_objects(tracked_objects, roi, detections, inside_roi):
         else:
             if obj.id in inside_roi:
                 inside_roi.remove(obj.id)
-        # print(detections)
 
 
 def draw(frame, roi, norfair_detections, tracked_objects, track_shape: str, detections, inside_roi):

@@ -3,6 +3,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as googleRequests
 import requests
 from src.pusher_socket import PusherSocket
+from src.log.logger import Logger
 from src.tracking_module.util import get_payload_from_jwt
 
 
@@ -44,7 +45,7 @@ class Authenticator:
             _token = self.JWT_creation(_payload)
             return _token
         except Exception as e:
-            print("failed to authenticate profile: " + str(e))
+            Logger.logEntry("failed to authenticate profile: " + str(e))
             return ""
 
     def JWT_creation(self, profile):
@@ -58,7 +59,7 @@ class Authenticator:
             valid = get_payload_from_jwt(request, "valid", self.SECRET_KEY)
             return True if valid == "True" else False
         except Exception as e:
-            print("JWT token was not valid: " + str(e))
+            Logger.logEntry("JWT token was not valid: " + str(e))
             return False
 
     def authenticate_pusher(self, request):

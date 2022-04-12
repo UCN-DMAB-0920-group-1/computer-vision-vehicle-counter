@@ -2,6 +2,7 @@ from src.interfaces.IDao import IDao
 from pymongo import MongoClient
 from datetime import datetime
 from functools import reduce
+from src.log.logger import Logger
 
 
 class DaoDetections(IDao):
@@ -60,7 +61,7 @@ class DaoDetections(IDao):
             })
         except Exception as e:
             errorTxt = "Could not insert new task "
-            print(errorTxt + str(e))
+            Logger.logEntry(errorTxt + str(e))
             return errorTxt
         return res
 
@@ -84,7 +85,7 @@ class DaoDetections(IDao):
             })
         except Exception as e:
             errorTxt = "Could not update database value"
-            print(errorTxt + str(e))
+            Logger.logEntry(errorTxt + str(e))
             res = errorTxt
         return res
 

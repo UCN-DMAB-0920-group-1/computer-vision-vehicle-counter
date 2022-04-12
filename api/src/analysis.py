@@ -6,6 +6,7 @@ from src.tracking_module import Tracker, streams
 from functools import reduce
 from pymongo import MongoClient
 import json
+from src.log.logger import Logger
 
 
 class Analysis:
@@ -33,17 +34,18 @@ class Analysis:
                 should_draw=False
             )
 
-            print("Now running with: " + str(value) + " as distance parameter")
+            Logger.logEntry("Now running with: " +
+                            str(value) + " as distance parameter")
             detections = tracker.track(url)
             # reduce(lambda a, b: a+b, detections.values())
             total = detections["car"]
             diff = expected - total
 
-            print("Finished tracking. found ")
-            print(detections)
+            Logger.logEntry("Finished tracking. found ")
+            Logger.logEntry(detections)
 
             if(bestDeviation < abs(diff)):
-                print("New best! " + str(total))
+                Logger.logEntry("New best! " + str(total))
                 bestValue = value
                 bestDeviation = diff
 

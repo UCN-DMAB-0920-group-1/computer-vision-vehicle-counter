@@ -15,6 +15,7 @@ from src.routes.detections import Detections
 from src.tracking_module.tracker import Tracker
 from src.tracking_module.util import get_payload_from_jwt
 from src.infrastructure.blob_filehandler import BlobFilehandler
+from src.log.logger import Logger
 
 # Load config
 app = Flask(__name__)
@@ -74,7 +75,7 @@ def get_count(id):
 @app.route('/detection/user')
 def get_user_videos():
     UUID = request.args.get("UUID")
-    print(UUID)
+    Logger.logEntry(UUID)
     permitted = _authenticator.check_permission(request)
     return _detections.get_user_videos(
         UUID) if permitted else "Not permitted to access this resource"
@@ -86,7 +87,7 @@ def login():
     code = request.args.get('code')
     # returns empty string if failed to authenticate
     res = _authenticator.authenticate_google(code)
-    print(res)
+    Logger.logEntry(res)
     return jsonify({"jwt": res})
 
 

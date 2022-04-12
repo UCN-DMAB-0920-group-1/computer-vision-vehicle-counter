@@ -33,7 +33,7 @@ class BlobFilehandler(IFileHandler):
 
         path = Configuration.get(
             "APP_SETTINGS.STORAGE_FOLDER") + filename
-        print("PATH: " + path)
+        logger.logEntry("PATH: " + path)
         with open(path, "wb+") as my_blob:
             blob_data = blob.download_blob()
             blob_data.readinto(my_blob)

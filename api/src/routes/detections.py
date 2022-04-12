@@ -5,6 +5,7 @@ import json
 import os
 import threading
 import uuid
+from src.log.logger import Logger
 
 from src.models.task import Task
 
@@ -30,6 +31,7 @@ class Detections:
         self.dao_detections: DaoDetections = dao_detections
 
     def upload_video(self, request, UUID):
+
         self.validate_video_post(request)
         file = request.files['file']
 
@@ -72,7 +74,8 @@ class Detections:
         try:
             self.startVideoTracker(id, temp_video_path, options, bbox, UUID)
         except Exception as e:
-            print("Exception while starting detection and tracker" + str(e))
+            Logger.logEntry(
+                "Exception while starting detection and tracker" + str(e))
             return abort(
                 500, 'Internal error while starting video task, try again')
         return jsonify({'id': id})
@@ -100,7 +103,7 @@ class Detections:
                                   daemon=True)
         self.thread_list.append(thread)
         thread.start()
-        print("Thread Started: " + thread.getName())
+        Logger.logEntry("Thread Started: " + thread.getName())
         return "Thread started"
 
     def threadVideoTracker(self, id, video_path, options: map, bbox, UUID):
@@ -132,7 +135,7 @@ class Detections:
             self.filehandler.upload(UUID + "/" + id + ".mkv", bytes)
             self.dao_detections.update_one(id, detections)
 
-            print("OUTPUTTED TO CONSOLE!")
+            Logger.logEntry("OUTPUTTED TO CONSOLE!")
             socket = PusherSocket("private-video-channel-" + UUID)
             socket.send_notification("video-event", {
                 "status": "Finished",
@@ -141,8 +144,9 @@ class Detections:
             })
 
         except Exception as e:
-            print("EXCEPTION thrown in thread from threadVideoTracker:")
-            print(e)
+            Logger.logEntry(
+                "EXCEPTION thrown in thread from threadVideoTracker:")
+            Logger.logEntry(e)
 
         finally:
             # Delete temp files
@@ -151,7 +155,7 @@ class Detections:
             if os.path.exists(path):
                 os.remove(path)
 
-            print("Thread Done")
+            Logger.logEntry("Thread Done")
             self.checkQueue()
             return 'Thread Done'
 
@@ -160,7 +164,7 @@ class Detections:
         for t in self.thread_list:
             if t.is_alive():
                 count += 1
-        print('Threads running: ' + str(count))
+        Logger.logEntry('Threads running: ' + str(count))
         return count
 
     def allowed_file(self, filename):
@@ -201,17 +205,17 @@ class Detections:
         try:
             os.mkdir(self.STORAGE_FOLDER)
         except FileExistsError as e:
-            print("path already exists")
+            Logger.logEntry("path already exists")
 
         file.save(video_path)
         return "File saved"
 
     def checkQueue(self):
-        print("Checking task list...")
+        Logger.logEntry("Checking task list...")
 
         if self.checkThreadCount() < self.MAX_THREADS + 1 and len(
                 self.task_queue) > 0:
-            print("Starting new task")
+            Logger.logEntry("Starting new task")
             task = self.task_queue.pop(0)
             self.startVideoTracker(task.id, task.video_path, task.options,
                                    task.bbox, task.UUID)

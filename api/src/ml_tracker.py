@@ -4,6 +4,7 @@ from src.tracking_module import Tracker, streams
 from functools import reduce
 from pymongo import MongoClient
 import json
+from src.log.logger import Logger
 
 actual = 61  # How many cars should be detected
 
@@ -34,16 +35,17 @@ for distance in range(start_distance, end_distance, increment_interval):
                           596, 697], [5, 708], [0, 332]]
                       )
 
-    print("Now running with: " + str(distance) + " as distance parameter")
+    Logger.logEntry("Now running with: " + str(distance) +
+                    " as distance parameter")
     detections = tracker.track(streams["file-1-min"])
     total = reduce(lambda a, b: a+b, detections.values())
     diff = actual - total
 
-    print("Finished tracking. found ")
-    print(detections)
+    Logger.logEntry("Finished tracking. found ")
+    Logger.logEntry(detections)
 
     if(bestDeviation < abs(diff)):
-        print("New best! " + str(total))
+        Logger.logEntry("New best! " + str(total))
         bestDist = distance
         bestDeviation = diff
 
@@ -59,5 +61,5 @@ for distance in range(start_distance, end_distance, increment_interval):
     collection.insert_one(data_to_send)
 
 
-print("Best distance: " + str(bestDist) +
-      " with a deviation of " + str(bestDeviation))
+Logger.logEntry("Best distance: " + str(bestDist) +
+                " with a deviation of " + str(bestDeviation))
