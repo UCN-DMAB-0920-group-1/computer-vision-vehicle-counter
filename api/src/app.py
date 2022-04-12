@@ -7,6 +7,7 @@ from pymongo import MongoClient
 from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
 from api.configuration import Configuration
+from api.src.domain.i_filehandler import IFileHandler
 
 from src.dao.dao_detections import DaoDetections
 from src.routes.Auth import Authenticator
@@ -26,7 +27,7 @@ ALLOWED_EXTENSIONS = set(Configuration.get("APP_SETTINGS.ALLOWED_EXTENSIONS"))
 
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 # detections routes init
-_filehandler: BlobFilehandler = BlobFilehandler()
+_filehandler: IFileHandler = BlobFilehandler()
 
 mongo_client = MongoClient(Configuration.get("mongodb"))
 

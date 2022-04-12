@@ -115,21 +115,15 @@
       </button>
     </section>
   </div>
-      <div class="fixed bottom-6 z-10 flex flex-col justify-end flex-wrap h-full pt-6 gap-3">
-        <div v-for="item in error" :key="item">
-          <AlertPopup :text="item" :type="'Error'"></AlertPopup>
-        </div>
-      </div>
 </template>
 
 <script>
 import { ref, watch, computed } from "vue";
 import { useStore } from "vuex";
 import PictureThumbnail from "./PictureThumbnail.vue";
-import AlertPopup from "../core/AlertPopup.vue";
 
 export default {
-  components: { PictureThumbnail, AlertPopup },
+  components: { PictureThumbnail},
   setup() {
     const store = useStore();
 
@@ -163,6 +157,8 @@ export default {
     async function onUploadFile() {
       if (!file.value) {
         error.value.push("Please select a file!");
+          store.dispatch("AlertsList/addAlert", {e:"Please select a file!", type:"Error"});
+
         return;
       }
       
