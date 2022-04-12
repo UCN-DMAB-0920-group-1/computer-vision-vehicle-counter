@@ -18,7 +18,7 @@ export function logoutCookie() {
 
 export function getPayloadValue(key) {
     let token = getCookie("jwt");
-    if (token.length > 0) {
+    if (token && token.length > 0) {
         let json = jwt_decode(getCookie("jwt"));
         return json[key];
     } else return "no token found";
