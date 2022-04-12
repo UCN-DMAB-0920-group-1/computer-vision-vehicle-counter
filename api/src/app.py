@@ -3,13 +3,15 @@ from pymongo import MongoClient
 
 from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
+from api.src.filehandler_module import console_filehandler
 from src.configuration import Configuration
 from src.dao.dao_detections import DaoDetections
 from src.routes.Auth import Authenticator
 from src.routes.detections import Detections
 from src.tracking_module.tracker import Tracker
 from src.tracking_module.util import get_payload_from_jwt
-from src.implementations.storage_filehandler import StorageFilehandler
+from src.filehandler_module.console_filehandler import ConsoleFilehandler
+from src.filehandler_module.infrastructure.i_filehandler import IFileHandler
 
 # Load config
 app = Flask(__name__)
@@ -22,7 +24,7 @@ ALLOWED_EXTENSIONS = set(Configuration.get("APP_SETTINGS.ALLOWED_EXTENSIONS"))
 
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 # detections routes init
-_filehandler: StorageFilehandler = StorageFilehandler()
+_filehandler: IFileHandler = ConsoleFilehandler()
 
 mongo_client = MongoClient(Configuration.get("mongodb"))
 
