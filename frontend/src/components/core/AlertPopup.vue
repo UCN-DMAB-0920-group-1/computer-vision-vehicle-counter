@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-import {ref, defineProps} from "vue"
+import {ref, defineProps } from "vue"
 
 let typeClasses = ""
 let headerText = ""
@@ -36,6 +36,10 @@ switch(props.type) {
 }
 const props = defineProps(["text","type"])
 let alertOpen = ref(true)
+
+    function closeAlert(){
+        alertOpen.value = false;
+    }
 
 </script>
 
