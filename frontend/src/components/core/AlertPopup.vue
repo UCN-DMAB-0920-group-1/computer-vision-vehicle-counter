@@ -13,7 +13,7 @@
 </template>
 
 <script setup>
-import {ref, defineProps,onMounted } from "vue"
+import {ref, defineProps } from "vue"
 
 let typeClasses = ""
 let headerText = ""
@@ -41,11 +41,6 @@ let alertOpen = ref(true)
         alertOpen.value = false;
     }
 
-onMounted(() => {
-  setTimeout(() => {
-    closeAlert();
-  }, 3000);
-});
 </script>
 
 <style scoped>
