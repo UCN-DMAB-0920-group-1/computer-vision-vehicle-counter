@@ -1,7 +1,5 @@
 <template>
-  <div>
-    <AlertBox v-for="video in finishedVideos" :key="video.id" :video="video"></AlertBox>
-
+  <div>    
     <div>
       <section v-if="loading">
         <div class="flex justify-center items-center">
@@ -35,11 +33,10 @@
 import DetectionResults from "@/components/core/detectionResults.vue";
 import { ref, computed } from "vue";
 import { useStore } from "vuex";
-import AlertBox from "../core/AlertBox.vue";
 import { getPayloadValue } from "@/util/Cookie";
 
 export default {
-  components: { AlertBox, DetectionResults },
+  components: { DetectionResults },
   setup() {
     const store = useStore();
     const vehicleTypes = ref([]);
@@ -56,6 +53,7 @@ export default {
       channel.bind(`video-event`, function (data) {
         if (data.status == "Finished") {
           store.commit("Detections/addFinishedVideo", data);
+          store.dispatch("AlertsList/addAlert", {e:"Your video is finished!", type:"Success"});
           store.dispatch("Detections/getVideoData", {
             id: data.id,
           });
@@ -76,7 +74,6 @@ export default {
       }
     }
     return {
-      finishedVideos: computed(() => store.getters["Detections/finishedVideos"]),
       vehicleTypes,
       loading,
       downloadNewestData,
