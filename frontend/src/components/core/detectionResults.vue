@@ -23,24 +23,28 @@ const props = defineProps(["video"]);
 
 async function downloadVideo() {
   const id = props.video._id;
-  console.log("id:", id);
 
-  //
   const response = await fetch(`${process.env.VUE_APP_PROCESSING_ENDPOINT}/detection/${id}/video`, {
     method: "GET",
     headers: { Authorization: getCookie("jwt") },
   });
 
-  console.log(response);
+  if (response.ok) {
+    const blob = await response.blob();
+    let url = URL.createObjectURL(blob);
 
-  const a = Object.assign(document.createElement("a"), {
-    href: `data:${process.env.VUE_APP_PROCESSING_ENDPOINT}/detection/${id}/video`,
-    style: "display:none",
-    download: "ML-Tacking-" + id,
-  });
-  document.getElementById("videoAppend").appendChild(a);
-  a.click();
-  a.remove();
+    const a = Object.assign(document.createElement("a"), {
+      href: url,
+      style: "display:none",
+      download: "ML-Tacking" + id,
+    });
+
+    a.click();
+    a.remove();
+  } else {
+    //TODO: show custom alert
+    alert("Heyo, something went wrong while fetching the video!");
+  }
 }
 </script>
 
