@@ -77,11 +77,13 @@ class Detections:
                 500, 'Internal error while starting video task, try again')
         return jsonify({'id': id})
 
-    def get_video(self, id, uuid):
-        filename = id + ".mp4"
-        filename += "_processed.mkv"
+    def get_video(self, uuid, videoId):
 
-        return self.filehandler.download(uuid, filename)
+        # Next lines below might need to be moved into IStorageHandler
+        # filename = videoId + ".mp4"
+        # filename += "_processed.mkv"
+
+        return self.filehandler.download(uuid, videoId)
 
     def get_count(self, id):
         res = self.dao_detections.find_one(id)
