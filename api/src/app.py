@@ -6,12 +6,12 @@ from pymongo import MongoClient
 
 from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
-from api.src.domain.i_filehandler import IFileHandler
+from src.application.i_filehandler import IFileHandler
 from configuration import Configuration
 
-from src.dao.dao_detections import DaoDetections
-from src.routes.Auth import Authenticator
-from src.routes.detections import Detections
+from src.infrastructure.dao_detections import DaoDetections
+from src.infrastructure.routes.Auth import Authenticator
+from src.infrastructure.routes.detections import Detections
 from src.tracking_module.tracker import Tracker
 from src.tracking_module.util import get_payload_from_jwt
 from src.infrastructure.blob_filehandler import BlobFilehandler

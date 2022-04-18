@@ -2,8 +2,8 @@ import jwt
 from google.oauth2 import id_token
 from google.auth.transport import requests as googleRequests
 import requests
-from src.pusher_socket import PusherSocket
 from src.tracking_module.util import get_payload_from_jwt
+from src.infrastructure.pusher_socket import PusherSocket
 
 
 class Authenticator:
