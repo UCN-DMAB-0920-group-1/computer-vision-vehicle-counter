@@ -16,6 +16,7 @@ const state = {
     startY: 0,
     endY: 100,
   },
+  blobLink: ""
 };
 
 const mutations = {
@@ -27,6 +28,7 @@ const mutations = {
     (state.videoDrawPoints = state.videoDrawPoints.filter((item) => item.id != id)),
   saveOptions: (state, options) => (state.advancedOptions = options),
   saveBboxCoordinates: (state, coordinates) => (state.bboxCoordinates = coordinates),
+  setBlobLink: (state, link) => (state.blobLink = link),
 };
 const actions = {
   async uploadVideo({ commit, state }, { file }) {
@@ -68,6 +70,24 @@ const actions = {
     console.log("VIDEO URL:", url);
     commit("setVideoUrl", url);
   },
+  async downloadVideo({ commit }, id) {
+    const url =process.env.VUE_APP_PROCESSING_ENDPOINT + "detection/" + id + "/video";
+
+
+    const response = await fetch(url, {
+        method: 'GET',
+        headers:{ Authorization: getCookie('jwt')},
+    })
+    if (response.ok) {
+      const blob = await response.blob();
+      const blobLink = window.URL.createObjectURL(blob);
+      commit("setBlobLink", blobLink);
+      return blobLink
+    } else {
+      throw "could not fetch";
+
+    }
+  },
 };
 const getters = {
   videoIds: (state) => state.videoIds,
@@ -75,6 +95,7 @@ const getters = {
   advancedOptions: (state) => state.advancedOptions,
   bboxCoordinates: (state) => state.bboxCoordinates,
   videoDrawPoints: (state) => state.videoDrawPoints,
+  getBlobLink: (state) => state.blobLink,
 };
 
 export default {

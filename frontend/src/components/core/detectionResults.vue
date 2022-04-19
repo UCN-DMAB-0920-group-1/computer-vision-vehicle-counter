@@ -17,21 +17,15 @@
 </template>
 
 <script setup>
-import { getCookie } from "@/util/Cookie";
+import {useStore} from "vuex"
 import { defineProps } from "vue";
+const store = useStore();
 const props = defineProps(["video"]);
 
 async function downloadVideo() {
   const id = props.video._id;
-
-  const response = await fetch(`${process.env.VUE_APP_PROCESSING_ENDPOINT}/detection/${id}/video`, {
-    method: "GET",
-    headers: { Authorization: getCookie("jwt") },
-  });
-
-  if (response.ok) {
-    const blob = await response.blob();
-    let url = URL.createObjectURL(blob);
+    try {
+      let url = store.dispatch("FileProcessing/downloadVideo", id)
 
     const a = Object.assign(document.createElement("a"), {
       href: url,
@@ -41,10 +35,9 @@ async function downloadVideo() {
 
     a.click();
     a.remove();
-  } else {
-    //TODO: show custom alert
-    alert("Heyo, something went wrong while fetching the video!");
-  }
+    } catch (error) {
+      store.dispatch("AlertsList/addAlert", {e:"Could not download file", type:"Error"});
+    }
 }
 </script>
 
