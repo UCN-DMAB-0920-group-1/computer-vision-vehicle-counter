@@ -28,19 +28,19 @@ class BlobFilehandler(IFileHandler):
         blob.upload_blob(bytes)
 
     def download(self, dir, filename):
+        filename = filename + ".mkv"
         blob = BlobClient.from_connection_string(
             conn_str=Configuration.get("BLOB_STORAGE"), container_name=dir, blob_name=filename)
 
-        path = Configuration.get(
-            "APP_SETTINGS.STORAGE_FOLDER") + filename
+        path = Configuration.ROOT_DIR + "/" + Configuration.get(
+            "APP_SETTINGS.STORAGE_FOLDER")
+
         print("PATH: " + path)
-        with open(path, "wb+") as my_blob:
+        with open(path + "/" + filename, "wb+") as my_blob:
             blob_data = blob.download_blob()
             blob_data.readinto(my_blob)
 
-        # TODO: maybe stream blob_data instead?
-        send_from_directory("./" + Configuration.get(
-            "APP_SETTINGS.STORAGE_FOLDER"), filename)
+        return send_from_directory(path, filename)
 
     def delete(self, path):
         if os.path.exists(path):
