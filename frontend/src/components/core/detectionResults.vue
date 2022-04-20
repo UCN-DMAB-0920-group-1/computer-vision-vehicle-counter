@@ -2,7 +2,7 @@
   <div class="rounded-lg p-3 sm:w-80 w-[95%] mx-auto">
     <div id="videoAppend"></div>
     <p class="text-left" v-for="entity in Object.entries(props.video)" :key="entity[0]">
-      <span class="font-semibold">{{ entity[0] }}:</span>: {{ entity[1] }}
+      <span class="font-semibold">{{ entity[0] }}</span>: {{ entity[1] }}
     </p>
 
     <button

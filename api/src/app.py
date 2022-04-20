@@ -1,18 +1,17 @@
-
-
 import json
 import uuid
 from pymongo import MongoClient
 
 from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
+from api.src.infrastructure.console_tracker import ConsoleTracker
 from src.application.i_filehandler import IFileHandler
 from configuration import Configuration
 
 from src.infrastructure.dao_detections import DaoDetections
 from src.infrastructure.routes.Auth import Authenticator
 from src.infrastructure.routes.detections import Detections
-from src.tracking_module.tracker import Tracker
+from src.application.i_tracker import ITracker
 from src.tracking_module.util import get_payload_from_jwt
 from src.infrastructure.blob_filehandler import BlobFilehandler
 
@@ -28,13 +27,14 @@ ALLOWED_EXTENSIONS = set(Configuration.get("APP_SETTINGS.ALLOWED_EXTENSIONS"))
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 # detections routes init
 _filehandler: IFileHandler = BlobFilehandler()
+_tracker: ITracker = ConsoleTracker
 
 mongo_client = MongoClient(Configuration.get("mongodb"))
 
 _detections = Detections(
     UPLOAD_FOLDER=UPLOAD_FOLDER,
     STORAGE_FOLDER=TEMP_STORAGE_FOLDER,
-    tracker=Tracker,
+    tracker=_tracker,
     dao_detections=DaoDetections(mongoClient=mongo_client),
     MAX_THREADS=MAX_THREADS,
     ALLOWED_EXTENSIONS=ALLOWED_EXTENSIONS,
@@ -60,8 +60,8 @@ def upload_video():
 def get_video(id):
     permitted = _authenticator.check_permission(request)
     UUID = get_payload_from_jwt(request, "UUID", SECRET_KEY)
-    return _detections.get_video(UUID,
-                                 id) if permitted else "Not permitted to access this resource"
+    return _detections.get_video(
+        UUID, id) if permitted else "Not permitted to access this resource"
 
 
 @app.route('/detection/<string:id>')
