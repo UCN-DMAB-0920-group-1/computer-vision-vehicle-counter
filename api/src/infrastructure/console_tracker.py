@@ -1,10 +1,14 @@
 from typing import Iterable, Mapping
 
-from api.src.tracking_module.tracker import Tracker
 import random
 
+from src.application.i_tracker import ITracker
 
-class ConsoleTracker(Tracker):
+
+class ConsoleTracker(ITracker):
+
+    def __init__(self, **kwargs):
+        pass
 
     def track(self,
               content_feed: str,

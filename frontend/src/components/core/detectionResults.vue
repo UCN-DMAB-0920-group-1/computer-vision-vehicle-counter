@@ -25,16 +25,16 @@ const props = defineProps(["video"]);
 async function downloadVideo() {
   const id = props.video._id;
     try {
-      let url = store.dispatch("FileProcessing/downloadVideo", id)
-
-    const a = Object.assign(document.createElement("a"), {
-      href: url,
-      style: "display:none",
-      download: "ML-Tacking" + id,
-    });
-
-    a.click();
-    a.remove();
+      let url = await store.dispatch("FileProcessing/downloadVideo", id)
+    if (url){
+        const a = Object.assign(document.createElement("a"), {
+        href: url,
+        style: "display:none",
+        download: "ML-Tacking" + id,
+        });
+        a.click();
+        a.remove();
+      }
     } catch (error) {
       store.dispatch("AlertsList/addAlert", {e:"Could not download file", type:"Error"});
     }
