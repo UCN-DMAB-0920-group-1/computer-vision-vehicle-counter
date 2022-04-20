@@ -2,7 +2,7 @@ import os
 from flask import send_from_directory
 
 from azure.storage.blob import BlobServiceClient, ContainerClient, BlobClient
-from src.application.i_filehandler import IFileHandler
+from application.i_filehandler import IFileHandler
 from configuration import Configuration
 
 
@@ -36,7 +36,7 @@ class BlobFilehandler(IFileHandler):
             "APP_SETTINGS.STORAGE_FOLDER")
 
         print("PATH: " + path)
-        with open(path + "/" + filename, "wb+") as my_blob:
+        with open(f"{path}/{filename}", "wb+") as my_blob:
             blob_data = blob.download_blob()
             blob_data.readinto(my_blob)
 

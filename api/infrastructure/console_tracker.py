@@ -2,7 +2,7 @@ from typing import Iterable, Mapping
 
 import random
 
-from src.application.i_tracker import ITracker
+from application.i_tracker import ITracker
 
 
 class ConsoleTracker(ITracker):

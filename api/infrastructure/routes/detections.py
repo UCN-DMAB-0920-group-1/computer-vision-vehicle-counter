@@ -1,15 +1,15 @@
-from src.application.i_tracker import ITracker
-from src.infrastructure.dao_detections import DaoDetections
+from application.i_tracker import ITracker
+from infrastructure.dao_detections import DaoDetections
 from flask import abort, jsonify
 import json
 import os
 import threading
 import uuid
 
-from src.domain.task import Task
+from domain.task import Task
 
-from src.infrastructure.pusher_socket import PusherSocket
-from src.application.i_filehandler import IFileHandler
+from infrastructure.pusher_socket import PusherSocket
+from application.i_filehandler import IFileHandler
 
 
 class Detections:

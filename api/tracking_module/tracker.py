@@ -10,7 +10,7 @@ import progress.bar as Bar
 import torch
 from norfair import Tracker as NorfairTracker
 
-from src.application.i_tracker import ITracker
+from application.i_tracker import ITracker
 
 from .norfair_helpers import euclidean_distance, yolo_detections_to_norfair_detections
 from .util import center_pos, get_stream
@@ -31,7 +31,7 @@ class Tracker(ITracker):
         track_shape: str = "bbox",  # Can be centroid or bbox
         label_offset:
         int = 50,  # Offset from center point to classification label
-        max_distance_between_points: int = 30):
+            max_distance_between_points: int = 30):
 
         # Load yolo model
         if (custom_model):
