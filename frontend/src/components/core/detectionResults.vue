@@ -26,7 +26,7 @@ async function downloadVideo() {
   const id = props.video._id;
     try {
       let url = await store.dispatch("FileProcessing/downloadVideo", id)
-    if (url){
+      if (url){
         const a = Object.assign(document.createElement("a"), {
         href: url,
         style: "display:none",

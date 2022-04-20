@@ -47,6 +47,11 @@ _authenticator = Authenticator(Configuration.get("CLIENT_ID"), SECRET_KEY,
 ############# - ROUTES - #############
 
 
+@app.route('/', methods=["GET"])
+def welcome():
+    return "Welcome 🎈"
+
+
 @app.route('/detection', methods=['POST'])
 def upload_video():
     permitted = _authenticator.check_permission(request)

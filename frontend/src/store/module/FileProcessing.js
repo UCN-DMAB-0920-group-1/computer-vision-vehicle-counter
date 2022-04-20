@@ -84,8 +84,7 @@ const actions = {
         commit("setBlobLink", blobLink);
         return blobLink
       } else {
-        throw "could not fetch";
-        
+        throw "could not fetch";  
       }
     } catch  {
       dispatch("AlertsList/addAlert", {e:"Could not download file", type:"Error"}, {root:true})
