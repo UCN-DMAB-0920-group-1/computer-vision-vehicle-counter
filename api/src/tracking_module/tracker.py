@@ -61,21 +61,25 @@ class Tracker:
         self.should_draw = should_draw
         self.should_save = should_save
 
-    def track(self, content_feed: str, roi: Iterable[list[int]] = None) -> Mapping[str, int]:
+    def track(
+        self,
+        content_feed: str,
+        roi: Iterable[list[int]] = None
+    ) -> Mapping[str, int]:
         """Tracks objects in a given file within a specified regoin of interest (roi)
 
         Args:
             content_feed (str): path/url to video
-            roi (np.ndarray[int, int], optional): region of interest, as a list og points. Defaults to None.
+            roi (Iterable[list[int]], optional): region of interest, as a list og points. Defaults to None.
 
         Raises:
-            Exception: _description_
+            Exception: cannot accept 2 point or less for roi
 
         Returns:
-            _type_: _description_
+            Mapping[str, int]: a dictionary of different classes found and their count
         """        # setup variables
-        detection_map = {}
-        inside_roi = []
+        detection_map: Mapping[str, int] = dict()
+        inside_roi: Iterable[int] = list()
 
         # Ready the stream
         stream_url = get_stream(content_feed)
@@ -84,17 +88,21 @@ class Tracker:
         video_stream = cv2.VideoCapture(stream_url)
 
         if(roi is None):
+            # Create roi based on content size (full screen roi)
             video_dimension = (int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
                                int(video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-            roi = [[0, 0], [video_dimension[0], 0], [
-                video_dimension[0], video_dimension[1]], [0, video_dimension[1]]]
+            roi = [[0, 0],
+                   [video_dimension[0], 0],
+                   [video_dimension[0], video_dimension[1]],
+                   [0, video_dimension[1]]]
         if(len(roi) <= 2):
             raise Exception("roi needs more than 2 points")
 
         roi = np.array(roi)
 
         # Get frame count for stream
-        stream_frame_count = video_stream.get(cv2.CAP_PROP_FRAME_COUNT)
+        stream_frame_count = video_stream.get(
+            cv2.CAP_PROP_FRAME_COUNT)
 
         # Open file writer
         out = cv2.VideoWriter(
@@ -147,7 +155,8 @@ class Tracker:
             tracked_objects = self.norfair_tracker.update(
                 detections=detections)
 
-            count_objects(tracked_objects, roi, detection_map, inside_roi)
+            #count_objects(tracked_objects, roi, detection_map, inside_roi)
+            count_objects(tracked_objects, roi)
 
             if(self.should_draw or self.should_save):
                 draw(frame, roi, detections, tracked_objects,
@@ -171,7 +180,6 @@ class Tracker:
         # Safely disposed any used resources
         video_stream.release()
         out.release()
-        # cv2.destroyAllWindows()
 
         bar.finish()
 
@@ -273,21 +281,53 @@ def mask_image(image: np.ndarray, mask: np.ndarray, bounding_rect: tuple[int, in
     return masked_image
 
 
-def count_objects(tracked_objects, roi, detections, inside_roi):
-    """counts objects inside tracked inside the ROI
+def count_objects(
+    tracked_objects: list,
+    roi: list[tuple[int, int]],
+) -> Mapping[str, int]:
+    """counts objects tracked inside the ROI
+
+    Args:
+        tracked_objects (list): list of TrackedObject (from norfair tracker.update method)
+        roi (list[tuple[int, int]]): list of points comprising a region of interrest
+        detections (Mapping[str, int]): dictionary of object classes and appearance count
+        inside_roi (list[int]): list of tracked objects (by ID) inside the ROI
     """
-    center_positions = (
-        {
-            obj.id:
+    detections: Mapping[str, int] = dict()
+
+    if not any(tracked_objects):
+        return
+
+    center_positions: list[tuple[any, int]] = (
+        (
+            obj,
             cv2.pointPolygonTest(
                 contour=np.array(roi, np.int32),
                 pt=center_pos(obj.estimate[obj.live_points]),
                 measureDist=False
             )
-        }
+        )
         for obj in tracked_objects if obj.live_points.any()
     )
 
+    for obj in [*center_positions]:
+        if obj[1] == -1:
+            break
+        if obj[0].label in detections:
+            detections[obj[0].label] += 1
+            break
+        else:
+            detections[obj[0].label] = 1
+
+    return detections
+
+
+def count_objectss(
+    tracked_objects: list,
+    roi: list[tuple[int, int]],
+    detections: Mapping[str, int],
+    inside_roi: list[int]
+) -> Mapping[str, int]:
     # Find ROI vehicles
     for obj in tracked_objects:
         if not obj.live_points.any():
