@@ -1,16 +1,12 @@
 import os
 from flask import send_from_directory
 
-from azure.storage.blob import BlobServiceClient, ContainerClient, BlobClient
+from azure.storage.blob import ContainerClient, BlobClient
 from src.application.i_filehandler import IFileHandler
 from configuration import Configuration
 
 
 class BlobFilehandler(IFileHandler):
-
-    def __init__(self):
-        self.blob = BlobServiceClient.from_connection_string(
-            conn_str=Configuration.get("BLOB_STORAGE"))
 
     def upload(self, path, bytes):
         container_name = path.split("/")[0]
@@ -35,7 +31,6 @@ class BlobFilehandler(IFileHandler):
         path = Configuration.ROOT_DIR + "/" + Configuration.get(
             "APP_SETTINGS.STORAGE_FOLDER")
 
-        print("PATH: " + path)
         with open(path + "/" + filename, "wb+") as my_blob:
             blob_data = blob.download_blob()
             blob_data.readinto(my_blob)
