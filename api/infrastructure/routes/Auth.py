@@ -20,7 +20,7 @@ class Authenticator:
             'code': code,
             "client_id": self.CLIENT_ID,
             "client_secret": self.CLIENT_SECRET,
-            "redirect_uri": "http://localhost:8080",
+            "redirect_uri": "https://frontend-luwh3.ondigitalocean.app/",
             "grant_type": "authorization_code"
         }
 
