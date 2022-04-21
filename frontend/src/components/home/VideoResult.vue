@@ -14,15 +14,6 @@
             <h1 class="font-bold text-lg">Video result ({{ videoIds.length }})</h1>
             <DetectionResults :video="videoData"></DetectionResults>
           </div>
-
-          <!-- <p>Total vehicles: {{ totalCars }}</p> -->
-
-          <button
-            class="mx-auto px-3 shadow-xl block rounded-full bg-violet-700 p-2 text-white mt-4 transition ease-in-out hover:text-violet-700 hover:bg-white font-semibold"
-            @click="downloadNewestData"
-          >
-            Download newest data
-          </button>
         </div>
       </section>
     </div>
