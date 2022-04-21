@@ -1,21 +1,21 @@
-from src.tracking_module.tracker import Tracker
-from src.infrastructure.dao_detections import DaoDetections
+from application.i_tracker import ITracker
+from infrastructure.dao_detections import DaoDetections
 from flask import abort, jsonify
 import json
 import os
 import threading
 import uuid
 
-from src.domain.task import Task
+from domain.task import Task
 
-from src.infrastructure.pusher_socket import PusherSocket
-from src.application.i_filehandler import IFileHandler
+from infrastructure.pusher_socket import PusherSocket
+from application.i_filehandler import IFileHandler
 
 
 class Detections:
 
     def __init__(self, UPLOAD_FOLDER: str, STORAGE_FOLDER: str,
-                 tracker: Tracker, dao_detections: DaoDetections,
+                 tracker: ITracker, dao_detections: DaoDetections,
                  MAX_THREADS: int, ALLOWED_EXTENSIONS: set[str],
                  filehandler: IFileHandler):
 
@@ -26,7 +26,7 @@ class Detections:
         self.UPLOAD_FOLDER = UPLOAD_FOLDER
         self.STORAGE_FOLDER = STORAGE_FOLDER
         self.ALLOWED_EXTENSIONS: set[str] = ALLOWED_EXTENSIONS
-        self.tracker: Tracker = tracker
+        self.tracker: ITracker = tracker
         self.dao_detections: DaoDetections = dao_detections
 
     def upload_video(self, request, UUID):
@@ -126,12 +126,8 @@ class Detections:
 
             path = video_path + "_processed.mkv"
 
-            # opening for [r]eading as [b]inary
-            in_file = open(path, "rb")
-            bytes = in_file.read()
-            in_file.close()
+            self.send_to_storage(path, UUID)
 
-            self.filehandler.upload(UUID + "/" + id + ".mkv", bytes)
             self.dao_detections.update_one(id, detections)
 
             print("OUTPUTTED TO CONSOLE!")
@@ -218,3 +214,14 @@ class Detections:
             self.startVideoTracker(task.id, task.video_path, task.options,
                                    task.bbox, task.UUID)
         return len(self.task_queue)
+
+    def send_to_storage(self, path: str, UUID: str):
+        try:
+            # opening for [r]eading as [b]inary
+            in_file = open(path, "rb")
+            bytes = in_file.read()
+            in_file.close()
+
+            self.filehandler.upload(UUID + "/" + id + ".mkv", bytes)
+        except:
+            print("could not save file")

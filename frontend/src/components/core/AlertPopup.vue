@@ -46,7 +46,7 @@ let alertOpen = ref(true)
 <style scoped>
 .box{
   opacity: 1;
-  animation: fade 1.5s ease-in-out;
+  animation: fade 0.5s ease-in-out;
 }
 @keyframes fade{
   0% {opacity: 0;}

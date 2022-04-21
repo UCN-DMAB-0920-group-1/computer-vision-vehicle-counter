@@ -70,22 +70,24 @@ const actions = {
     console.log("VIDEO URL:", url);
     commit("setVideoUrl", url);
   },
-  async downloadVideo({ commit }, id) {
+  async downloadVideo({ commit, dispatch }, id) {
     const url =process.env.VUE_APP_PROCESSING_ENDPOINT + "detection/" + id + "/video";
 
-
-    const response = await fetch(url, {
+    try {
+      const response = await fetch(url, {
         method: 'GET',
         headers:{ Authorization: getCookie('jwt')},
-    })
-    if (response.ok) {
-      const blob = await response.blob();
-      const blobLink = window.URL.createObjectURL(blob);
-      commit("setBlobLink", blobLink);
-      return blobLink
-    } else {
-      throw "could not fetch";
-
+      })
+      if (response.ok) {
+        const blob = await response.blob();
+        const blobLink = window.URL.createObjectURL(blob);
+        commit("setBlobLink", blobLink);
+        return blobLink
+      } else {
+        throw "could not fetch";  
+      }
+    } catch  {
+      dispatch("AlertsList/addAlert", {e:"Could not download file", type:"Error"}, {root:true})
     }
   },
 };

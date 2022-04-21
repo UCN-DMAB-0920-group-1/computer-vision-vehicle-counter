@@ -1,4 +1,4 @@
-from src.domain.i_filehandler import IFileHandler
+from i_filehandler import IFileHandler
 
 
 class ConsoleFilehandler(IFileHandler):

@@ -4,16 +4,16 @@ from pymongo import MongoClient
 
 from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
-from api.src.infrastructure.console_tracker import ConsoleTracker
-from src.application.i_filehandler import IFileHandler
+from infrastructure.console_tracker import ConsoleTracker
+from application.i_filehandler import IFileHandler
 from configuration import Configuration
 
-from src.infrastructure.dao_detections import DaoDetections
-from src.infrastructure.routes.Auth import Authenticator
-from src.infrastructure.routes.detections import Detections
-from src.application.i_tracker import ITracker
-from src.tracking_module.util import get_payload_from_jwt
-from src.infrastructure.blob_filehandler import BlobFilehandler
+from infrastructure.dao_detections import DaoDetections
+from infrastructure.routes.Auth import Authenticator
+from infrastructure.routes.detections import Detections
+from application.i_tracker import ITracker
+from tracking_module.util import get_payload_from_jwt
+from infrastructure.blob_filehandler import BlobFilehandler
 
 # Load config
 app = Flask(__name__)
@@ -47,9 +47,9 @@ _authenticator = Authenticator(Configuration.get("CLIENT_ID"), SECRET_KEY,
 ############# - ROUTES - #############
 
 
-@app.route('/', methods=["GET"])
-def welcome():
-    return "Welcome 🎈"
+@app.route('/')
+def index():
+    return 'hello, world!'
 
 
 @app.route('/detection', methods=['POST'])
@@ -103,3 +103,7 @@ def pusher_auth():
         return abort(401, "unauthenticated")
 
     return res
+
+
+if __name__ == '__main__':
+    app.run()
