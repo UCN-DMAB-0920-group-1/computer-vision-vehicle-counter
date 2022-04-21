@@ -52,6 +52,11 @@ def index():
     return 'hello, world!'
 
 
+@app.route('/test')
+def test():
+    return 'test message, hey mom!'
+
+
 @app.route('/detection', methods=['POST'])
 def upload_video():
     permitted = _authenticator.check_permission(request)
@@ -106,4 +111,4 @@ def pusher_auth():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', port=5000)
