@@ -35,19 +35,18 @@ class Tracker(ITracker):
 
         # Load yolo model
         if (custom_model):
-            self.model = torch.hub.load(repo_or_dir='ultralytics/yolov5',
-                                        model='custom',
-                                        path=model_path,
-                                        force_reload=False,
-                                        skip_validation=True)
-            # self.model = torch.load('yolov5m.pt', map_location=torch.device(
-            #     f"{'cuda' if torch.cuda.is_available() else 'cpu'}"))
+            self.model = torch.hub.load(
+                repo_or_dir='ultralytics/yolov5',
+                model='custom',
+                path=model_path,
+                force_reload=False,
+                skip_validation=True)
         else:
-            # downloads model to root folder, fix somehow
-            self.model = torch.hub.load(repo_or_dir="ultralytics/yolov5",
-                                        model=model_path,
-                                        force_reload=False,
-                                        skip_validation=True)
+            self.model = torch.hub.load(
+                repo_or_dir="ultralytics/yolov5",
+                model=model_path,
+                force_reload=False,
+                skip_validation=True)
 
         self.model.conf = confidence_threshold
         self.model.iou = 0.45
@@ -106,7 +105,7 @@ class Tracker(ITracker):
 
         # Open file writer
         out = cv2.VideoWriter(
-            filename=content_feed + "_processed.mkv",
+            filename=f"{content_feed}_processed.mkv",
             fourcc=cv2.VideoWriter_fourcc(*'FMP4'),  # FFMPEG codec
             fps=video_stream.get(cv2.CAP_PROP_FPS),
             frameSize=(int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
@@ -114,7 +113,7 @@ class Tracker(ITracker):
 
         # Get first frame for masking
         if (video_stream.isOpened()):
-            ref_frame = video_stream.read()[1]
+            _, ref_frame = video_stream.read()
 
         # returns (x,y,w,h) of the rect surrounding the ROI
         b_rect = cv2.boundingRect(roi)
@@ -396,7 +395,12 @@ def draw(frame, roi, norfair_detections, tracked_objects, track_shape: str,
 
 
 def draw_label(frame, label: Label):
+    """Draw label on top of detection region og object
 
+    Args:
+        frame (any): frame on which to draw the label
+        label (Label): Label object descriping text and formatting
+    """
     label_container, label_text = label.get_label_location()
 
     cv2.rectangle(img=frame,
