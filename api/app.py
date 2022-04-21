@@ -24,7 +24,7 @@ TEMP_STORAGE_FOLDER = Configuration.get("APP_SETTINGS.STORAGE_FOLDER")
 UPLOAD_FOLDER = Configuration.get("APP_SETTINGS.UPLOAD_FOLDER")
 ALLOWED_EXTENSIONS = set(Configuration.get("APP_SETTINGS.ALLOWED_EXTENSIONS"))
 
-cors = CORS(app, resources={r"*": {"origins": "*"}})
+cors = CORS(app, resources={"*": {"origins": "*"}})
 # detections routes init
 _filehandler: IFileHandler = BlobFilehandler()
 _tracker: ITracker = ConsoleTracker
