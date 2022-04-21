@@ -8,29 +8,30 @@ from configuration import Configuration
 
 class BlobFilehandler(IFileHandler):
 
-    def __init__(self):
-        self.blob = BlobServiceClient.from_connection_string(
-            conn_str=Configuration.get("BLOB_STORAGE"))
-
     def upload(self, path, bytes):
         container_name = path.split("/")[0]
         blob_name = path.split("/")[1]
 
         container_client = ContainerClient.from_connection_string(
-            conn_str=Configuration.get("BLOB_STORAGE"), container_name=container_name)
+            conn_str=Configuration.get("BLOB_STORAGE"),
+            container_name=container_name)
 
         if not container_client.exists():
             container_client.create_container()
 
-        blob = BlobClient.from_connection_string(conn_str=Configuration.get(
-            "BLOB_STORAGE"), container_name=container_name, blob_name=blob_name)
+        blob = BlobClient.from_connection_string(
+            conn_str=Configuration.get("BLOB_STORAGE"),
+            container_name=container_name,
+            blob_name=blob_name)
 
         blob.upload_blob(bytes)
 
     def download(self, dir, filename):
         filename = filename + ".mkv"
         blob = BlobClient.from_connection_string(
-            conn_str=Configuration.get("BLOB_STORAGE"), container_name=dir, blob_name=filename)
+            conn_str=Configuration.get("BLOB_STORAGE"),
+            container_name=dir,
+            blob_name=filename)
 
         path = Configuration.ROOT_DIR + "/" + Configuration.get(
             "APP_SETTINGS.STORAGE_FOLDER")

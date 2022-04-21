@@ -23,7 +23,7 @@ class Configuration(dict):
             for new_key in keys:
                 if(new_key is None or new_key == ""):
                     raise Exception(
-                        "${new_key} is empty! thats illegal! full key: ${key}")
+                        "${new_key} is None or empty! thats illegal! full key: ${key}")
 
                 conf_map = conf_map[new_key]
             return conf_map
