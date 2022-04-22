@@ -20,7 +20,7 @@ class Authenticator:
             'code': code,
             "client_id": self.CLIENT_ID,
             "client_secret": self.CLIENT_SECRET,
-            "redirect_uri": "localhost:8080",
+            "redirect_uri": "http://127.0.0.1:8080",
             "grant_type": "authorization_code"
         }
 
