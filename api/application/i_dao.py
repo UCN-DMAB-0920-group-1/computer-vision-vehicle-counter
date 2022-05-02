@@ -3,6 +3,10 @@ from abc import ABC, abstractmethod
 
 class IDao(ABC):
     @abstractmethod
+    def find(key: str, value):  # should read a single object
+        pass
+
+    @abstractmethod
     def find_one(id: str):  # should read a single object
         pass
 
