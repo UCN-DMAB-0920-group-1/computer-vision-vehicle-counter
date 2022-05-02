@@ -108,6 +108,7 @@ class Detections:
     def threadVideoTracker(self, id, video_path, options: map, bbox, UUID):
         if options['enabled'] == 'false':
             bbox = None
+            max_distance_between_points = float(20)
             confidence = 0.6
         else:
             if len(bbox) == 0:
