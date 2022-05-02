@@ -34,7 +34,7 @@ class Configuration(dict):
             raise Exception("This class is a Configuration!")
         else:
             Configuration.__instance = self
-            with open("api/conf.json", "r") as config:
+            with open("conf.json", "r") as config:
                 self.env = json.load(config)
 
 

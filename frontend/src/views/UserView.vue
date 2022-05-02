@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div v-if="loggedIn" class="flex gap-5 flex-wrap flex-grow w-full justify-center">
+        <div v-if="loggedIn" class="flex row-reverse gap-5 flex-wrap flex-grow w-full justify-center">
             <div class="bg-violet-300 shadow-md rounded-lg" v-for="video in videos" :key="video.UUID">
                <DetectionResults :video="video"></DetectionResults>
             </div>

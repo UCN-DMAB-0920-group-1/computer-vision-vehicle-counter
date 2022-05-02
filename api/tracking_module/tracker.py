@@ -31,7 +31,8 @@ class Tracker(ITracker):
         track_shape: str = "bbox",  # Can be centroid or bbox
         label_offset:
         int = 50,  # Offset from center point to classification label
-            max_distance_between_points: int = 30):
+        max_distance_between_points: int = 30
+    ):
 
         # Load yolo model
         if (custom_model):

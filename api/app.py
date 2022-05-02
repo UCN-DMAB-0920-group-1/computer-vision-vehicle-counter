@@ -13,6 +13,7 @@ from infrastructure.routes.Auth import Authenticator
 from infrastructure.routes.detections import Detections
 from application.i_tracker import ITracker
 from tracking_module.util import get_payload_from_jwt
+from tracking_module.tracker import Tracker
 from infrastructure.blob_filehandler import BlobFilehandler
 
 # Load config
@@ -27,7 +28,7 @@ ALLOWED_EXTENSIONS = set(Configuration.get("APP_SETTINGS.ALLOWED_EXTENSIONS"))
 cors = CORS(app, resources={r"*": {"origins": "*"}})
 # detections routes init
 _filehandler: IFileHandler = BlobFilehandler()
-_tracker: ITracker = ConsoleTracker
+_tracker: ITracker = Tracker
 
 mongo_client = MongoClient(Configuration.get("mongodb"))
 

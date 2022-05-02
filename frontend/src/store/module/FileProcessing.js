@@ -71,7 +71,7 @@ const actions = {
     commit("setVideoUrl", url);
   },
   async downloadVideo({ commit, dispatch }, id) {
-    const url =process.env.VUE_APP_PROCESSING_ENDPOINT + "detection/" + id + "/video";
+    const url =process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection/" + id + "/video";
 
     try {
       const response = await fetch(url, {

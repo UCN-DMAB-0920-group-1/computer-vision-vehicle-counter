@@ -126,11 +126,10 @@ class Detections:
 
             path = video_path + "_processed.mkv"
 
-            self.send_to_storage(path, UUID)
+            self.send_to_storage(path, UUID, id)
 
             self.dao_detections.update_one(id, detections)
 
-            print("OUTPUTTED TO CONSOLE!")
             socket = PusherSocket("private-video-channel-" + UUID)
             socket.send_notification("video-event", {
                 "status": "Finished",
@@ -215,7 +214,7 @@ class Detections:
                                    task.bbox, task.UUID)
         return len(self.task_queue)
 
-    def send_to_storage(self, path: str, UUID: str):
+    def send_to_storage(self, path: str, UUID: int, id: str):
         try:
             # opening for [r]eading as [b]inary
             in_file = open(path, "rb")
@@ -223,5 +222,5 @@ class Detections:
             in_file.close()
 
             self.filehandler.upload(UUID + "/" + id + ".mkv", bytes)
-        except:
-            print("could not save file")
+        except Exception as e:
+            print("could not save file" + str(e))
