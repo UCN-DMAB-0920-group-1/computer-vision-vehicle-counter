@@ -35,6 +35,7 @@ class Tracker(ITracker):
     ):
 
         # Load yolo model
+        torch.hub.set_dir("models")
         if (custom_model):
             self.model = torch.hub.load(repo_or_dir='ultralytics/yolov5',
                                         model='custom',
@@ -121,7 +122,7 @@ class Tracker(ITracker):
         b_rect = cv2.boundingRect(roi)
 
         # TODO: @midi SKRIV NOGLE FUCKING KOMMENTARER
-        b_rect = [*b_rect[:2], *(x - 1 for x in b_rect[2:])]
+        b_rect = [*b_rect[:2], *[x - 1 for x in b_rect[2:]]]
         mask, roi_offset = create_mask(ref_frame, roi, b_rect)
 
         bar = Bar.IncrementalBar('Analyzing',
