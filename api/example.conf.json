@@ -1,0 +1,21 @@
+{
+  "mongodb": "mongodb+srv://MongoAdmin:ucnGruppe1@cluster0.vvg7n.mongodb.net",
+  "SECRET_KEY": "SUPER SECRET KEY BY MAGNUS",
+  "GOOGLE_CLIENT_SECRET": "",
+  "GOOGLE_CLIENT_ID": "",
+  "JWT_algorithm": "HS256",
+
+  "PUSHER_APP_ID": "",
+  "PUSHER_KEY": "",
+  "PUSHER_SECRET": "",
+
+  "APP_SETTINGS": {
+    "MAX_THREADS": 4,
+    "ALLOWED_EXTENSIONS": ["mp4"],
+    "UPLOAD_FOLDER": "storage/",
+    "STORAGE_FOLDER": "temp/"
+  },
+  "LOG_PATH": "./api/logs",
+
+  "BLOB_STORAGE": ""
+}

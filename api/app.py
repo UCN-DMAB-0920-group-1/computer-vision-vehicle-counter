@@ -41,9 +41,9 @@ _detections = Detections(
     ALLOWED_EXTENSIONS=ALLOWED_EXTENSIONS,
     filehandler=_filehandler)
 
-_authenticator = Authenticator(Configuration.get("CLIENT_ID"), SECRET_KEY,
+_authenticator = Authenticator(Configuration.get("GOOGLE_CLIENT_ID"), SECRET_KEY,
                                Configuration.get("JWT_algorithm"),
-                               Configuration.get("CLIENT_SECRET"))
+                               Configuration.get("GOOGLE_CLIENT_SECRET"))
 
 ############# - ROUTES - #############
 
