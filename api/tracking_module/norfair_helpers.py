@@ -5,10 +5,17 @@ import torch
 from norfair import Detection
 
 
+# Code from https://github.com/tryolabs/norfair
+# Authors: Tryolabs and Contributors
 def euclidean_distance(detection: Detection, tracked_object: Detection):
     """calculates the distance between new detections and already tracked objects
     """
     return np.linalg.norm(detection.points - tracked_object.estimate)
+
+
+# Originally from https://github.com/tryolabs/norfair/blob/master/demos/yolov5/yolov5demo.py
+# Modified for our specific use case
+# Authors: Tryolabs and Contributors, UCN gruppe 1
 
 
 def yolo_detections_to_norfair_detections(
