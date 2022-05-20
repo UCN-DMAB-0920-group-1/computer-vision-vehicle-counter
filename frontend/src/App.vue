@@ -2,7 +2,7 @@
   <div class="">
     <NavBar></NavBar>
     <router-view></router-view>
-    <div class="fixed bottom-6 z-10 flex flex-col justify-end flex-wrap h-full pt-6 gap-3 px-2">
+    <div class="fixed bottom-6 z-10 flex flex-col justify-end flex-wrap max-h-full pt-6 gap-3 px-2">
       <AlertPopup v-for="item in alerts" :key="item" :text="item.event" :type="item.type"></AlertPopup>
     </div>
   </div>
