@@ -321,6 +321,8 @@ def count_objects(tracked_objects, roi, detections, inside_roi):
         else:
             if obj.id in inside_roi:
                 inside_roi.remove(obj.id)
+            if not obj in tracked_objects:
+                inside_roi.remove(obj.id)
         # print(detections)
 
 
