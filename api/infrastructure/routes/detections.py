@@ -150,7 +150,7 @@ class Detections:
                 os.remove(path)
 
             print("Thread Done")
-            self.checkQueue()
+            self.check_queue()
             return 'Thread Done'
 
     def checkThreadCount(self):
@@ -204,7 +204,7 @@ class Detections:
         file.save(video_path)
         return "File saved"
 
-    def checkQueue(self):
+    def check_queue(self):
         print("Checking task list...")
 
         if self.checkThreadCount() < self.MAX_THREADS + 1 and len(

@@ -35,7 +35,7 @@ class Tracker(ITracker):
     ):
 
         # Load yolo model
-        torch.hub.set_dir("models")
+        torch.hub.set_dir("ai_models")
         if (custom_model):
             self.model = torch.hub.load(repo_or_dir='ultralytics/yolov5',
                                         model='custom',
@@ -67,9 +67,11 @@ class Tracker(ITracker):
         self.should_draw = should_draw
         self.should_save = should_save
 
-    def track(self,
-              content_feed: str,
-              roi: Iterable[list[int]] = None) -> Mapping[str, int]:
+    def track(
+        self,
+        content_feed: str,
+        roi: Iterable[list[int]] = None
+    ) -> Mapping[str, int]:
         """Tracks objects in a given file within a specified regoin of interest (roi)
 
         Args:
@@ -193,15 +195,16 @@ class Tracker(ITracker):
 
 class Label:
 
-    def __init__(self,
-                 text: str,
-                 bbox_location: Iterable,
-                 font_face: int = cv2.FONT_HERSHEY_SIMPLEX,
-                 font_scale: float = 0.5,
-                 font_color: tuple[int, int, int] = (255, 255, 255),
-                 font_thickness: int = 1,
-                 box_color: tuple[int, int, int] = (0, 0, 255),
-                 box_margin: int = 2) -> None:
+    def __init__(
+            self,
+            text: str,
+            bbox_location: Iterable,
+            font_face: int = cv2.FONT_HERSHEY_SIMPLEX,
+            font_scale: float = 0.5,
+            font_color: tuple[int, int, int] = (255, 255, 255),
+            font_thickness: int = 1,
+            box_color: tuple[int, int, int] = (0, 0, 255),
+            box_margin: int = 2):
 
         self.text = text
         self.bbox_location = bbox_location
@@ -403,11 +406,12 @@ def draw_label(frame, label: Label):
 
     label_container, label_text = label.get_label_location()
 
-    cv2.rectangle(img=frame,
-                  pt1=(label_container.x_min, label_container.y_min),
-                  pt2=(label_container.x_max, label_container.y_max),
-                  color=label.box_color,
-                  thickness=cv2.FILLED)
+    cv2.rectangle(
+        img=frame,
+        pt1=(label_container.x_min, label_container.y_min),
+        pt2=(label_container.x_max, label_container.y_max),
+        color=label.box_color,
+        thickness=cv2.FILLED)
 
     cv2.putText(
         img=frame,
@@ -417,8 +421,7 @@ def draw_label(frame, label: Label):
         fontScale=label.font_scale,
         color=label.font_color,
         thickness=label.font_thickness,
-        lineType=cv2.LINE_AA,
-    )
+        lineType=cv2.LINE_AA,)
 
 
 def detection_to_tracked_linker(norfair_detetion, tracked_objects):
