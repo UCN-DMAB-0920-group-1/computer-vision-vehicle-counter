@@ -28,6 +28,8 @@ class Detections:
         self.tracker: ITracker = tracker
         self.dao_detections: DaoDetections = dao_detections
 
+############# - ROUTES - #############
+    # Validates the request options & video material and creates a task to be run by the tracker module.
     def upload_video(self, request, UUID):
         self.validate_video_post(request)
         file = request.files['file']
@@ -42,7 +44,6 @@ class Detections:
         }
 
         bbox = json.loads(request.form["bbox"])
-
         id = str(uuid.uuid4())
         temp_video_path = os.path.join(self.STORAGE_FOLDER, (id + ".mp4"))
         file = request.files['file']
@@ -51,18 +52,20 @@ class Detections:
         # Add pending task to database
         self.dao_detections.insert_one_task(id, "Pending", UUID)
 
+        # Creates a websocket channel via pusher
         socket = PusherSocket("private-video-channel-" + UUID)
-
+        # Send notification via pusher
         socket.send_notification("video-event", {
             "status": "Pending",
             "id": id
         })
 
+        # Get current number of running threads.
         threadCount = self.checkThreadCount()
+        # Check if current number of running threads is higher or equal to number of allowed MAX threads.
+        # If yes - Append a tracking task to the Queue, else start a tracking task immediatley.
         if threadCount >= self.MAX_THREADS:
-
             task = Task(id, temp_video_path, options, bbox, UUID)
-
             self.task_queue.append(task)
             return abort(
                 503,
@@ -77,11 +80,9 @@ class Detections:
         return jsonify({'id': id})
 
     def get_video(self, uuid, videoId):
-
         # Next lines below might need to be moved into IStorageHandler
         # filename = videoId + ".mp4"
         # filename += "_processed.mkv"
-
         return self.filehandler.download(uuid, videoId)
 
     def get_count(self, id):
@@ -92,8 +93,9 @@ class Detections:
         res = self.dao_detections.find(key="UUID", value=UUID)
         return jsonify(res)
 
-    ############# - METHODS - #############
+############# - METHODS - #############
 
+    # Creates a thread with a tracking task, and appends it to the current list of running threads.
     def startVideoTracker(self, id, temp_video_path, options: map, bbox, UUID):
         thread = threading.Thread(target=self.threadVideoTracker,
                                   args=(id, temp_video_path, options, bbox,
@@ -104,6 +106,7 @@ class Detections:
         print("Thread Started: " + thread.getName())
         return "Thread started"
 
+    # Instantiates all properties required for a tracking task, and executes it.
     def threadVideoTracker(self, id, video_path, options: map, bbox, UUID):
         if options['enabled'] == 'false':
             bbox = None
@@ -149,9 +152,11 @@ class Detections:
                 os.remove(path)
 
             print("Thread Done")
+            # Checks the queue, to see if a new thread should be started.
             self.check_queue()
             return 'Thread Done'
 
+    # Returns how many tracking threads are currently running.
     def checkThreadCount(self):
         count = 0
         for t in self.thread_list:
@@ -160,10 +165,12 @@ class Detections:
         print('Threads running: ' + str(count))
         return count
 
+    # Check if file-extension is allowed.
     def allowed_file(self, filename):
         return '.' in filename and \
             filename.rsplit('.', 1)[1].lower() in self.ALLOWED_EXTENSIONS
 
+    # Validates the video in the http request.
     def validate_video_post(self, request):
 
         # check if the post request has the file part
@@ -182,6 +189,7 @@ class Detections:
         if request.content_length > 1000000000:
             return abort(403, 'File is too large - try a smaller video')
 
+    # Creates the options needed for the tracking module.
     def create_options(self, request):
         if 'enabled' not in request.form:
             return {'enabled': 'false'}
@@ -194,6 +202,7 @@ class Detections:
             'confidence': request.form['confidence']
         }
 
+    # Saves the video in specified storage folder
     def save_video_file(self, video_path, file):
         try:
             os.mkdir(self.STORAGE_FOLDER)
@@ -203,6 +212,8 @@ class Detections:
         file.save(video_path)
         return "File saved"
 
+    # Checks if there are any pending tasks in the Queue, if a task is allowed to be started, a task will be executed as a thread.
+    # Returns current length of queue.
     def check_queue(self):
         print("Checking task list...")
 
@@ -214,6 +225,7 @@ class Detections:
                                    task.bbox, task.UUID)
         return len(self.task_queue)
 
+    # Send video to specified storage option in file-handler
     def send_to_storage(self, path: str, UUID: int, id: str):
         try:
             # opening for [r]eading as [b]inary
