@@ -244,8 +244,8 @@ class Label:
 
 def create_mask(
     image: np.ndarray, roi: np.ndarray,
-    bounding_rect: list[int, int, int,
-                        int]) -> tuple[np.ndarray, tuple[int, int]]:
+    bounding_rect: list[int, int, int, int]
+) -> tuple[np.ndarray, tuple[int, int]]:
     """Creates mask based on image and ROI
     """
     # mask defaulting to black for 3-channel and transparent for 4-channel
@@ -279,8 +279,10 @@ def create_mask(
     return mask, roi_offset
 
 
-def mask_image(image: np.ndarray, mask: np.ndarray,
-               bounding_rect: tuple[int, int, int, int]) -> np.ndarray:
+def mask_image(
+    image: np.ndarray, mask: np.ndarray,
+    bounding_rect: tuple[int, int, int, int]
+) -> np.ndarray:
     """crops the given frame to fit the mask, based on ROI area
     """
     # crop frame to masked area
@@ -293,7 +295,12 @@ def mask_image(image: np.ndarray, mask: np.ndarray,
     return masked_image
 
 
-def count_objects(tracked_objects, roi, detections, inside_roi):
+def count_objects(
+    tracked_objects,
+    roi,
+    detections,
+    inside_roi
+):
     """counts objects inside tracked inside the ROI
     """
     center_positions = ({
@@ -329,8 +336,15 @@ def count_objects(tracked_objects, roi, detections, inside_roi):
         # print(detections)
 
 
-def draw(frame, roi, norfair_detections, tracked_objects, track_shape: str,
-         detections, inside_roi):
+def draw(
+    frame,
+    roi,
+    norfair_detections,
+    tracked_objects,
+    track_shape: str,
+    detections,
+    inside_roi
+):
     # Draw detected label
     frame_scale = frame.shape[0] / 100
     id_size = frame_scale / 10
@@ -402,7 +416,10 @@ def draw(frame, roi, norfair_detections, tracked_objects, track_shape: str,
     )
 
 
-def draw_label(frame, label: Label):
+def draw_label(
+    frame,
+    label: Label
+):
 
     label_container, label_text = label.get_label_location()
 
@@ -424,7 +441,10 @@ def draw_label(frame, label: Label):
         lineType=cv2.LINE_AA,)
 
 
-def detection_to_tracked_linker(norfair_detetion, tracked_objects):
+def detection_to_tracked_linker(
+    norfair_detetion,
+    tracked_objects
+):
     for object in tracked_objects:
         if (object.last_detection == norfair_detetion):
             return object
