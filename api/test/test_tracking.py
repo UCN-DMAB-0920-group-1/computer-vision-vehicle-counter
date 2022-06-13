@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 import cv2
 import numpy as np
 
-from src.tracking_module.tracker import Tracker, create_mask
+from tracking_module.tracker import Tracker, create_mask
 
 
 def test_masking():

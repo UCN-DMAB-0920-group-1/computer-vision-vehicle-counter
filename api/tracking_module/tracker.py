@@ -10,7 +10,7 @@ import progress.bar as Bar
 import torch
 from norfair import Tracker as NorfairTracker
 
-from application.i_tracker import ITracker
+from application.interfaces.i_tracker import ITracker
 
 from .norfair_helpers import euclidean_distance, yolo_detections_to_norfair_detections
 from .util import center_pos, get_stream
@@ -40,7 +40,7 @@ class Tracker(ITracker):
             self.model = torch.hub.load(repo_or_dir='ultralytics/yolov5',
                                         model='custom',
                                         path=model_path,
-                                        force_reload=False,
+                                        force_reload=True,
                                         skip_validation=True)
             # self.model = torch.load('yolov5m.pt', map_location=torch.device(
             #     f"{'cuda' if torch.cuda.is_available() else 'cpu'}"))

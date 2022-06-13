@@ -1,7 +1,7 @@
 from unittest.mock import MagicMock, patch
 
-from src.infrastructure.routes.detections import Detections
-from src.app import app
+from application.routes.detections import Detections
+from app import app
 
 
 def test_detection_upload():
