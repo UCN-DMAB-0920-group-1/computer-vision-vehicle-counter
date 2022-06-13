@@ -137,7 +137,8 @@ dmypy.json
 
 # ML training
 content/
-algo
+algo/
+ai_models/
 
 # ENV file
 conf.json
