@@ -1,3 +1,4 @@
+from asyncio import exceptions
 import threading
 from collections import namedtuple
 from functools import reduce
@@ -8,9 +9,8 @@ import norfair
 import numpy as np
 import progress.bar as Bar
 import torch
-from norfair import Tracker as NorfairTracker
-
 from application.interfaces.i_tracker import ITracker
+from norfair import Tracker as NorfairTracker
 
 from .norfair_helpers import euclidean_distance, yolo_detections_to_norfair_detections
 from .util import center_pos, get_stream
@@ -24,38 +24,33 @@ class Tracker(ITracker):
         self,
         should_draw: bool = True,
         should_save: bool = True,
-        model_path: str = "yolov5m",  # YOLO version
         custom_model: bool = False,
-        # How confidence should YOLO be, before labeling
+        model_path: str = "yolov5m",  # YOLOv5 model
         confidence_threshold: float = 0.6,
-        track_shape: str = "bbox",  # Can be centroid or bbox
-        label_offset:
-        int = 50,  # Offset from center point to classification label
+        track_shape: str = "bbox",  # what to draw, Can be centroid or bbox
+        label_offset: int = 50,  # Offset from center point to classification label
         max_distance_between_points: int = 30
     ):
 
         # Load yolo model
-        torch.hub.set_dir("ai_models")
+        torch.hub.set_dir("ai_models")  # set custom download path
         if (custom_model):
-            self.model = torch.hub.load(repo_or_dir='ultralytics/yolov5',
-                                        model='custom',
-                                        path=model_path,
-                                        force_reload=True,
-                                        skip_validation=True)
-            # self.model = torch.load('yolov5m.pt', map_location=torch.device(
-            #     f"{'cuda' if torch.cuda.is_available() else 'cpu'}"))
+            self.model = torch.hub.load(
+                repo_or_dir='ultralytics/yolov5',
+                model='custom',
+                path=model_path,
+                force_reload=True,
+                skip_validation=True)
         else:
             # downloads model to root folder, fix somehow
-            self.model = torch.hub.load(repo_or_dir="ultralytics/yolov5",
-                                        model=model_path,
-                                        force_reload=False,
-                                        skip_validation=True)
+            self.model = torch.hub.load(
+                repo_or_dir="ultralytics/yolov5",
+                model=model_path,
+                force_reload=False,
+                skip_validation=True)
 
         self.model.conf = confidence_threshold
-        self.model.iou = 0.45
-
-        self.inside_roi = []  # Int array
-        self.detections = {}
+        self.model.iou = 0.45  # threshold for intersecting bbox
 
         self.norfair_tracker = NorfairTracker(
             distance_function=euclidean_distance,
@@ -76,16 +71,16 @@ class Tracker(ITracker):
 
         Args:
             content_feed (str): path/url to video
-            roi (np.ndarray[int, int], optional): region of interest, as a list og points. Defaults to None.
+            roi (Iterable[list[int]]): region of interest, as a list og points. Defaults to None.
 
         Raises:
-            Exception: _description_
+            InvalidArgumentException: throws exception if insufficient roi is given
 
         Returns:
-            _type_: _description_
-        """        # setup variables
-        detection_map = {}
-        inside_roi = []
+            Mapping[str, int]: map containing the different detection types and how many of them it found
+        """
+        detection_map = {}  # map of detections types and count
+        inside_roi = []  # detection id's currently inside the roi (for video)
 
         # Ready the stream
         stream_url = get_stream(content_feed)
@@ -93,44 +88,51 @@ class Tracker(ITracker):
         # Open stream
         video_stream = cv2.VideoCapture(stream_url)
 
-        if (roi is None):
+        if (roi is None):  # if no roi is given, create it based on video dimensions
+            # Get video dimensions
             video_dimension = (int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
-                               int(video_stream.get(
-                                   cv2.CAP_PROP_FRAME_HEIGHT)))
+                               int(video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+
+            # setup roi
             roi = [[0, 0], [video_dimension[0], 0],
                    [video_dimension[0], video_dimension[1]],
                    [0, video_dimension[1]]]
-        if (len(roi) <= 2):
-            raise Exception("roi needs more than 2 points")
+        if (len(roi) <= 2):  # if insufficient roi is given
+            raise InvalidArgumentException("roi needs more than 2 points")
 
+        # convert roi to numpy array (needed for openCV)
         roi = np.array(roi)
 
-        # Get frame count for stream
+        # Get frame count of video
         stream_frame_count = video_stream.get(cv2.CAP_PROP_FRAME_COUNT)
 
-        # Open file writer
+        # Create new file writer
         out = cv2.VideoWriter(
-            filename=content_feed + "_processed.mkv",
+            filename=f"{content_feed}_processed.mkv",
             fourcc=cv2.VideoWriter_fourcc(*'FMP4'),  # FFMPEG codec
             fps=video_stream.get(cv2.CAP_PROP_FPS),
             frameSize=(int(video_stream.get(cv2.CAP_PROP_FRAME_WIDTH)),
                        int(video_stream.get(cv2.CAP_PROP_FRAME_HEIGHT))))
 
-        # Get first frame for masking
+        # Get first frame of video (needed for masking)
         if (video_stream.isOpened()):
             ref_frame = video_stream.read()[1]
 
         # returns (x,y,w,h) of the rect surrounding the ROI
         b_rect = cv2.boundingRect(roi)
 
-        # TODO: @midi SKRIV NOGLE FUCKING KOMMENTARER
+        # subtracts 1 from width and height of the bounding rectangle
         b_rect = [*b_rect[:2], *[x - 1 for x in b_rect[2:]]]
+        
+        # Create new mask and get the offset from original video
         mask, roi_offset = create_mask(ref_frame, roi, b_rect)
 
-        bar = Bar.IncrementalBar('Analyzing',
-                                 max=stream_frame_count - 1,
-                                 redirect_stdout=True,
-                                 suffix='%(percent).1f%% ETA: %(eta_td)s')
+        # Create new loading bar
+        bar = Bar.IncrementalBar(
+            'Analyzing',
+            max=stream_frame_count - 1,
+            redirect_stdout=True,
+            suffix='%(percent).1f%% ETA: %(eta_td)s')
 
         # As long as the video stream is open, run the YOLO model on the frame, and show the output
         while video_stream.isOpened():
@@ -448,3 +450,8 @@ def detection_to_tracked_linker(
     for object in tracked_objects:
         if (object.last_detection == norfair_detetion):
             return object
+
+
+class InvalidArgumentException(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
