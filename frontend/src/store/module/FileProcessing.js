@@ -16,7 +16,7 @@ const state = {
     startY: 0,
     endY: 100,
   },
-  blobLink: ""
+  blobLink: "",
 };
 
 const mutations = {
@@ -31,16 +31,17 @@ const mutations = {
   setBlobLink: (state, link) => (state.blobLink = link),
 };
 const actions = {
+  // Uploads video, and queues it for
   async uploadVideo({ commit, state }, { file }) {
     const formData = new FormData();
     formData.append("file", file);
 
-    state.advancedOptions["confidence"] /= 100;
+    state.advancedOptions["confidence"] /= 100; // from % to decimal
     Object.entries(state.advancedOptions).forEach(([key, value]) => {
+      // adds all options to formdata
       formData.append(key, value);
-      console.log(key, value);
     });
-    state.advancedOptions["confidence"] *= 100;
+    state.advancedOptions["confidence"] *= 100; // resets the UI data
 
     let bbox = [];
     //Check if draw is true and if there are more than 2 points drawn else make default box
@@ -67,27 +68,27 @@ const actions = {
     return json.id;
   },
   saveVideoUrl({ commit }, url) {
-    console.log("VIDEO URL:", url);
     commit("setVideoUrl", url);
   },
+  //downloads video with [ID] and makes it into a bloblink that is set in state
   async downloadVideo({ commit, dispatch }, id) {
-    const url =process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection/" + id + "/video";
+    const url = process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection/" + id + "/video";
 
     try {
       const response = await fetch(url, {
-        method: 'GET',
-        headers:{ Authorization: getCookie('jwt')},
-      })
+        method: "GET",
+        headers: { Authorization: getCookie("jwt") },
+      });
       if (response.ok) {
         const blob = await response.blob();
         const blobLink = window.URL.createObjectURL(blob);
         commit("setBlobLink", blobLink);
-        return blobLink
+        return blobLink;
       } else {
-        throw "could not fetch";  
+        throw "could not fetch";
       }
-    } catch  {
-      dispatch("AlertsList/addAlert", {e:"Could not download file", type:"Error"}, {root:true})
+    } catch {
+      dispatch("AlertsList/addAlert", { e: "Could not download file", type: "Error" }, { root: true });
     }
   },
 };

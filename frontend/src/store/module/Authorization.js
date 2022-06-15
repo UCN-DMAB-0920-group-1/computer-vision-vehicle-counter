@@ -13,6 +13,8 @@ const mutations = {
   setPusherSession: (state, pusher) => (state.pusher = pusher),
 };
 const actions = {
+  // Sends a GET request to the api in order to get the JWT from google, using a one-time use google identity token
+  // also sends a dispatch to check if the user is now logged in
   async login({ dispatch }, { routeCode }) {
     const response = await fetch(process.env.VUE_APP_PROCESSING_ENDPOINT + "/auth?code=" + routeCode, {
       method: "GET",
@@ -31,30 +33,29 @@ const actions = {
     logoutCookie();
     dispatch("checkLoggedin");
   },
+  //Checks if a JWT is expired or is invalid, and if so logs the users out
   checkLoggedin({ commit, dispatch }) {
     const loggedIn = isLoggedIn();
     //checks if jwt is expired, logs you out if so
-    if (getPayloadValue("exp") <= (Date.now() / 1000)) {
-      dispatch("logout")
+    if (getPayloadValue("exp") <= Date.now() / 1000) {
+      dispatch("logout");
     } else {
       commit("setLoginData", loggedIn);
     }
   },
+
+  // Requests a pusher-specific token to authenticate the user to a pusher-channel, this ensures only the authenticated user can see messages from specific channel(s)
   authenticatePusher({ commit }) {
     Pusher.logToConsole = false;
 
     const authUrl = `${process.env.VUE_APP_PROCESSING_ENDPOINT}/auth/pusher`;
-    let authorizer = (channel, options) => {
-      console.log("PUSHER authorizer", options);
+    let authorizer = (channel) => {
       return {
         authorize: (socketId, callback) => {
-          console.log("PUSHER AUTH!", socketId);
           const body = JSON.stringify({
             socket_id: socketId,
             channel_name: channel.name,
           });
-
-          console.log("BODY:", body);
           const jwt = getCookie("jwt");
           fetch(authUrl, {
             method: "POST",

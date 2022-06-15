@@ -2,7 +2,8 @@
   <div class="rounded-lg p-3 sm:w-80 w-[95%] mx-auto">
     <div id="videoAppend"></div>
     <p class="text-left break-words" v-for="entity in Object.entries(props.video)" :key="entity[0]">
-      <span class="font-semibold">{{ entity[0] }}</span>: {{ entity[1] }}
+      <span class="font-semibold">{{ entity[0] }}</span
+      >: {{ entity[1] }}
     </p>
 
     <button
@@ -17,27 +18,29 @@
 </template>
 
 <script setup>
-import {useStore} from "vuex"
+import { useStore } from "vuex";
 import { defineProps } from "vue";
 const store = useStore();
 const props = defineProps(["video"]);
 
+//downloads the video by creating a <a> tag with the href as the bloblink of the video and clicking it
+// Afterwards the link is removed again.
 async function downloadVideo() {
   const id = props.video._id;
-    try {
-      let url = await store.dispatch("FileProcessing/downloadVideo", id)
-      if (url){
-        const a = Object.assign(document.createElement("a"), {
+  try {
+    let url = await store.dispatch("FileProcessing/downloadVideo", id);
+    if (url) {
+      const a = Object.assign(document.createElement("a"), {
         href: url,
         style: "display:none",
         download: "ML-Tacking" + id,
-        });
-        a.click();
-        a.remove();
-      }
-    } catch (error) {
-      store.dispatch("AlertsList/addAlert", {e:"Could not download file", type:"Error"});
+      });
+      a.click();
+      a.remove();
     }
+  } catch (error) {
+    store.dispatch("AlertsList/addAlert", { e: "Could not download file", type: "Error" });
+  }
 }
 </script>
 

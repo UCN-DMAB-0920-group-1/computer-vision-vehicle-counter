@@ -22,7 +22,6 @@ let loggedIn = computed(() => store.getters["Authorization/loginState"]);
 store.dispatch("Detections/downloadUserDetections");
 
 let videos = computed(() => store.getters["Detections/userVideos"]);
-console.log(videos.value);
 </script>
 
 <style lang="scss" scoped></style>

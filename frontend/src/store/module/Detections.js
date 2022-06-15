@@ -14,6 +14,7 @@ const mutations = {
     (state.finishedVideos = state.finishedVideos.filter((item) => item.id != id)),
 };
 const actions = {
+  // sends a GET request in order to download video data, from a specific task with _id_
   async getVideoData({ commit }, { id }) {
     const response = await fetch(process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection/" + id, {
       method: "GET",
@@ -24,21 +25,8 @@ const actions = {
 
     commit("setVideoData", json);
   },
-  async downloadVideo({ commit }, file) {
-    const formData = new FormData();
-    formData.append("file", file);
 
-    const response = await fetch(process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection", {
-      method: "POST",
-      body: formData,
-      headers: { Authorization: getCookie("jwt") },
-    });
-
-    const json = await response.json();
-    state.videoIds.push(json.id); //Save ids for later use
-
-    commit("setVideoIds", state.videoIds);
-  },
+  //Downloads all tasks from a specific user
   async downloadUserDetections({ commit }) {
     const UUID = getPayloadValue("UUID");
     const response = await fetch(process.env.VUE_APP_PROCESSING_ENDPOINT + "/detection/user?UUID=" + UUID, {
