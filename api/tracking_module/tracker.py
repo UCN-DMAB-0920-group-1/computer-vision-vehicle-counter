@@ -123,7 +123,7 @@ class Tracker(ITracker):
 
         # subtracts 1 from width and height of the bounding rectangle
         b_rect = [*b_rect[:2], *[x - 1 for x in b_rect[2:]]]
-        
+
         # Create new mask and get the offset from original video
         mask, roi_offset = create_mask(ref_frame, roi, b_rect)
 
@@ -136,6 +136,7 @@ class Tracker(ITracker):
 
         # As long as the video stream is open, run the YOLO model on the frame, and show the output
         while video_stream.isOpened():
+            # Get the next frame
             ret, frame = video_stream.read()
 
             # Ensures no error occur, even when there is no more frames to check for
@@ -147,14 +148,12 @@ class Tracker(ITracker):
 
             try:
                 # Detect objects inside the cropped frame
-                # yolo_detections = self.model(frame)
                 yolo_detections = self.model(masked_image)
             except Exception as e:
+                # can fail if image is too small
                 print(str(e))
-                break
 
             # Convert to norfair detections
-            # detections = yolo_detections_to_norfair_detections(yolo_detections, track_points=self.track_points)
             detections = yolo_detections_to_norfair_detections(
                 yolo_detections,
                 track_points=self.track_shape,
@@ -164,8 +163,10 @@ class Tracker(ITracker):
             tracked_objects = self.norfair_tracker.update(
                 detections=detections)
 
+            # Count objects
             count_objects(tracked_objects, roi, detection_map, inside_roi)
 
+            # only draw to video frames if it has to be shown or saved
             if (self.should_draw or self.should_save):
                 draw(frame, roi, detections, tracked_objects, self.track_shape,
                      detection_map, inside_roi)
@@ -174,8 +175,8 @@ class Tracker(ITracker):
             if (self.should_save):
                 out.write(frame)
 
+            # Draw the model classifications on a gui
             if (self.should_draw):
-                # Draw the model classifications on a gui
                 cv2.imshow("REALTIME! " + threading.currentThread().getName(),
                            np.squeeze(frame))
 
@@ -185,13 +186,13 @@ class Tracker(ITracker):
             if (cv2.waitKey(1) == 27):
                 break
 
-        # Safely disposed any used resources
+        # Safely disposed/finish any used resources
         video_stream.release()
         out.release()
-        # cv2.destroyAllWindows()
-
+        cv2.destroyAllWindows()
         bar.finish()
 
+        # return results
         return detection_map
 
 
@@ -218,11 +219,17 @@ class Label:
         self.box_margin = box_margin
 
     def get_text_size(self):
+        """returns the size of the text in pixels 
+        """
         return cv2.getTextSize(self.text, self.font_face, self.font_scale,
                                self.font_thickness)
 
     def get_label_location(self):
-        # get size of label to draw
+        """Calculates location for label based on object location
+
+        Returns:
+            tuple(tuple(int, int, int, int), tuple(int, int)): tuple with label and container placements
+        """        # get size of label to draw
         text_size = self.get_text_size()
 
         # Define tuples
@@ -245,20 +252,28 @@ class Label:
 
 
 def create_mask(
-    image: np.ndarray, roi: np.ndarray,
+    image: np.ndarray,
+    roi: np.ndarray,
     bounding_rect: list[int, int, int, int]
 ) -> tuple[np.ndarray, tuple[int, int]]:
     """Creates mask based on image and ROI
+
+    Args:
+        image (np.ndarray): Image to base mask on (used for channel information)
+        roi (np.ndarray): Area to use as mask
+        bounding_rect (list[int, int, int, int]): Rectangle used for cropping frame to roi area
+
+    Returns:
+        tuple[np.ndarray, tuple[int, int]]: The mask itself and an offset from the original frame
     """
     # mask defaulting to black for 3-channel and transparent for 4-channel
     # Step-by-step guide to understand this wizadry :D
     # 1. slicing and unpacking the bounding box of the roi: [*bounding_rect[3:1:-1]]
     # # slices the tuple (eg. (x=0, y=0, w=1920, h=1080)) beginning from index 3 (height) to index 1 (y) non inclusive.
     # # traverses tuple in reverse order in steps by -1
-    # # '*' unpacks the tuple, meaning, automatically replaces [*bounding_rect] with [0, 0, 1920, 1080]
+    # # '*' unpacks the tuple, meaning, automatically replaces [*bounding_rect] with [1080, 1920]
     mask_shape = [*bounding_rect[3:1:-1], image.shape[2]]
     mask = np.zeros(mask_shape, dtype=np.uint8)
-    # mask = np.zeros(image.shape, dtype=np.uint8)
 
     # automatically find lowest offsets (for later repositioning)
     min_x = min(point[0] for point in roi)
@@ -274,9 +289,8 @@ def create_mask(
     # array of white color, sized to channels count
     ignore_mask_color = (255, ) * channel_count
 
-    # draw desired area on mask
+    # Fill desired area on mask-image
     cv2.fillConvexPoly(mask, roi_region, ignore_mask_color)
-    # cv2.drawContours(mask, [roi_corners], -1, ignore_mask_color, -1, cv2.LINE_AA)
 
     return mask, roi_offset
 
@@ -335,7 +349,6 @@ def count_objects(
                 inside_roi.remove(obj.id)
             if not obj in tracked_objects:
                 inside_roi.remove(obj.id)
-        # print(detections)
 
 
 def draw(
@@ -372,7 +385,9 @@ def draw(
     # Draw ROI
     cv2.polylines(frame, [np.array(roi, np.int32)], True, (15, 220, 10), 6)
 
+    # Loop to draw labels for tracked objects
     for detection in norfair_detections:
+        # find objects 
         tracked_object = detection_to_tracked_linker(detection,
                                                      tracked_objects)
 
@@ -391,7 +406,6 @@ def draw(
         draw_label(frame, label)
 
     # Draw vehicle counter
-
     total_vehicles = reduce(lambda a, b: a + b,
                             detections.values()) if len(detections) > 0 else 0
 
@@ -422,7 +436,12 @@ def draw_label(
     frame,
     label: Label
 ):
+    """Draws label for detections
 
+    Args:
+        frame (Any): Frame on which to draw the label
+        label (Label): Label to draw
+    """
     label_container, label_text = label.get_label_location()
 
     cv2.rectangle(
@@ -447,6 +466,15 @@ def detection_to_tracked_linker(
     norfair_detetion,
     tracked_objects
 ):
+    """Matches objects detected by norfair with objects currently tracked
+
+    Args:
+        norfair_detetion (Iterable(Detections)): Detection from norfair
+        tracked_objects (Iterable(Detections)): List of actively tracked objects from norfair
+
+    Returns:
+        Detection: The matching object found, if any, else None
+    """
     for object in tracked_objects:
         if (object.last_detection == norfair_detetion):
             return object
